@@ -70,7 +70,7 @@ const db = mysql.createConnection({
             else if (results.length>0){
                 const match = await bcrypt.compare(password, results[0].password);
                 if (match) {
-                    const exp = Math.floor(Date.now() / 1000) + 1;
+                    const exp = Math.floor(Date.now() / 1000) + 86400;
                     const token = jwt.sign({ username, exp }, secretKey);
                     return res.status(200).json({ token });
                 } 
