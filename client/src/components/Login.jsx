@@ -25,7 +25,6 @@ const LoginComponent = (props) => {
     if(theToken){
         try{
             const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-            console.log(response);
             if(response.data.username){
                 props.setUsername(response.data.username)
                 props.setIsLoggedIn(true);
