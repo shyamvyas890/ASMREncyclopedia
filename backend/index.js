@@ -1,27 +1,21 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mysql = require('mysql2');
 const cors= require("cors");
 
 const app = express();
-
 const port = 3001;
 const secretKey= "secret_key" //Will change this later
-
 app.use(express.json())
-app.use(express.urlencoded({ extended: true })); //Might not need this
+app.use(express.urlencoded({ extended: true })); // Might not need this
 app.use(cors());
-
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'password',
     database: 'ASMR_DB',
   });
-
-
   db.connect((err) => {
     if (err) {
       console.error('Error connecting to MySQL:', err);
@@ -29,9 +23,6 @@ const db = mysql.createConnection({
       console.log('Connected to MySQL');
     }
   });
-
-
-
   app.post("/register", async (req,res)=>{
     const { username, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 13);
@@ -54,9 +45,6 @@ const db = mysql.createConnection({
     );
 
   });
-
-
-
   app.post("/login", async (req, res)=>{
     const { username, password } = req.body;
     db.query(
@@ -84,9 +72,6 @@ const db = mysql.createConnection({
         }
     );
   })
-
-
-
   app.get('/verify-token/:token', (req, res)=>{
     const submittedToken= req.params.token;
 
@@ -109,12 +94,6 @@ const db = mysql.createConnection({
     db.query('SELECT * FROM blacklisted_tokens WHERE token = ?', [submittedToken], verificationFunction )
   })
 
-
-
-
-
-
-
   app.post('/logout/:token', (req,res)=>{
     const token=req.params.token;
     db.query('INSERT INTO blacklisted_tokens (token) VALUES (?)', [token], function(err){
@@ -128,6 +107,235 @@ const db = mysql.createConnection({
     })
   })
 
+  app.post('/video/:VideoId', (req,res)=>{
+    const VideoLinkId= req.params.VideoId;
+    const {UserId, Title} = req.body
+    db.query('INSERT INTO VideoPost (UserId, Title, VideoLinkId) VALUES (?, ?, ?)', [UserId, Title, VideoLinkId], (err)=>{
+        if(err){
+            console.log(err);
+            res.status(500).send("Error adding video");
+        }
+        else {
+            res.status(201).send("Successfully added video");
+        }
+    } )
+  })
+
+  app.post('/video-rating/:VideoPostId', (req,res)=>{
+        const VideoPostId= req.params.VideoPostId;
+        const {UserId, LikeStatus}= req.body;
+        db.query('INSERT INTO LikeDislike (VideoPostId, UserId, LikeStatus) VALUES (?, ?, ?)', [VideoPostId, UserId, LikeStatus], (err)=>{
+            if(err){
+                console.log(err)
+                res.status(500).send("Error adding rating")
+            }
+            else {
+                res.status(201).send("Successfully added rating")
+            }
+        })
+  })
+
+  app.post('/genre', (req,res)=>{
+        const genre= req.body.genre;
+        db.query('INSERT INTO Genre (Genre) VALUES (?)', [genre], (err)=>{
+            if(err){
+                console.log(err)
+                res.status(500).send("Error adding genre")
+            }
+            else {
+                res.status(201).send("Successfully added genre");
+            }
+        })
+  })
+
+  app.post('/video-genre', (req,res)=>{
+        const {VideoPostId, GenreId}= req.body
+        db.query('INSERT INTO VideoPostGenre (VideoPostId, GenreId) VALUES (?, ?)', [VideoPostId, GenreId], (err)=>{
+            if(err){
+                console.log(err)
+                res.status(500).send("Error adding genre to this video")
+            }
+            else {
+                res.status(201).send("Successfully added genre to this video");
+            }
+        })
+  })
+
+  app.get('/users/id', (req, res)=> {
+        const username= req.body.username
+        db.query('SELECT * FROM users WHERE username = ?', [username], (err, results)=>{
+            if(err){
+                console.log(err)
+                res.status(500).send("Something went wrong")
+            }
+            else if(results.length===0){
+                res.status(404).send("This username doesn't exist")
+            }
+            else {
+                res.status(200).send({id:results[0].id})
+            }
+        })
+  })
+
+  app.get('/genre/id', (req, res)=> {
+    const genre= req.body.genre
+    db.query('SELECT * FROM Genre WHERE Genre = ?', [genre], (err, results)=>{
+        if(err){
+            console.log(err)
+            res.status(500).send("Something went wrong")
+        }
+        else if(results.length===0){
+            res.status(404).send("This genre doesn't exist")
+        }
+        else {
+            res.status(200).send({GenreId:results[0].GenreId})
+        }
+    })
+})
+
+app.get('/video/id', (req, res)=>{
+    const {VideoLinkId, VideoPostId} = req.body
+    if(VideoLinkId){
+        db.query('SELECT * FROM VideoPost WHERE VideoLinkId = ?', [VideoLinkId], (err, results)=>{
+            if(err){
+                console.log(err)
+                res.status(500).send("Something went wrong")
+            }
+            else if(results.length===0){
+                res.status(404).send("This video doesn't exist in the database")
+            }
+            else {
+                res.status(200).json(results)
+            }
+        })
+    }
+    else {
+        db.query('SELECT * FROM VideoPost WHERE VideoPostId = ?', [VideoPostId], (err, results)=>{
+            if(err){
+                console.log(err)
+                res.status(500).send("Something went wrong")
+            }
+            else if(results.length===0){
+                res.status(404).send("This video doesn't exist in the database")
+            }
+            else {
+                res.status(200).json(results)
+            }
+        })
+    }   
+})
+app.delete('/video', (req, res)=>{
+    const {id, VideoPostId, LikeDislikeId, GenreId, VideoPostGenreId}= req.body
+    if(id){
+        db.query('DELETE FROM users WHERE id = ?', [id], (err)=>{
+            if(err){
+                console.log(err);
+                res.status(500).send("Error in deleting user");
+            }
+            else {
+                res.status(200).send("Successfully deleted user")
+            }
+        });
+    }
+    else if(VideoPostId){
+        db.query('DELETE FROM VideoPost WHERE VideoPostId = ?', [VideoPostId], (err)=>{
+            if(err){
+                console.log(err);
+                res.status(500).send("Error in deleting Video Post");
+            }
+            else {
+                res.status(200).send("Successfully deleted Video Post")
+            }
+        });
+
+    }
+    else if(LikeDislikeId){
+        db.query('DELETE FROM LikeDislike WHERE LikeDislikeId = ?', [LikeDislikeId], (err)=>{
+            if(err){
+                console.log(err);
+                res.status(500).send("Error in deleting Like or Dislike");
+            }
+            else {
+                res.status(200).send("Successfully deleted Like or Dislike")
+            }
+        });
+
+    }
+    else if(GenreId){
+        db.query('DELETE FROM Genre WHERE GenreId = ?', [GenreId], (err)=>{
+            if(err){
+                console.log(err);
+                res.status(500).send("Error in deleting Genre");
+            }
+            else {
+                res.status(200).send("Successfully deleted Genre")
+            }
+    });
+
+    }
+    else {
+        db.query('DELETE FROM VideoPostGenre WHERE VideoPostGenreId = ?', [VideoPostGenreId], (err)=>{
+            if(err){
+                console.log(err);
+                res.status(500).send("Error in deleting Video Genre");
+            }
+            else {
+                res.status(200).send("Successfully deleted Video Genre")
+            }
+        });
+    }
+})
+app.get('/video',(req,res)=>{
+    db.query('SELECT * FROM VideoPost', (err, results)=>{
+        if(err) {
+            console.log(err)
+            res.status(500).send("Internal Server Error");
+        }
+        return res.json(results);
+    });
+})
+
+app.get('/video-by-genre-or-user',(req,res)=>{
+    const {GenreId, UserId, VideoPostId}= req.body;
+    if(GenreId){
+        db.query('SELECT * FROM VideoPostGenre WHERE GenreId = ?',[GenreId], (err, results)=>{
+            if(err) {
+                console.log(err)
+                res.status(500).send("Internal Server Error");
+            }
+            return res.json(results);
+        });
+    }
+    else if(UserId) {
+        db.query('SELECT * FROM VideoPost WHERE UserId = ?',[UserId], (err, results)=>{
+            if(err) {
+                console.log(err)
+                res.status(500).send("Internal Server Error");
+            }
+            return res.json(results);
+        });
+    }
+    else {
+        db.query('SELECT * FROM VideoPostGenre WHERE VideoPostId = ?',[VideoPostId], (err, results)=>{
+            if(err) {
+                console.log(err)
+                res.status(500).send("Internal Server Error");
+            }
+            return res.json(results);
+        });
+    }
+})
+
+app.get('/video-rating', (req,res)=>{   
+    const {VideoPostId}= req.body 
+    db.query('SELECT * FROM LikeDislike WHERE VideoPostId = ?', [VideoPostId], (err, results)=>{
+        if(err) {
+            console.log(err)
+            res.status(500).send("Internal Server Error");
+        }
+        return res.json(results);
+    });
+})
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
