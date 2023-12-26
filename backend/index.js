@@ -161,24 +161,43 @@ const db = mysql.createConnection({
         })
   })
 
+
+  
+
   app.get('/users/id', (req, res)=> {
-        const username= req.body.username
-        db.query('SELECT * FROM users WHERE username = ?', [username], (err, results)=>{
-            if(err){
-                console.log(err)
-                res.status(500).send("Something went wrong")
-            }
-            else if(results.length===0){
-                res.status(404).send("This username doesn't exist")
-            }
-            else {
-                res.status(200).send({id:results[0].id})
-            }
-        })
+        const {username, UserId}= req.query
+        if(username){
+            db.query('SELECT * FROM users WHERE username = ?', [username], (err, results)=>{
+                if(err){
+                    console.log(err)
+                    res.status(500).send("Something went wrong")
+                }
+                else if(results.length===0){
+                    res.status(404).send("This username doesn't exist")
+                }
+                else {
+                    res.status(200).send({id:results[0].id})
+                }
+            })
+        }
+        else {
+            db.query('SELECT * FROM users WHERE id = ?', [UserId], (err, results)=>{
+                if(err){
+                    console.log(err)
+                    res.status(500).send("Something went wrong")
+                }
+                else if(results.length===0){
+                    res.status(404).send("This username doesn't exist")
+                }
+                else {
+                    res.status(200).send({username:results[0].username})
+                }
+            })
+        }
   })
 
   app.get('/genre/id', (req, res)=> {
-    const genre= req.body.genre
+    const {genre}= req.query
     db.query('SELECT * FROM Genre WHERE Genre = ?', [genre], (err, results)=>{
         if(err){
             console.log(err)
@@ -194,7 +213,7 @@ const db = mysql.createConnection({
 })
 
 app.get('/video/id', (req, res)=>{
-    const {VideoLinkId, VideoPostId} = req.body
+    const {VideoLinkId, VideoPostId} = req.query
     if(VideoLinkId){
         db.query('SELECT * FROM VideoPost WHERE VideoLinkId = ?', [VideoLinkId], (err, results)=>{
             if(err){
@@ -296,7 +315,7 @@ app.get('/video',(req,res)=>{
 })
 
 app.get('/video-by-genre-or-user',(req,res)=>{
-    const {GenreId, UserId, VideoPostId}= req.body;
+    const {GenreId, UserId, VideoPostId}= req.query;
     if(GenreId){
         db.query('SELECT * FROM VideoPostGenre WHERE GenreId = ?',[GenreId], (err, results)=>{
             if(err) {
@@ -327,7 +346,7 @@ app.get('/video-by-genre-or-user',(req,res)=>{
 })
 
 app.get('/video-rating', (req,res)=>{   
-    const {VideoPostId}= req.body 
+    const {VideoPostId}= req.query 
     db.query('SELECT * FROM LikeDislike WHERE VideoPostId = ?', [VideoPostId], (err, results)=>{
         if(err) {
             console.log(err)
