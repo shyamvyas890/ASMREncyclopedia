@@ -244,7 +244,7 @@ app.get('/video/id', (req, res)=>{
     }   
 })
 app.delete('/video', (req, res)=>{
-    const {id, VideoPostId, LikeDislikeId, GenreId, VideoPostGenreId}= req.body
+    const {id, VideoPostId, LikeDislikeId, GenreId, VideoPostGenreId}= req.query
     if(id){
         db.query('DELETE FROM users WHERE id = ?', [id], (err)=>{
             if(err){
@@ -346,14 +346,30 @@ app.get('/video-by-genre-or-user',(req,res)=>{
 })
 
 app.get('/video-rating', (req,res)=>{   
-    const {VideoPostId}= req.query 
-    db.query('SELECT * FROM LikeDislike WHERE VideoPostId = ?', [VideoPostId], (err, results)=>{
-        if(err) {
-            console.log(err)
-            res.status(500).send("Internal Server Error");
-        }
-        return res.json(results);
-    });
+    const {VideoPostId, UserId}= req.query
+    
+    if(VideoPostId && UserId){
+        db.query('SELECT * FROM LikeDislike WHERE VideoPostId = ? AND UserId= ?', [VideoPostId, UserId], (err, results)=>{
+            if(err) {
+                console.log(err)
+                res.status(500).send("Internal Server Error");
+            }
+            return res.json(results);
+        });
+    }
+    else {
+        db.query('SELECT * FROM LikeDislike WHERE VideoPostId = ?', [VideoPostId], (err, results)=>{
+            if(err) {
+                console.log(err)
+                res.status(500).send("Internal Server Error");
+            }
+            return res.json(results);
+        });
+    }
+    
+
+
+
 })
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
