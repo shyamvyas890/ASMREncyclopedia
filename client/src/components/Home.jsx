@@ -4,6 +4,7 @@ import PostComponent from './Post';
 import axios from 'axios';
 const HomeComponent= () => {
     const [username, setUsername] = useState('');
+    const [userIdOfCurrentUser, setUserIdOfCurrentUser]= useState(null);
     const [isLoggedIn, setIsLoggedIn]= useState(false);
     const [videoPosts, setVideoPosts]= useState(null);
     const [userRatings, setUserRatings]= useState(null);
@@ -37,30 +38,30 @@ const HomeComponent= () => {
                         console.log(err);
                     }
                 }
-                let UserIdOfCurrentUser 
+                 
                 let feedback=[];
+                let tempHolderOfUserIdOfCurrentUser;
                 try{
                     const theId= await axios.get("http://localhost:3001/users/id", 
                         {
                             params:{ username }
                         }
                     );
-                    UserIdOfCurrentUser=theId.data.id;
+                    tempHolderOfUserIdOfCurrentUser=theId.data.id
+                    setUserIdOfCurrentUser(theId.data.id);
                 }
                 catch(err){
                     console.log(err);
                 }
-                console.log(`thePostsData.length ${thePostsData.length}`)
                 for(let i=0;i<thePostsData.length;i++){
                     try{
-                        console.log(thePostsData[i].VideoPostId)
                         const rating= await axios.get("http://localhost:3001/video-rating", 
                         {
                             params:{ VideoPostId:thePostsData[i].VideoPostId }
                         }
                         );
                         for(let j=0; j<rating.data.length; j=j+1){
-                            if(rating.data[j].UserId===UserIdOfCurrentUser){
+                            if(rating.data[j].UserId===tempHolderOfUserIdOfCurrentUser){
                                 if(rating.data[j].LikeStatus){
                                     feedback.push(1);
                                 }
@@ -69,7 +70,6 @@ const HomeComponent= () => {
                                 }
                                 break;
                             }
-                            
                             else if(j===rating.data.length - 1){
                                 feedback.push(0);
                             }
@@ -82,8 +82,6 @@ const HomeComponent= () => {
                         console.log(err)
                     }
                 }
-                console.log(feedback);
-                
                 setVideoPosts(thePostsData);
                 setUserRatings(feedback);
 
@@ -104,13 +102,18 @@ const HomeComponent= () => {
             isLoggedIn={isLoggedIn}
             setIsLoggedIn={setIsLoggedIn}
             />
-            {isLoggedIn && videoPosts ? (
+            {(isLoggedIn && videoPosts && userRatings && userIdOfCurrentUser) ? (
                 videoPosts.map((post, index)=>{
                     return <PostComponent 
-                                key={index} 
+                                key={index}
+                                index={index} 
                                 username={post.username} 
                                 title={post.Title} 
-                                id= {post.VideoLinkId}
+                                userIdOfCurrentUser= {userIdOfCurrentUser}
+                                VideoLinkId= {post.VideoLinkId}
+                                VideoPostId= {post.VideoPostId}
+                                rating= {userRatings[index]}
+                                setUserRatings={setUserRatings}
                             />
                             }
                         )
