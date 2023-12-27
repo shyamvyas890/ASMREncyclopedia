@@ -9,6 +9,9 @@ const NavigationComponent= () => {
             <li>
                 <Link to="/register">Register</Link>
             </li>
+            <li>
+                <Link to="/forums">Forums</Link>
+            </li>
         </ul>
     </nav>)
 }

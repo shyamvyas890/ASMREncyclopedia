@@ -374,3 +374,11 @@ app.get('/video-rating', (req,res)=>{
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
+
+  app.get("/forums", (req,res)=>{
+    const query = "SELECT * FROM forums"
+    db.query(query,(err,data)=>{
+        if(err) return res.json(err)
+        return res.json(data)
+    })
+})

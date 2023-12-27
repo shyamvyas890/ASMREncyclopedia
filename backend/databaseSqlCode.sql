@@ -40,3 +40,10 @@ CREATE TABLE VideoPostGenre (
   FOREIGN KEY (GenreId) REFERENCES Genre(GenreId),
   UNIQUE (VideoPostId, GenreId)
 );
+
+CREATE TABLE forums (
+  id INT AUTO_INCREMENT UNIQUE,
+  title varchar(255) NOT NULL,
+  description varchar(255) NOT NULL,
+  PRIMARY KEY (id)
+);
