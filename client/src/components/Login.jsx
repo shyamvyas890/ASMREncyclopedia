@@ -14,8 +14,6 @@ const LoginComponent = (props) => {
       console.log('Login successful. Token:', response.data.token);
       localStorage.setItem("token", response.data.token);
       props.setIsLoggedIn(true);
-
-      // You may want to store the token in state or local storage for authentication
     } catch (error) {
       console.log('Login error:', error);
     }
