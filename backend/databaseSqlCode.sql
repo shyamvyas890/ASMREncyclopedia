@@ -37,6 +37,18 @@ CREATE TABLE VideoPostGenre (
   VideoPostId INT NOT NULL,
   GenreId INT NOT NULL,
   FOREIGN KEY (VideoPostId) REFERENCES VideoPost(VideoPostId) ON DELETE CASCADE,
-  FOREIGN KEY (GenreId) REFERENCES Genre(GenreId),
+  FOREIGN KEY (GenreId) REFERENCES Genre(GenreId) ON DELETE CASCADE,
   UNIQUE (VideoPostId, GenreId)
+);
+
+
+CREATE TABLE VideoPostComments (
+  VideoPostCommentId INT AUTO_INCREMENT PRIMARY KEY,
+  UserId INT NOT NULL,
+  Comment VARCHAR(5000) NOT NULL,
+  VideoPostId INT NOT NULL,
+  ReplyToVideoPostCommentId INT,
+  FOREIGN KEY UserId REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY VideoPostId REFERENCES VideoPost(VideoPostId) ON DELETE CASCADE,
+  FOREIGN KEY ReplyToVideoPostCommentId REFERENCES VideoPostComments(VideoPostCommentId) 
 );
