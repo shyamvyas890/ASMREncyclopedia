@@ -14,8 +14,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomeComponent token= {token} setToken= {setToken}/>}/>
             <Route path="/register" element={<RegistrationComponent token= {token} setToken= {setToken}/>}/>
-            <Route path="/forums" element={<ForumComponent/>}/>
-          </Routes>
+            <Route path="/forums" element={<ForumComponent/>}/></Routes>
       </BrowserRouter>
       
     </div>

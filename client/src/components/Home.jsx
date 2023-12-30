@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import LoginComponent from './Login';
 import PostComponent from './Post';
 import axios from 'axios';
+import { ForumPostComponent } from './ForumPost';
+
 const HomeComponent= () => {
     const [username, setUsername] = useState('');
     const [userIdOfCurrentUser, setUserIdOfCurrentUser]= useState(null);
@@ -94,6 +96,8 @@ const HomeComponent= () => {
             fetchVideoPosts();
         }
     }, [isLoggedIn])
+
+    
     return (
         <div>
             <LoginComponent 
@@ -102,6 +106,10 @@ const HomeComponent= () => {
             isLoggedIn={isLoggedIn}
             setIsLoggedIn={setIsLoggedIn}
             />
+
+            
+            {(isLoggedIn) ?  <ForumPostComponent username={username} /> : null}
+
             {(isLoggedIn && videoPosts && userRatings && userIdOfCurrentUser) ? (
                 videoPosts.map((post, index)=>{
                     return <PostComponent 
@@ -117,7 +125,9 @@ const HomeComponent= () => {
                             />
                             }
                         )
-            ):null}
+                        ):null }
+            
+            
         </div>
     )
 }

@@ -13,7 +13,7 @@ app.use(cors());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'password',
+    password: '#jySJSU2024',
     database: 'ASMR_DB',
   });
   db.connect((err) => {
@@ -366,19 +366,52 @@ app.get('/video-rating', (req,res)=>{
             return res.json(results);
         });
     }
-    
-
-
-
 })
-  app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-  });
 
-  app.get("/forums", (req,res)=>{
+app.post("/forumCreate", async (req,res)=>{
+    const title = req.body.title
+    const description = req.body.description 
+    db.query("INSERT INTO forums(title, description) VALUES(?, ?)", [title, description],(err)=>{
+        if(err){
+            if(err.errno === 1062){
+                res.status(500).send("This forum already exists.")
+            }
+            else{
+                res.send(err)
+            }
+        } 
+        return res.status(201).send("Forum created successfully")
+    })
+})
+
+app.get("/forums", (req,res)=>{
     const query = "SELECT * FROM forums"
     db.query(query,(err,data)=>{
-        if(err) return res.json(err)
+        if(err){
+            res.send(err)
+        }
         return res.json(data)
     })
 })
+
+app.post("/forumPostCreate", async (req, res) => {
+    console.log(req.body) //for debugging
+    const username = req.body.username
+    const title = req.body.title
+    const body = req.body.body
+    const forums = req.body.forums //currently only selecting 1 forum
+    
+    db.query('INSERT INTO ForumPost(username, title, body, post_timestamp, forums) VALUES (?, ?, ?, NOW(), ?)', [username, title, body, forums], function(err) {
+        if(err){
+            console.log(err)
+            res.status(500).send(err)
+        }
+        else{
+            return res.status(201).send("Post Successful!")
+        }
+    })
+})
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});

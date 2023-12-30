@@ -1,12 +1,13 @@
 CREATE DATABASE ASMR_DB;
 use ASMR_DB;
-CREATE TABLE `users` (
+CREATE TABLE users (
   id int NOT NULL AUTO_INCREMENT,
   username varchar(255) NOT NULL,
   password varchar(255) NOT NULL,
-  PRIMARY KEY ('id'),
-  UNIQUE KEY unique_username ('username')
-)
+  PRIMARY KEY (id),
+  UNIQUE KEY unique_username (username)
+);
+
 CREATE TABLE blacklisted_tokens (
   id INT AUTO_INCREMENT PRIMARY KEY,
   token VARCHAR(255) NOT NULL,
@@ -43,7 +44,20 @@ CREATE TABLE VideoPostGenre (
 
 CREATE TABLE forums (
   id INT AUTO_INCREMENT UNIQUE,
-  title varchar(255) NOT NULL,
+  title varchar(255) NOT NULL UNIQUE,
   description varchar(255) NOT NULL,
   PRIMARY KEY (id)
 );
+
+CREATE TABLE ForumPost(
+id INT AUTO_INCREMENT UNIQUE,
+username varchar(255) NOT NULL,
+title varchar(255) NOT NULL, 
+body TEXT NOT NULL, 
+post_timestamp timestamp NOT NULL, 
+forums TEXT,
+PRIMARY KEY(id),
+FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+);
+
+
