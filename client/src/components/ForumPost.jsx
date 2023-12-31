@@ -31,6 +31,7 @@ export const ForumPostComponent = (props) =>{
             username: props.username
         }
         axios.post('http://localhost:3001/forumPostCreate', data).then( (response) => {
+            window.location.reload()
             console.log(response)
         })
     }

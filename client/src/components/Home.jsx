@@ -3,6 +3,7 @@ import LoginComponent from './Login';
 import PostComponent from './Post';
 import axios from 'axios';
 import { ForumPostComponent } from './ForumPost';
+import UserPostsComponent from './UserPosts';
 
 const HomeComponent= () => {
     const [username, setUsername] = useState('');
@@ -107,8 +108,9 @@ const HomeComponent= () => {
             setIsLoggedIn={setIsLoggedIn}
             />
 
-            
             {(isLoggedIn) ?  <ForumPostComponent username={username} /> : null}
+
+            {(isLoggedIn) ?  <UserPostsComponent username={username} /> : null}
 
             {(isLoggedIn && videoPosts && userRatings && userIdOfCurrentUser) ? (
                 videoPosts.map((post, index)=>{

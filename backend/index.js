@@ -13,7 +13,7 @@ app.use(cors());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '#jySJSU2024',
+    password: 'password',
     database: 'ASMR_DB',
   });
   db.connect((err) => {
@@ -394,6 +394,17 @@ app.get("/forums", (req,res)=>{
     })
 })
 
+app.get("/UserPosts", async (req,res)=>{
+    const username = req.query.username
+    console.log(username)
+    db.query('SELECT * FROM forumpost WHERE username = ?', [username], (err, data)=>{
+        if(err){
+            res.send(err)
+        }
+        return res.json(data)
+    })
+})
+
 app.post("/forumPostCreate", async (req, res) => {
     console.log(req.body) //for debugging
     const username = req.body.username
@@ -411,6 +422,16 @@ app.post("/forumPostCreate", async (req, res) => {
         }
     })
 })
+
+app.delete("/forumPost/:id", (req,res)=>{
+    const forumPostID = req.params.id;
+    const query = "DELETE FROM forumpost WHERE id = ?"
+
+    db.query(query, [forumPostID], (err,data)=>{
+        if (err) return res.send(err);
+        return res.json("Post has been deleted successfully");
+    });
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

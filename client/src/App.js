@@ -5,6 +5,8 @@ import RegistrationComponent from './components/Register';
 import HomeComponent from './components/Home';
 import NavigationComponent from './components/Navigation';
 import ForumComponent from './components/Forum';
+import UserPostsComponent from './components/UserPosts';
+
 function App() {
   const [token, setToken]= React.useState("");
   return (
@@ -14,7 +16,8 @@ function App() {
           <Routes>
             <Route path="/" element={<HomeComponent token= {token} setToken= {setToken}/>}/>
             <Route path="/register" element={<RegistrationComponent token= {token} setToken= {setToken}/>}/>
-            <Route path="/forums" element={<ForumComponent/>}/></Routes>
+            <Route path="/forums" element={<ForumComponent/>}/>
+          </Routes>
       </BrowserRouter>
       
     </div>

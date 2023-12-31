@@ -12,6 +12,9 @@ const NavigationComponent= () => {
             <li>
                 <Link to="/forums">Forums</Link>
             </li>
+            <li>
+                <Link to="/UserPosts">My Posts</Link>
+            </li>
         </ul>
     </nav>)
 }
