@@ -13,7 +13,7 @@ app.use(cors());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'password',
+    password: '#jySJSU2024',
     database: 'ASMR_DB',
   });
   db.connect((err) => {
@@ -423,7 +423,34 @@ app.post("/forumPostCreate", async (req, res) => {
     })
 })
 
-app.delete("/forumPost/:id", (req,res)=>{
+
+//viewing all posts, mainly for testing purposes can change the condition later
+app.get("/forumPostsAll", async (req,res)=>{
+
+    db.query('SELECT * FROM forumpost', (err, data)=>{
+        if(err){
+            res.send(err)
+        }
+        return res.json(data)
+    })
+})
+
+//viewing a post by its id
+app.get("/forumPostsById/:id", async (req,res)=>{
+
+    const id = parseInt(req.params.id, 10)
+    console.log(typeof(id))
+    console.log(id)
+    db.query('SELECT * FROM forumpost WHERE id=?', [id], (err, data)=>{
+        if(err){
+            res.send(err)
+        }
+        console.log(data)
+        return res.json(data)
+    })
+})
+
+app.delete("/forumPostDelete/:id", (req,res)=>{
     const forumPostID = req.params.id;
     const query = "DELETE FROM forumpost WHERE id = ?"
 

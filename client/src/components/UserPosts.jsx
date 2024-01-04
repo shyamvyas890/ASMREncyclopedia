@@ -33,6 +33,7 @@ export const UserPostsComponent = (props) =>{
             <div className="user-posts" key={UserPost.id}>
                 <h2>{UserPost.title}</h2>
                 <p>{UserPost.body}</p>
+                <p> {UserPost.post_timestamp}</p>
                 <button className="delete" onClick={()=>handleDelete(UserPost.id)}>Delete</button>
             </div>
         ))}

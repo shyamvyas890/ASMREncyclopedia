@@ -4,6 +4,7 @@ import PostComponent from './Post';
 import axios from 'axios';
 import { ForumPostComponent } from './ForumPost';
 import UserPostsComponent from './UserPosts';
+import { ForumPostFeedComponent } from './ForumPostFeed';
 
 const HomeComponent= () => {
     const [username, setUsername] = useState('');

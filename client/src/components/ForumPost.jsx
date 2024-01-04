@@ -2,10 +2,14 @@ import react from "react";
 import axios from "axios";
 import { useState } from "react";
 import { useEffect } from "react";
+import * as yup from "yup"
 
 //props contains the username 
 export const ForumPostComponent = (props) =>{
-
+    const schema = yup.object().shape({
+        title: yup.string().required("You must have a title"),
+        body: yup.string().required("You must have a body")
+    })
     const [forumOptions, setForumOptions] = useState([])
 
     //get all current forums for creating a post
@@ -22,7 +26,7 @@ export const ForumPostComponent = (props) =>{
     }, [])
     
     //get data from form (e.target.elements.<>.<>) and post to server
-    const onSubmit =  (e) => {
+    const onSubmit =  async (e) => {
         e.preventDefault()
         const data = {
             title: e.target.elements.title.value,
@@ -30,10 +34,17 @@ export const ForumPostComponent = (props) =>{
             forums: e.target.elements.forum.value,
             username: props.username
         }
-        axios.post('http://localhost:3001/forumPostCreate', data).then( (response) => {
-            window.location.reload()
-            console.log(response)
-        })
+        const isValid = await schema.isValid(data)
+        if(isValid){
+            axios.post('http://localhost:3001/forumPostCreate', data).then( (response) => {
+                window.location.reload()
+                console.log(response)
+                alert("Post Succssful!")
+            })
+        }
+        else{
+            alert("Make sure to give your post a title and body!")
+        }
     }
 
     //render fields for title, body and a select menu for all current forums
