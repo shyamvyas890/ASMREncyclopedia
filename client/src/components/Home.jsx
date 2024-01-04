@@ -3,6 +3,7 @@ import LoginComponent from './Login';
 import PostComponent from './Post';
 import axios from 'axios';
 import AddVideoPostComponent from './AddVideoPost';
+import {VideoCommentContainerComponent} from './VideoCommentContainer';
 const HomeComponent= () => {
     const [username, setUsername] = useState('');
     const [userIdOfCurrentUser, setUserIdOfCurrentUser]= useState(null);
@@ -91,24 +92,33 @@ const HomeComponent= () => {
             />
             {(isLoggedIn && videoPostsAndRatings && userIdOfCurrentUser) ? (
                 <>
+                    
                     <h3>Add a new Video!</h3>
                     <AddVideoPostComponent 
                     userIdOfCurrentUser={userIdOfCurrentUser}
-                    fetchVideoPosts={fetchVideoPosts}
+                    fetchVideoPosts={fetchVideoPosts}    
                     />
                     {videoPostsAndRatings.videoPosts.map((post, index)=>(
-                        <PostComponent 
-                            key={index}
-                            index={index} 
-                            username={post.username} 
-                            title={post.Title} 
-                            userIdOfCurrentUser= {userIdOfCurrentUser}
-                            usernameOfCurrentUser= {username}
-                            VideoLinkId= {post.VideoLinkId}
-                            VideoPostId= {post.VideoPostId}
-                            rating= {videoPostsAndRatings.userRatings[index]}
-                            setVideoPostsAndRatings= {setVideoPostsAndRatings}
-                        />
+                        <div key={index+videoPostsAndRatings.videoPosts.length} >
+                            <PostComponent 
+                                key={index}
+                                index={index} 
+                                username={post.username} 
+                                title={post.Title} 
+                                userIdOfCurrentUser= {userIdOfCurrentUser}
+                                usernameOfCurrentUser= {username}
+                                VideoLinkId= {post.VideoLinkId}
+                                VideoPostId= {post.VideoPostId}
+                                rating= {videoPostsAndRatings.userRatings[index]}
+                                setVideoPostsAndRatings= {setVideoPostsAndRatings}
+                            />
+                            <VideoCommentContainerComponent 
+                                key={index+videoPostsAndRatings.videoPosts.length+1}
+                                VideoPostId= {post.VideoPostId}
+                                userIdOfCurrentUser= {userIdOfCurrentUser}
+                                usernameOfCurrentUser= {username}
+                            />
+                        </div>
                     ))}
                 </>
             ):null}
