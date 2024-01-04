@@ -4,6 +4,7 @@ import PostComponent from './Post';
 import axios from 'axios';
 import { ForumPostComponent } from './ForumPost';
 import UserPostsComponent from './UserPosts';
+import { ForumPostFeedComponent } from './ForumPostFeed';
 
 const HomeComponent= () => {
     const [username, setUsername] = useState('');
@@ -110,7 +111,7 @@ const HomeComponent= () => {
 
             {(isLoggedIn) ?  <ForumPostComponent username={username} /> : null}
 
-            {(isLoggedIn) ?  <UserPostsComponent username={username} /> : null}
+            { (isLoggedIn) ? <ForumPostFeedComponent /> : null}
 
             {(isLoggedIn && videoPosts && userRatings && userIdOfCurrentUser) ? (
                 videoPosts.map((post, index)=>{

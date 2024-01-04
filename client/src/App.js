@@ -6,6 +6,7 @@ import HomeComponent from './components/Home';
 import NavigationComponent from './components/Navigation';
 import ForumComponent from './components/Forum';
 import UserPostsComponent from './components/UserPosts';
+import { ViewForumPostComponent } from './components/ViewForumPostComponent';
 
 function App() {
   const [token, setToken]= React.useState("");
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<HomeComponent token= {token} setToken= {setToken}/>}/>
             <Route path="/register" element={<RegistrationComponent token= {token} setToken= {setToken}/>}/>
             <Route path="/forums" element={<ForumComponent/>}/>
+            <Route path="/forumPost/:id" element={<ViewForumPostComponent/>} />
           </Routes>
       </BrowserRouter>
       
