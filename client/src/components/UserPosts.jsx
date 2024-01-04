@@ -21,7 +21,6 @@ export const UserPostsComponent = (props) =>{
     const handleDelete = async (id)=>{
         try{
             await axios.delete("http://localhost:3001/forumPost/"+id)
-            window.location.reload()
         }catch(err){
             console.log(err)
         }
