@@ -40,15 +40,23 @@ CREATE TABLE VideoPostGenre (
   FOREIGN KEY (GenreId) REFERENCES Genre(GenreId) ON DELETE CASCADE,
   UNIQUE (VideoPostId, GenreId)
 );
-
-
 CREATE TABLE VideoPostComments (
   VideoPostCommentId INT AUTO_INCREMENT PRIMARY KEY,
   UserId INT NOT NULL,
   Comment VARCHAR(5000) NOT NULL,
   VideoPostId INT NOT NULL,
   ReplyToVideoPostCommentId INT,
-  FOREIGN KEY UserId REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY VideoPostId REFERENCES VideoPost(VideoPostId) ON DELETE CASCADE,
-  FOREIGN KEY ReplyToVideoPostCommentId REFERENCES VideoPostComments(VideoPostCommentId) 
+  DELETED BOOLEAN NOT NULL,
+  FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (VideoPostId) REFERENCES VideoPost(VideoPostId) ON DELETE CASCADE,
+  FOREIGN KEY (ReplyToVideoPostCommentId) REFERENCES VideoPostComments(VideoPostCommentId) ON DELETE CASCADE
+);
+CREATE TABLE VideoPostCommentLikeDislike (
+  VideoPostCommentLikeDislikeId INT AUTO_INCREMENT PRIMARY KEY,
+  VideoPostCommentId INT NOT NULL,
+  UserId INT NOT NULL,
+  LikeStatus BOOLEAN NOT NULL,
+  FOREIGN KEY (VideoPostCommentId) REFERENCES VideoPostComments(VideoPostCommentId) ON DELETE CASCADE,
+  FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE (VideoPostCommentId, UserId)
 );
