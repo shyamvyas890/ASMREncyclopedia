@@ -244,7 +244,7 @@ app.get('/video/id', (req, res)=>{
     }   
 })
 app.delete('/video', (req, res)=>{
-    const {id, VideoPostId, LikeDislikeId, GenreId, VideoPostGenreId}= req.query
+    const {id, VideoPostId, LikeDislikeId, GenreId, VideoPostGenreId, UserId, VideoPostCommentId}= req.query
     if(id){
         db.query('DELETE FROM users WHERE id = ?', [id], (err)=>{
             if(err){
@@ -289,10 +289,32 @@ app.delete('/video', (req, res)=>{
             else {
                 res.status(200).send("Successfully deleted Genre")
             }
-    });
+        });
+    }
+    else if(VideoPostCommentId && UserId){
+        db.query('DELETE FROM VideoPostCommentLikeDislike WHERE VideoPostCommentId = ? AND UserId = ?', [VideoPostCommentId, UserId], (err)=>{
+            if(err){
+                console.log(err);
+                res.status(500).send("Error in deleting Video Comment rating");
+            }
+            else {
+                res.status(200).send("Successfully deleted Video comment rating")
+            }
+        });
 
     }
-    else {
+    else if(VideoPostCommentId){ 
+        db.query('UPDATE VideoPostComments SET Comment = ?, DELETED = ? WHERE VideoPostCommentId = ?', ["deleted",true,VideoPostCommentId], (err)=>{
+            if(err){
+                console.log(err);
+                res.status(500).send("Error in deleting comment");
+            }
+            else {
+                res.status(200).send("Successfully deleted comment")
+            }
+        });
+    }
+    else if(VideoPostGenreId) {
         db.query('DELETE FROM VideoPostGenre WHERE VideoPostGenreId = ?', [VideoPostGenreId], (err)=>{
             if(err){
                 console.log(err);
@@ -366,11 +388,95 @@ app.get('/video-rating', (req,res)=>{
             return res.json(results);
         });
     }
+})
+
+
+  app.get("/videoComments/:VideoPostId", (req,res)=>{
+    const VideoPostId= req.params.VideoPostId;
+    db.query('SELECT * FROM VideoPostComments WHERE VideoPostId = ?',[VideoPostId], (err, results)=>{
+        if(err) {
+            console.log(err)
+            return res.status(500).send("Internal Server Error");
+        }
+        return res.json(results);
+    });
+  })
+
+  app.put("/videoComments/:VideoPostCommentId", (req,res)=>{
+    const VideoPostCommentId = req.params.VideoPostCommentId;
+    const {updatedComment}= req.body;
+    db.query('UPDATE VideoPostComments SET Comment= ? WHERE VideoPostCommentId =?', [updatedComment, VideoPostCommentId], (err, results)=>{
+        if(err) {
+            console.log(err)
+            return res.status(500).send("Internal Server Error");
+        }
+        return res.json(results);
+    })
+  })
+
+  app.post("/videoComments", (req,res)=>{
+    const {UserId, Comment, VideoPostId, ReplyToVideoPostCommentId}= req.body;
+    if(ReplyToVideoPostCommentId!==null){
+        db.query('SELECT * FROM VideoPostComments WHERE VideoPostCommentId = ?', [ReplyToVideoPostCommentId], (err, results)=>{
+            if(err){
+                console.log(err)
+                return res.status(500).send("Internal Server Error")
+            }
+            if(results[0].DELETED){
+                return res.status(400).send("You cannot reply to a deleted comment");
+            }
+            db.query('INSERT INTO VideoPostComments (UserId, Comment, VideoPostId, ReplyToVideoPostCommentId, DELETED) VALUES (?, ?, ?, ?, ?)', [UserId, Comment, VideoPostId, ReplyToVideoPostCommentId, false], (err1, results1)=>{
+                if(err1){
+                    console.log(err1)
+                    return res.status(500).send("Internal Server Error");
+                }
+                return res.json(results1);
+            })
+        })
+    }
+    else {
+        db.query('INSERT INTO VideoPostComments (UserId, Comment, VideoPostId, ReplyToVideoPostCommentId, DELETED) VALUES (?, ?, ?, ?, ?)', [UserId, Comment, VideoPostId, ReplyToVideoPostCommentId, false], (err1, results1)=>{
+            if(err1){
+                console.log(err1)
+                return res.status(500).send("Internal Server Error");
+            }
+            return res.json(results1);
+        })
+    }
     
 
+  })
+
+  app.post("/videoCommentRating", (req, res)=>{
+    const {VideoPostCommentId, UserId, LikeStatus}= req.body;
+    db.query('INSERT INTO VideoPostCommentLikeDislike (VideoPostCommentId, UserId, LikeStatus) VALUES (?, ?, ?)', [VideoPostCommentId, UserId, LikeStatus], (err, results)=>{
+        if(err){
+            console.log(err);
+            return res.status(500).send("Internal Server Error");
+        }
+        return res.status(201).send("Successfully added Video Comment Rating")
+    })
+  })
+
+  app.delete("/videoCommentRating", (req, res)=>{
+    const {VideoPostCommentId, UserId}= req.query;
 
 
-})
+  })
+
+  app.get("/videoCommentRating", (req, res)=>{
+        const {VideoPostCommentId, UserId} = req.query;
+        db.query("SELECT * FROM VideoPostCommentLikeDislike WHERE UserId= ? AND VideoPostCommentId = ?", [UserId, VideoPostCommentId], (error, results)=>{
+            if (error){
+                console.log(error);
+                return res.status(500).send("Internal Server Error");
+            }
+            return res.json(results);
+        })
+  })
+
+
+
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
