@@ -60,3 +60,25 @@ CREATE TABLE VideoPostCommentLikeDislike (
   FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE,
   UNIQUE (VideoPostCommentId, UserId)
 );
+
+CREATE TABLE FriendRequests (
+  FriendRequestId INT AUTO_INCREMENT PRIMARY KEY,
+  SenderUserId INT NOT NULL,
+  ReceiverUserId INT NOT NULL,
+  SentAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(SenderUserId) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY(ReceiverUserId) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(SenderUserId, ReceiverUserId),
+  CHECK(SenderUserId != ReceiverUserId)
+);-- Make sure to check that a user cant send a friend request to someone who already has sent them a friend request which hasnt been accepted or declined yet.
+
+CREATE TABLE Friendships (
+  FriendshipId INT AUTO_INCREMENT PRIMARY KEY,
+  UserId1 INT NOT NULL,
+  UserId2 INT NOT NULL,
+  AcceptedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(UserId1) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY(UserId2) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(UserId1 , UserId2),
+  CHECK(UserId1 < UserId2)
+);
