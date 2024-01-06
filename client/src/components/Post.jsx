@@ -94,9 +94,10 @@ const PostComponent = (props) =>{
         <div>
             <h5>{props.username}</h5>
             <h6>{props.title}</h6>
-            <iframe width="420" height="315" title= "Title" allow="fullscreen;"
+            {/* <iframe width="420" height="315" title= "Title" allow="fullscreen;"
                 src={`https://www.youtube.com/embed/${props.VideoLinkId}`}>
-            </iframe>
+            </iframe> */}
+            <div>{props.VideoLinkId}</div>
             <button onClick={handleLike} style={highlightLikeButtonRating}>Like </button>
             <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike</button>
             {props.username === props.usernameOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
