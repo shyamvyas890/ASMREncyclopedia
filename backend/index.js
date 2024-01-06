@@ -107,6 +107,19 @@ const db = mysql.createConnection({
     })
   })
 
+  app.get('/users',(req,res)=>{
+    db.query('SELECT * FROM users', (err, results)=>{
+        if(err){
+            console.log(err);
+            return res.json("Error retrieving all users")
+        }
+        return res.json(results.map((result)=>{
+            return {id:result.id,
+                    username:result.username}
+        }));
+    })
+  })
+
   app.post('/video/:VideoId', (req,res)=>{
     const VideoLinkId= req.params.VideoId;
     const {UserId, Title} = req.body
@@ -458,12 +471,6 @@ app.get('/video-rating', (req,res)=>{
     })
   })
 
-  app.delete("/videoCommentRating", (req, res)=>{
-    const {VideoPostCommentId, UserId}= req.query;
-
-
-  })
-
   app.get("/videoCommentRating", (req, res)=>{
         const {VideoPostCommentId, UserId} = req.query;
         db.query("SELECT * FROM VideoPostCommentLikeDislike WHERE UserId= ? AND VideoPostCommentId = ?", [UserId, VideoPostCommentId], (error, results)=>{
@@ -475,8 +482,121 @@ app.get('/video-rating', (req,res)=>{
         })
   })
 
+ const queryTheDatabase= (theQuery, theArray, res)=>{
+    db.query(theQuery, theArray, (error, results)=>{
+        if(error){
+            console.log(error)
+            res.status(500).send("Internal Server Error");
+        }
+        res.send(results);
+    })
+ } 
+
+  app.post("/friendRequests", (req, res)=>{
+    const {SenderUserId, ReceiverUserId}= req.body;
+    
+    let theQuery= "SELECT * FROM FriendRequests WHERE SenderUserId = ? AND ReceiverUserId = ?"
+    let theArray= [ReceiverUserId, SenderUserId];
+    db.query(theQuery, theArray, (error, results)=>{
+        if(error){
+            console.log(error)
+            return res.status(500).send("Internal Server Error");
+        }
+        if(results.length>0){
+            return res.status(400).send("You already have a pending friend request from this person")
+        }
+        else {
+            theQuery= "INSERT INTO FriendRequests (SenderUserId, ReceiverUserId) VALUES (?, ?)"
+            
+            theArray=[SenderUserId, ReceiverUserId];
+            queryTheDatabase(theQuery, theArray, res);
+        }
+    })
+  })
+
+  app.delete("/friendRequests", (req,res)=>{
+    const {SenderUserId, ReceiverUserId}= req.query;
+    queryTheDatabase("DELETE FROM FriendRequests WHERE SenderUserId = ? AND ReceiverUserId = ?",[SenderUserId, ReceiverUserId], res)
+  })
+
+  app.post("/Friendships", (req, res)=>{
+    const {UserId1, UserId2}= req.body
+    let val1, val2;
+    if(UserId1>UserId2){
+        val1= UserId2
+        val2= UserId1
+    }
+    else{
+        val1=UserId1
+        val2=UserId2
+    }
+    queryTheDatabase("INSERT INTO Friendships (UserId1, UserId2) VALUES (?, ?)", [val1, val2], res)
+  })
+  app.delete("/Friendships", (req, res)=>{
+    const {UserId1, UserId2}= req.query
+    let val1, val2;
+    if(UserId1>UserId2){
+        val1= UserId2
+        val2= UserId1
+    }
+    else{
+        val1=UserId1
+        val2=UserId2
+    }
+    queryTheDatabase("DELETE FROM Friendships WHERE UserId1= ? AND UserId2 = ?", [val1, val2], res)
+  })
+
+  app.get("/OutgoingFriendRequests/:UserId", (req,res)=>{
+    const UserId = req.params.UserId
+    queryTheDatabase("SELECT * FROM FriendRequests WHERE SenderUserId = ?", [UserId], res);
+  })
+  app.get("/IncomingFriendRequests/:UserId", (req,res)=>{
+    const UserId = req.params.UserId
+    queryTheDatabase("SELECT * FROM FriendRequests WHERE ReceiverUserId = ?", [UserId], res);
+  })
+  app.get("/ListOfFriends/:UserId", (req, res)=>{
+    const UserId = req.params.UserId
+    queryTheDatabase("SELECT * FROM Friendships WHERE UserId1 = ? OR UserId2 = ?", [UserId,UserId], res)
+  })
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
