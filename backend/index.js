@@ -123,13 +123,13 @@ const db = mysql.createConnection({
   app.post('/video/:VideoId', (req,res)=>{
     const VideoLinkId= req.params.VideoId;
     const {UserId, Title} = req.body
-    db.query('INSERT INTO VideoPost (UserId, Title, VideoLinkId) VALUES (?, ?, ?)', [UserId, Title, VideoLinkId], (err)=>{
+    db.query('INSERT INTO VideoPost (UserId, Title, VideoLinkId) VALUES (?, ?, ?)', [UserId, Title, VideoLinkId], (err, results)=>{
         if(err){
             console.log(err);
             res.status(500).send("Error adding video");
         }
         else {
-            res.status(201).send("Successfully added video");
+            res.status(201).send(results);
         }
     } )
   })
@@ -150,32 +150,16 @@ const db = mysql.createConnection({
 
   app.post('/genre', (req,res)=>{
         const genre= req.body.genre;
-        db.query('INSERT INTO Genre (Genre) VALUES (?)', [genre], (err)=>{
+        db.query('INSERT INTO Genre (Genre) VALUES (?)', [genre], (err, results)=>{
             if(err){
                 console.log(err)
                 res.status(500).send("Error adding genre")
             }
             else {
-                res.status(201).send("Successfully added genre");
+                res.status(201).send(results);
             }
         })
   })
-
-  app.post('/video-genre', (req,res)=>{
-        const {VideoPostId, GenreId}= req.body
-        db.query('INSERT INTO VideoPostGenre (VideoPostId, GenreId) VALUES (?, ?)', [VideoPostId, GenreId], (err)=>{
-            if(err){
-                console.log(err)
-                res.status(500).send("Error adding genre to this video")
-            }
-            else {
-                res.status(201).send("Successfully added genre to this video");
-            }
-        })
-  })
-
-
-  
 
   app.get('/users/id', (req, res)=> {
         const {username, UserId}= req.query
@@ -559,9 +543,36 @@ app.get('/video-rating', (req,res)=>{
     queryTheDatabase("SELECT * FROM Friendships WHERE UserId1 = ? OR UserId2 = ?", [UserId,UserId], res)
   })
 
+  app.post('/video-genre', (req,res)=>{
+    const {VideoPostId, Genre}= req.body
+    db.query('SELECT * FROM Genre Where Genre = ?', [Genre.toLowerCase()], (err, results)=>{
+        if(err){
+            console.log(err)
+            res.status(500).send("Something went wrong in selecting from genres")
+        }
+        else {
+            if(results.length===1){
+                queryTheDatabase("INSERT INTO VideoPostGenre (VideoPostId, GenreId) VALUES (?, ?)", [VideoPostId, results[0].GenreId], res)
+            }
+            else if(results.length===0){
+                db.query(`INSERT INTO Genre (Genre) VALUES (?)`, [Genre], (err1, results1)=>{
+                    if(err1){
+                        console.log(err1)
+                        res.status(500).send("Something went wrong in creating new genre");
+                    }
+                    else {
+                        queryTheDatabase("INSERT INTO VideoPostGenre (VideoPostId, GenreId) VALUES (?, ?)", [VideoPostId, results1.insertId], res)
+                    }
+                } )
+            }
+        }
+    })
+  })
 
-
-
+  app.get("/genreName", (req, res)=>{
+    const {GenreId} = req.query;
+    queryTheDatabase("SELECT * FROM Genre WHERE GenreId = ?", [GenreId], res);
+  })
 
 
 
