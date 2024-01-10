@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 const PostComponent = (props) =>{
-
+    const hostname= "http://localhost:3001";
+    const [theGenres, setTheGenres]= useState(null);
     function changeTheRating(theRating){
       props.setVideoPostsAndRatings(function(prev){
         let newUserRatings= [...prev.userRatings];
@@ -52,7 +53,18 @@ const PostComponent = (props) =>{
         }
       })
     }
+    const getGenres = async ()=>{
+      const genres = await axios.get(`${hostname}/video-by-genre-or-user`, {params:{VideoPostId:props.VideoPostId}});
+      for(const genre of genres.data) {
+        const GenreName = await axios.get(`${hostname}/genreName`, {params:{GenreId: genre.GenreId}})
+        genre.GenreName= GenreName.data[0].Genre;
+      }
+      setTheGenres(genres.data)
+    }
 
+    React.useEffect(()=>{
+      getGenres();
+    },[])
     const handleDislike= async (e)=>{
         e.preventDefault();
         if(props.rating===0){
@@ -98,6 +110,12 @@ const PostComponent = (props) =>{
                 src={`https://www.youtube.com/embed/${props.VideoLinkId}`}>
             </iframe> */}
             <div>{props.VideoLinkId}</div>
+            <h4>Tags</h4>
+            {theGenres && theGenres.map((genre, index)=>(
+              <React.Fragment key={index}>
+                <div>{genre.GenreName}</div>
+              </React.Fragment>
+            ))}
             <button onClick={handleLike} style={highlightLikeButtonRating}>Like </button>
             <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike</button>
             {props.username === props.usernameOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
