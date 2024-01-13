@@ -1,22 +1,22 @@
 CREATE DATABASE ASMR_DB;
 use ASMR_DB;
-CREATE TABLE `users` (
-  id int NOT NULL AUTO_INCREMENT,
-  username varchar(255) NOT NULL,
+CREATE TABLE users (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  username varchar(255) UNIQUE NOT NULL,
   password varchar(255) NOT NULL,
-  PRIMARY KEY ('id'),
-  UNIQUE KEY unique_username ('username')
-)
+  email varchar(255)
+);
 CREATE TABLE blacklisted_tokens (
   id INT AUTO_INCREMENT PRIMARY KEY,
   token VARCHAR(255) NOT NULL,
-  blacklisted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  BlacklistedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE VideoPost (
   VideoPostId INT AUTO_INCREMENT PRIMARY KEY,
   UserId INT NOT NULL,
   Title VARCHAR(255) NOT NULL,
   VideoLinkId VARCHAR(255) NOT NULL UNIQUE,
+  PostedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE TABLE LikeDislike (
@@ -46,6 +46,7 @@ CREATE TABLE VideoPostComments (
   Comment VARCHAR(5000) NOT NULL,
   VideoPostId INT NOT NULL,
   ReplyToVideoPostCommentId INT,
+  CommentedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   DELETED BOOLEAN NOT NULL,
   FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (VideoPostId) REFERENCES VideoPost(VideoPostId) ON DELETE CASCADE,
@@ -82,3 +83,20 @@ CREATE TABLE Friendships (
   UNIQUE(UserId1 , UserId2),
   CHECK(UserId1 < UserId2)
 );
+
+CREATE TABLE VideoSubscriptionOnly ( -- represents if the user wants only the selected genres or everything except only the selected genres
+  VideoSubscriptionOnlyId INT AUTO_INCREMENT PRIMARY KEY,
+  UserId INT NOT NULL,
+  Only BOOLEAN NOT NULL,
+  FOREIGN KEY(UserId) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(UserId, Only)
+);
+
+CREATE TABLE VideoSubscriptions (
+  VideoSubscriptionId INT AUTO_INCREMENT PRIMARY KEY,
+  UserId INT NOT NULL,
+  GenreId INT NOT NULL,
+  FOREIGN KEY(UserId) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (GenreId) REFERENCES Genre(GenreId) ON DELETE CASCADE,
+  UNIQUE(UserId, GenreId)
+)
