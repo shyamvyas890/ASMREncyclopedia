@@ -12,6 +12,9 @@ const NavigationComponent= () => {
             <li>
                 <Link to="/friends">Friends</Link>
             </li>
+            <li>
+                <Link to="/settings">Settings</Link>
+            </li>
         </ul>
     </nav>)
 }
