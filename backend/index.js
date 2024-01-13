@@ -23,6 +23,15 @@ const db = mysql.createConnection({
       console.log('Connected to MySQL');
     }
   });
+  const queryTheDatabase= (theQuery, theArray, res)=>{
+    db.query(theQuery, theArray, (error, results)=>{
+        if(error){
+            console.log(error)
+            res.status(500).send("Internal Server Error");
+        }
+        res.send(results);
+    })
+  } 
   app.post("/register", async (req,res)=>{
     const { username, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 13);
@@ -45,6 +54,13 @@ const db = mysql.createConnection({
     );
 
   });
+
+  app.put("/changePassword", async (req, res)=>{
+    const {username, password}= req.body;
+    const hashedPassword = await bcrypt.hash(password, 13);
+    queryTheDatabase("UPDATE users SET password = ? WHERE username= ? ", [hashedPassword,username], res);
+
+  })
   app.post("/login", async (req, res)=>{
     const { username, password } = req.body;
     db.query(
@@ -106,6 +122,8 @@ const db = mysql.createConnection({
         }
     })
   })
+
+  
 
   app.get('/users',(req,res)=>{
     db.query('SELECT * FROM users', (err, results)=>{
@@ -466,16 +484,6 @@ app.get('/video-rating', (req,res)=>{
         })
   })
 
- const queryTheDatabase= (theQuery, theArray, res)=>{
-    db.query(theQuery, theArray, (error, results)=>{
-        if(error){
-            console.log(error)
-            res.status(500).send("Internal Server Error");
-        }
-        res.send(results);
-    })
- } 
-
   app.post("/friendRequests", (req, res)=>{
     const {SenderUserId, ReceiverUserId}= req.body;
     
@@ -569,21 +577,67 @@ app.get('/video-rating', (req,res)=>{
     })
   })
 
-  app.get("/genreName", (req, res)=>{
+  app.get("/genreName", (req, res)=>{ //fix this and add video later
     const {GenreId} = req.query;
     queryTheDatabase("SELECT * FROM Genre WHERE GenreId = ?", [GenreId], res);
   })
 
+  app.get("/email", (req, res)=>{
+    const {UserId} = req.query;
+    queryTheDatabase("SELECT email FROM users WHERE id = ?", [UserId], res)
+  })
+  app.put("/email", (req, res)=>{
+    const {UserId, email} = req.body;
+    queryTheDatabase("UPDATE users SET email = ? WHERE id = ?", [email, UserId], res)
+  })
 
+  app.get("/videoSubscriptionOnly", (req, res)=>{
+    const {UserId} = req.query;
+    queryTheDatabase("SELECT * FROM VideoSubscriptionOnly WHERE UserId = ?", [UserId], res)
+  })
+  app.delete("/videoSubscriptionOnly", (req,res)=>{
+    const {UserId}= req.query;
+    queryTheDatabase("DELETE FROM VideoSubscriptionOnly WHERE UserId = ?", [UserId], res);
+  })
+  app.post("/videoSubscriptionOnly", (req, res)=>{
+    const {UserId, Only}=req.body;
+    queryTheDatabase("INSERT INTO VideoSubscriptionOnly (UserId, Only) VALUES (?,?)", [UserId, Only], res);
+  })
 
+  app.get("/videoSubscriptions", (req, res)=>{
+    const {UserId} = req.query;
+    queryTheDatabase("SELECT * FROM VideoSubscriptions WHERE UserId = ?", [UserId], res);
+  })
 
-
-
-
-
-
-
-
+  app.delete("/videoSubscriptions", (req,res)=>{
+    const {UserId} = req.query;
+    queryTheDatabase("DELETE FROM VideoSubscriptions WHERE UserId = ?", [UserId], res);
+  })
+  app.post("/videoSubscriptions", (req,res)=>{
+    const {UserId, Genre}=req.body;
+    db.query('SELECT * FROM Genre Where Genre = ?', [Genre.toLowerCase()], (err, results)=>{
+        if(err){
+            console.log(err)
+            res.status(500).send("Something went wrong in selecting from genres")
+        }
+        else {
+            if(results.length===1){
+                queryTheDatabase("INSERT INTO VideoSubscriptions (UserId, GenreId) VALUES (?, ?)", [UserId, results[0].GenreId], res)
+            }
+            else if(results.length===0){
+                db.query(`INSERT INTO Genre (Genre) VALUES (?)`, [Genre], (err1, results1)=>{
+                    if(err1){
+                        console.log(err1)
+                        res.status(500).send("Something went wrong in creating new genre");
+                    }
+                    else {
+                        queryTheDatabase("INSERT INTO VideoSubscriptions (UserId, GenreId) VALUES (?, ?)", [UserId, results1.insertId], res)
+                    }
+                } )
+            }
+        }
+    })
+  })
   
   
   
