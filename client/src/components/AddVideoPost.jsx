@@ -103,7 +103,7 @@ const AddVideoPostComponent = (props)=>{
             <br />
             <label> Enter the genres for this ASMR Video, separated by commas (or press enter to add a genre)
                 <br/>
-            <input className="tag-container" contentEditable ref={tagRef} onKeyDown={handleOnKeyDown} />
+            <input className="tag-container" ref={tagRef} onKeyDown={handleOnKeyDown} />
             </label>
             <br />
             {videoTags.map((tag, index)=>(
