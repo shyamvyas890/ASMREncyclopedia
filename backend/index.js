@@ -13,7 +13,7 @@ app.use(cors());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '#jySJSU2024',
+    password: 'password',
     database: 'ASMR_DB',
   });
   db.connect((err) => {
@@ -446,6 +446,7 @@ app.get("/forumPostsById/:id", async (req,res)=>{
             res.send(err)
         }
         console.log(data)
+        console.log("hi")
         return res.json(data)
     })
 })
@@ -459,6 +460,78 @@ app.delete("/forumPostDelete/:id", (req,res)=>{
         return res.json("Post has been deleted successfully");
     });
 });
+
+app.post("/forumPostComment/:id", (req, res) => {
+   const forumPostID = parseInt(req.params.id, 10)
+   //debugging purposes
+   console.log(forumPostID)
+   console.log(typeof(forumPostID))
+   const username = req.body.username
+   const body = req.body.body
+
+   db.query("INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp) VALUES (?, ?, ?, NOW())", [forumPostID, username, body], function (err){
+    if(err){
+        console.log(err)
+    }else{
+        return res.status(201).send("Comment Successful")
+    }
+   })
+})
+
+app.get("/forumPostParentCommentGetByID/:id", (req, res) =>{
+    const forumPostID = parseInt(req.params.id, 10)
+    //debugging purposes
+    console.log(forumPostID)
+    console.log(typeof(forumPostID))
+    db.query("SELECT * FROM forumpostcomments WHERE forum_post_id=? AND parent_comment_id IS NULL", [forumPostID], function (err, data){
+    if(err){
+        console.log(err)
+    }
+    return res.json(data)
+    })
+})
+
+app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
+    const forumPostID = parseInt(req.params.id, 10)
+    const commentID = parseInt(req.params.commentID, 10)
+    const username = req.body.username
+    const body = req.body.body
+    const timestamp = new Date().toISOString()
+
+    const reply = {
+        username,
+        body,
+        timestamp
+    }
+    const insertQuery = "INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp, parent_comment_id) VALUES (?, ?, ?, NOW(),?)"
+
+           db.query(insertQuery, [forumPostID, username, body, commentID], (err) =>{
+            if(err){
+                console.log(err)
+            }
+            else{
+                return res.status(201).send("Reply Successful")
+            }
+           })
+})
+
+app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
+    const forumPostID = parseInt(req.params.id, 10)
+    const parentCommentID = parseInt(req.params.commentID, 10)
+    //debugging purposes
+    console.log(forumPostID)
+    console.log(typeof(forumPostID))
+    console.log(parentCommentID)
+    db.query("SELECT * FROM forumpostcomments WHERE parent_comment_id=?", [parentCommentID], function (err, data){
+    if(err){
+        console.log(err)
+    }
+    else{
+        return res.json(data)
+
+    }
+    })
+})
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

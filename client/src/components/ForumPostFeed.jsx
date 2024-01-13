@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-export const ForumPostFeedComponent = () =>{
+export const ForumPostFeedComponent = (props) =>{
    const [allPosts, setAllPosts] = useState([])
    const navigate = useNavigate()
 
@@ -24,9 +24,9 @@ return <div>
 
     {allPosts.map(post=>(
         <div className="user-posts" key={post.id}>
-            <h2>{post.title} by {post.username} @ {post.post_timestamp} </h2>
+            <h2>{post.title} by {post.username} @ {new Date(post.post_timestamp).toLocaleString()} </h2>
             <p>{post.body}</p>
-            <button onClick={ () => navigate(`/forumPost/${post.id}`)}> View Post </button>
+            <button onClick={ () => navigate(`/forumPost/${post.id}/viewing`, {state: {username: props.username}})}> View Post </button>
         </div>
     ))}
 </div>

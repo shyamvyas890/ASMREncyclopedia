@@ -60,4 +60,12 @@ PRIMARY KEY(id),
 FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );
 
+CREATE TABLE ForumPostComments(
+id INT AUTO_INCREMENT UNIQUE, 
+forum_post_id INT, 
+username varchar(255) NOT NULL, 
+body text NOT NULL, 
+comment_timestamp timestamp NOT NULL, 
+PRIMARY KEY (id), 
+FOREIGN KEY (forum_post_id) REFERENCES ForumPost(id));
 
