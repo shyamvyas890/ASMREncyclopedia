@@ -112,12 +112,6 @@ const HomeComponent= () => {
                                 rating= {videoPostsAndRatings.userRatings[index]}
                                 setVideoPostsAndRatings= {setVideoPostsAndRatings}
                             />
-                            <VideoCommentContainerComponent 
-                                key={index+videoPostsAndRatings.videoPosts.length+1}
-                                VideoPostId= {post.VideoPostId}
-                                userIdOfCurrentUser= {userIdOfCurrentUser}
-                                usernameOfCurrentUser= {username}
-                            />
                         </div>
                     ))}
                 </>
