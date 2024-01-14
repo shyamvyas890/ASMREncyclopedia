@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 export const ForumPostFeedComponent = (props) =>{
    const [allPosts, setAllPosts] = useState([])
-   
    const navigate = useNavigate()
    useEffect(()=>{
     const fetchAllPosts = async ()=>{
@@ -57,7 +56,7 @@ return <div>
         <div className="user-posts" key={post.id}>
             <h2>{post.title} by {post.username} @ {post.post_timestamp} </h2>
             <p>{post.body}</p>
-            <button onClick={ () => navigate(`/forumPost/${post.id}`)}> View Post </button>
+            <button onClick={ () => navigate(`/forumPost/${post.id}/viewing`, {state: {username: props.username}})}> View Post </button>
             <button className="like" onClick={()=>handleLikeDislike(post.id, 1)}>Like</button>
             <button className="dislike" onClick={()=>handleLikeDislike(post.id, 0)}>Dislike</button>
         </div>
