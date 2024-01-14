@@ -6,6 +6,7 @@ import HomeComponent from './components/Home';
 import NavigationComponent from './components/Navigation';
 import FriendsComponent from './components/Friends';
 import SettingsComponent from './components/Settings';
+import VideoPostWithCommentsComponent from './components/VideoPostWithComments';
 function App() {
   const [token, setToken]= React.useState("");
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/register" element={<RegistrationComponent token= {token} setToken= {setToken}/>}/>
             <Route path="/friends" element= {<FriendsComponent />}/>
             <Route path="/settings" element= {<SettingsComponent />} />
+            <Route path="/video/:VideoPostId" element={<VideoPostWithCommentsComponent />} />
           </Routes>
       </BrowserRouter>
       
