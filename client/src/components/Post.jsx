@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 const PostComponent = (props) =>{
     const hostname= "http://localhost:3001";
     const [theGenres, setTheGenres]= useState(null);
+    const navigate = useNavigate();
     function changeTheRating(theRating){
       props.setVideoPostsAndRatings(function(prev){
         let newUserRatings= [...prev.userRatings];
@@ -119,6 +121,7 @@ const PostComponent = (props) =>{
             <button onClick={handleLike} style={highlightLikeButtonRating}>Like </button>
             <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike</button>
             {props.username === props.usernameOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
+            <button onClick={()=>navigate(`/video/${props.VideoPostId}`)}>Comments</button>
         </div>
     );
 }
