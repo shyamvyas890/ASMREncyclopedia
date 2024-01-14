@@ -13,7 +13,7 @@ app.use(cors());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '#jySJSU2024',
+    password: 'password',
     database: 'ASMR_DB',
   });
   db.connect((err) => {
@@ -166,6 +166,7 @@ const db = mysql.createConnection({
 
   app.get('/users/id', (req, res)=> {
         const {username, UserId}= req.query
+        console.log(username)
         if(username){
             db.query('SELECT * FROM users WHERE username = ?', [username], (err, results)=>{
                 if(err){
@@ -423,7 +424,6 @@ app.post("/forumPostCreate", async (req, res) => {
     })
 })
 
-
 //viewing all posts, mainly for testing purposes can change the condition later
 app.get("/forumPostsAll", async (req,res)=>{
 
@@ -453,10 +453,65 @@ app.get("/forumPostsById/:id", async (req,res)=>{
 app.delete("/forumPostDelete/:id", (req,res)=>{
     const forumPostID = req.params.id;
     const query = "DELETE FROM forumpost WHERE id = ?"
-
     db.query(query, [forumPostID], (err,data)=>{
         if (err) return res.send(err);
         return res.json("Post has been deleted successfully");
+    });
+});
+
+app.get("/forumPostLikeStatus/", async (req,res)=>{
+    const forumPostID = req.query.postID
+    const userID = req.query.userID
+    const check = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND UserID = ?"
+    db.query(check, [forumPostID, userID], (err,data)=>{
+        if (err){
+            return res.send("error");
+        }
+        else { 
+            return res.json(data)
+        }
+    });
+});
+
+//Posts a like/dislike with user and post
+app.post("/forumPostLikeDislike/", async (req,res)=>{
+    const forumPostID = req.query.postID
+    const userID = req.query.userID
+    const rating = req.query.rating
+    const query = "INSERT INTO ForumPostLikeDislike (ForumPostID, UserID, LikeStatus) VALUES (?, ?, ?)"
+    db.query(query, [forumPostID, userID, rating], (err, data) => {
+        if (err) {
+            return res.status(500).send("Internal Server Error");
+        } else {
+            return res.status(201).send("Like/Dislike Successful!");
+        }
+    });
+});
+
+//Changes like to dislike and vice versa with user and post
+app.put("/forumChangeLikeDislike/", async (req,res)=>{
+    const LikeDislikeID = req.query.LikeDislikeID
+    const rating = req.query.rating
+    const query = "UPDATE ForumPostLikeDislike SET LikeStatus = ? WHERE LikeDislikeID = ?"
+    db.query(query, [rating, LikeDislikeID], (err, data) => {
+        if (err) {
+            return res.status(500).send("Internal Server Error");
+        } else {
+            return res.status(201).send("Like/Dislike Update Successful!");
+        }
+    });
+});
+
+//Deletes like/dislike from database
+app.delete("/forumDeleteLikeDislike/", async (req,res)=>{
+    const LikeDislikeID = req.query.LikeDislikeID
+    const query = "DELETE FROM ForumPostLikeDislike WHERE LikeDislikeID = ?"
+    db.query(query, [LikeDislikeID], (err, data) => {
+        if (err) {
+            return res.status(500).send("Internal Server Error");
+        } else {
+            return res.status(201).send("Like/Dislike Update Successful!");
+        }
     });
 });
 
