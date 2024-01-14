@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 const SettingsComponent = ()=>{
     const hostname= "http://localhost:3001";
     const [username, setUsername]= React.useState(null);
@@ -11,6 +12,7 @@ const SettingsComponent = ()=>{
     })
     const [subscriptionRadio, setSubscriptionRadio]= useState(null);
     const [videoTags, setVideoTags]= useState([]);
+    const navigate= useNavigate();
     const axiosRequest = async (reqNum, inputType, pathname, theInput )=>{ // reqNum = POST =1 DELETE = 2 GET = 3 PUT = 4   inputType = Body= 1 Query = 2 (doesnt cover params input)     
         let response;
         if(reqNum===1){
@@ -48,7 +50,7 @@ const SettingsComponent = ()=>{
                     setUsername({userIdOfCurrentUser, username:response.data.username})
                 }
                 else {
-                    setUsername(null);
+                    navigate("/");
                 }
             }
     
@@ -57,7 +59,7 @@ const SettingsComponent = ()=>{
             }
         }
         else{
-            setUsername(null)
+            navigate("/");
         }
     }
     React.useEffect(()=>{
@@ -158,9 +160,9 @@ const SettingsComponent = ()=>{
     }
     return (
         <React.Fragment>
-            <div>Your Current Settings</div>
             {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password)? 
                 (<>
+                    <div>Your Current Settings</div>
                     <div>Email</div>
                     <div>{emailAndSubscriptionPreferences.email===null? "No email provided":emailAndSubscriptionPreferences.email}</div>
                     <button onClick={changeEditEmail}>{emailAndSubscriptionPreferences.email===null? "Add email": "Change email"}</button>
