@@ -1,11 +1,13 @@
 import React, {useState} from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const FriendsComponent = (props)=>{
     const hostname= "http://localhost:3001";
     const [username, setUsername] = useState("");
     const [isLoggedIn, setIsLoggedIn]= useState(false);
     const [incomingOutgoingFriendRequestsAndFriendships, setIncomingOutgoingFriendRequestsAndFriendships]= useState(null)
+    const navigate=useNavigate();
     const tokenVerify= async (e) => {
         const theToken= localStorage.getItem("token");
         if(theToken){
@@ -16,7 +18,9 @@ const FriendsComponent = (props)=>{
                     setIsLoggedIn(true);
                 }
                 else {
-                    setIsLoggedIn(false);
+                    // setIsLoggedIn(false);
+                    navigate("/");
+                   
                 }
             }
     
@@ -25,7 +29,9 @@ const FriendsComponent = (props)=>{
             }
         }
         else{
-            setIsLoggedIn(false);
+            // setIsLoggedIn(false);
+            navigate("/");
+            
         }
     }
     
