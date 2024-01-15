@@ -99,4 +99,4 @@ CREATE TABLE VideoSubscriptions (
   FOREIGN KEY(UserId) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (GenreId) REFERENCES Genre(GenreId) ON DELETE CASCADE,
   UNIQUE(UserId, GenreId)
-)
+);
