@@ -7,13 +7,9 @@ const PostComponent = (props) =>{
     const navigate = useNavigate();
     function changeTheRating(theRating){
       props.setVideoPostsAndRatings(function(prev){
-        let newUserRatings= [...prev.userRatings];
-        newUserRatings[props.index]=theRating;
-        const newVideoPosts= prev.videoPosts;
-        return {
-          videoPosts:newVideoPosts,
-          userRatings: newUserRatings
-        }
+        const newVideoPosts= [...prev];
+        newVideoPosts[props.index].feedback=theRating
+        return newVideoPosts;
       })
     }
     const handleLike = async (e) => {
@@ -46,14 +42,7 @@ const PostComponent = (props) =>{
       catch(err){
         console.log(err);
       }
-      props.setVideoPostsAndRatings((prev)=>{
-        const newUserRatings= [...prev.userRatings.slice(0, props.index), ...prev.userRatings.slice(props.index+1)];
-        const newVideoPosts= [...prev.videoPosts.slice(0, props.index), ...prev.videoPosts.slice(props.index+1)];
-        return {
-          videoPosts:newVideoPosts,
-          userRatings: newUserRatings
-        }
-      })
+      props.setVideoPostsAndRatings((prev)=>([...prev.slice(0, props.index), ...prev.slice(props.index+1)]))
     }
     const getGenres = async ()=>{
       const genres = await axios.get(`${hostname}/video-by-genre-or-user`, {params:{VideoPostId:props.VideoPostId}});
