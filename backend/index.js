@@ -563,7 +563,7 @@ app.get('/video-rating', (req,res)=>{
                 queryTheDatabase("INSERT INTO VideoPostGenre (VideoPostId, GenreId) VALUES (?, ?)", [VideoPostId, results[0].GenreId], res)
             }
             else if(results.length===0){
-                db.query(`INSERT INTO Genre (Genre) VALUES (?)`, [Genre], (err1, results1)=>{
+                db.query(`INSERT INTO Genre (Genre) VALUES (?)`, [Genre.toLowerCase()], (err1, results1)=>{
                     if(err1){
                         console.log(err1)
                         res.status(500).send("Something went wrong in creating new genre");
@@ -625,7 +625,7 @@ app.get('/video-rating', (req,res)=>{
                 queryTheDatabase("INSERT INTO VideoSubscriptions (UserId, GenreId) VALUES (?, ?)", [UserId, results[0].GenreId], res)
             }
             else if(results.length===0){
-                db.query(`INSERT INTO Genre (Genre) VALUES (?)`, [Genre], (err1, results1)=>{
+                db.query(`INSERT INTO Genre (Genre) VALUES (?)`, [Genre.toLowerCase()], (err1, results1)=>{
                     if(err1){
                         console.log(err1)
                         res.status(500).send("Something went wrong in creating new genre");
