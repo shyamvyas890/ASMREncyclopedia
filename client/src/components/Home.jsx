@@ -99,7 +99,6 @@ const HomeComponent= () => {
         }
     }, [isLoggedIn])
 
-    
     return (
         <div>
             <LoginComponent 
@@ -111,10 +110,11 @@ const HomeComponent= () => {
 
             {(isLoggedIn) ?  <ForumPostComponent username={username} /> : null}
 
-            { (isLoggedIn) ? <ForumPostFeedComponent username = {username} /> : null}
+            {(isLoggedIn && userIdOfCurrentUser) ?  <ForumPostFeedComponent userID={userIdOfCurrentUser} setVideoPosts={setVideoPosts}/> : null}
 
             {(isLoggedIn && videoPosts && userRatings && userIdOfCurrentUser) ? (
                 videoPosts.map((post, index)=>{
+                    
                     return <PostComponent 
                                 key={index}
                                 index={index} 
