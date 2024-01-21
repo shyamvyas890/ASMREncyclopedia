@@ -436,9 +436,9 @@ app.get("/forumPostsAll", async (req,res)=>{
 })
 
 //viewing a post by its id
-app.get("/forumPostsById/:id", async (req,res)=>{
+app.get("/forumPostsById/:postID", async (req,res)=>{
 
-    const id = parseInt(req.params.id, 10)
+    const id = parseInt(req.params.postID, 10)
     console.log(typeof(id))
     console.log(id)
     db.query('SELECT * FROM forumpost WHERE id=?', [id], (err, data)=>{
@@ -464,8 +464,6 @@ app.delete("/forumPostDelete/:id", (req,res)=>{
 app.post("/forumPostComment/:id", (req, res) => {
    const forumPostID = parseInt(req.params.id, 10)
    //debugging purposes
-   console.log(forumPostID)
-   console.log(typeof(forumPostID))
    const username = req.body.username
    const body = req.body.body
 
@@ -480,9 +478,6 @@ app.post("/forumPostComment/:id", (req, res) => {
 
 app.get("/forumPostParentCommentGetByID/:id", (req, res) =>{
     const forumPostID = parseInt(req.params.id, 10)
-    //debugging purposes
-    console.log(forumPostID)
-    console.log(typeof(forumPostID))
     db.query("SELECT * FROM forumpostcomments WHERE forum_post_id=? AND parent_comment_id IS NULL", [forumPostID], function (err, data){
     if(err){
         console.log(err)
@@ -498,6 +493,10 @@ app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
     const body = req.body.body
     const timestamp = new Date().toISOString()
 
+    console.log("FORUM POST COMMENT REPLY FOR POST " + forumPostID)
+    console.log("TYPE OF FORUM POST ID " + typeof(forumPostID))
+    console.log("PARENT COMMENT " + commentID)
+    console.log()
     const reply = {
         username,
         body,
@@ -505,12 +504,24 @@ app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
     }
     const insertQuery = "INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp, parent_comment_id) VALUES (?, ?, ?, NOW(),?)"
 
-           db.query(insertQuery, [forumPostID, username, body, commentID], (err) =>{
+           db.query(insertQuery, [forumPostID, username, body, commentID], (err, insertResult) =>{
             if(err){
                 console.log(err)
             }
             else{
-                return res.status(201).send("Reply Successful")
+                const replyID = insertResult.insertId
+                const selectQuery = "SELECT username from forumpostcomments where id=?"
+                db.query(selectQuery, [replyID], (err, selectResult) => {
+                    if(err){
+                        console.log(err)
+                    }
+                    else
+                    {
+                        const replyUsername = selectResult[0].username
+                        console.log("USERNAME: " + replyUsername)
+                        return res.status(201).send({id: replyID, username: replyUsername, message:"Reply Successful"})
+                    }
+                })
             }
            })
 })
@@ -518,17 +529,18 @@ app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
 app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
     const forumPostID = parseInt(req.params.id, 10)
     const parentCommentID = parseInt(req.params.commentID, 10)
-    //debugging purposes
-    console.log(forumPostID)
-    console.log(typeof(forumPostID))
-    console.log(parentCommentID)
+    //debugging 
+
+    if(isNaN(parentCommentID)){
+        return;
+    }
+
     db.query("SELECT * FROM forumpostcomments WHERE parent_comment_id=?", [parentCommentID], function (err, data){
     if(err){
         console.log(err)
     }
     else{
         return res.json(data)
-
     }
     })
 })

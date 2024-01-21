@@ -18,7 +18,7 @@ function App() {
             <Route path="/" element={<HomeComponent token= {token} setToken= {setToken}/>}/>
             <Route path="/register" element={<RegistrationComponent token= {token} setToken= {setToken}/>}/>
             <Route path="/forums" element={<ForumComponent/>}/>
-            <Route path="/forumPost/:id/viewing" element={<ViewForumPostComponent/>} />
+            <Route path="/forumPost/:postID/viewing" element={<ViewForumPostComponent/>} />
           </Routes>
       </BrowserRouter>
       
