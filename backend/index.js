@@ -460,6 +460,36 @@ app.delete("/forumPostDelete/:id", (req,res)=>{
     });
 });
 
+//gets likes from post
+app.get("/fetchAllPostLikes/", async(req,res)=>{
+    //holds number of likes for each post
+    const forumPostID = req.query.postID
+    const queryLikes = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND LikeStatus = 1"
+        db.query(queryLikes, [forumPostID], (err, data)=>{
+            if (err){
+                return res.send("error");
+            }
+            else { 
+                return res.json(data)
+            }
+        })
+})
+
+//gets dislikes from post
+app.get("/fetchAllPostDislikes/", async(req,res)=>{
+    //holds number of dislikes for each post
+    const forumPostID = req.query.postID
+    const queryLikes = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND LikeStatus = 0"
+        db.query(queryLikes, [forumPostID], (err, data)=>{
+            if (err){
+                return res.send("error");
+            }
+            else { 
+                return res.json(data)
+            }
+        })
+})
+
 app.get("/forumPostLikeStatus/", async (req,res)=>{
     const forumPostID = req.query.postID
     const userID = req.query.userID

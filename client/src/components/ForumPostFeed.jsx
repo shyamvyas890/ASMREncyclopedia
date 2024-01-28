@@ -3,9 +3,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const ForumPostFeedComponent = (props) =>{
-   const [allPosts, setAllPosts] = useState([])
-   const navigate = useNavigate()
-   useEffect(()=>{
+    const [allPosts, setAllPosts] = useState([])
+    const [allPostLikes, setAllPostLikes] = useState(new Map())
+    const [allPostDislikes, setAllPostDislikes] = useState(new Map())
+    const navigate = useNavigate()
+    
+    useEffect(()=>{
     const fetchAllPosts = async ()=>{
         try{
             const res = await axios.get("http://localhost:3001/forumPostsAll")
@@ -16,6 +19,11 @@ export const ForumPostFeedComponent = (props) =>{
     } 
     fetchAllPosts()
 }, [])
+
+    useEffect(()=>{
+        fetchAllPostsLikes()
+        fetchAllPostsDislikes()
+    }, [allPosts])
 
 const handleLikeDislike = async (postID, rating)=>{
     try{
@@ -44,6 +52,43 @@ const handleLikeDislike = async (postID, rating)=>{
         } else{
             console.log("err")
         }
+        //update the likes and dislikes
+        fetchAllPostsLikes()
+        fetchAllPostsDislikes()
+    }catch(err){
+        console.log(err)
+    }
+}
+
+//gets likes for all posts
+const fetchAllPostsLikes = async ()=>{
+    console.log("testing")
+    try{
+        let likesMap = new Map();
+        for(const post of allPosts){
+            const likesData = await axios.get("http://localhost:3001/fetchAllPostLikes", {
+                params: {postID: post.id}
+            });
+            likesMap.set(post.id, likesData.data.length)
+        }
+        setAllPostLikes(likesMap);
+    }catch(err){
+        console.log(err)
+    }
+}
+
+//gets dislikes for all posts
+const fetchAllPostsDislikes = async ()=>{
+    console.log("testing")
+    try{
+        let dislikesMap = new Map();
+        for(const post of allPosts){
+            const dislikesData = await axios.get("http://localhost:3001/fetchAllPostDislikes", {
+                params: {postID: post.id}
+            });
+            dislikesMap.set(post.id, dislikesData.data.length)
+        }
+        setAllPostDislikes(dislikesMap)
     }catch(err){
         console.log(err)
     }
@@ -57,8 +102,8 @@ return <div>
             <h2>{post.title} by {post.username} @ {post.post_timestamp} </h2>
             <p>{post.body}</p>
             <button onClick={ () => navigate(`/forumPost/${post.id}/viewing`, {state: {username: props.username}})}> View Post </button>
-            <button className="like" onClick={()=>handleLikeDislike(post.id, 1)}>Like</button>
-            <button className="dislike" onClick={()=>handleLikeDislike(post.id, 0)}>Dislike</button>
+            <button className="like" onClick={()=>handleLikeDislike(post.id, 1)}>{allPostLikes.get(post.id)} Likes</button>
+            <button className="dislike" onClick={()=>handleLikeDislike(post.id, 0)}>{allPostDislikes.get(post.id)} Dislikes</button>
         </div>
     ))}
 </div>
