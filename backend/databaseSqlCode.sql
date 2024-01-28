@@ -73,9 +73,13 @@ CREATE TABLE ForumPostLikeDislike(
 CREATE TABLE ForumPostComments(
 id INT AUTO_INCREMENT UNIQUE, 
 forum_post_id INT, 
-username varchar(255) NOT NULL, 
+username varchar(255), 
 body text NOT NULL, 
-comment_timestamp timestamp NOT NULL, 
+comment_timestamp timestamp NOT NULL,
+parent_comment_id INT DEFAULT NULL, 
 PRIMARY KEY (id), 
-FOREIGN KEY (forum_post_id) REFERENCES ForumPost(id));
+FOREIGN KEY (forum_post_id) REFERENCES ForumPost(id), 
+FOREIGN KEY (parent_comment_id) REFERENCES ForumPostComments(id) ON DELETE CASCADE);
+
+DROP TABLE ForumPostComments;
 
