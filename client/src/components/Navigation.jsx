@@ -13,6 +13,9 @@ const NavigationComponent= () => {
                 <Link to="/friends">Friends</Link>
             </li>
             <li>
+                <Link to="/messages">Messages</Link>
+            </li>
+            <li>
                 <Link to="/settings">Settings</Link>
             </li>
         </ul>
