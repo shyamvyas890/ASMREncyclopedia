@@ -3,6 +3,9 @@ import LoginComponent from './Login';
 import PostComponent from './Post';
 import axios from 'axios';
 import AddVideoPostComponent from './AddVideoPost';
+
+//Re-render is broken when deleting posts now, so I will fix it later
+
 const HomeComponent= () => {
     const [username, setUsername] = useState('');
     const [userIdOfCurrentUser, setUserIdOfCurrentUser]= useState(null);
