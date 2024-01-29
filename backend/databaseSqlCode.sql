@@ -100,3 +100,15 @@ CREATE TABLE VideoSubscriptions (
   FOREIGN KEY (GenreId) REFERENCES Genre(GenreId) ON DELETE CASCADE,
   UNIQUE(UserId, GenreId)
 );
+
+
+CREATE TABLE ChatMessage (
+  ChatMessageId INT AUTO_INCREMENT PRIMARY KEY,
+  SenderUserId INT NOT NULL,
+  ReceiverUserId INT NOT NULL,
+  Message VARCHAR(5000) NOT NULL,
+  SentAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(SenderUserId) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY(ReceiverUserId) REFERENCES users(id) ON DELETE CASCADE,
+  CHECK (SenderUserId != ReceiverUserId)
+);
