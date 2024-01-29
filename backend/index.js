@@ -3,13 +3,20 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mysql = require('mysql2');
 const cors= require("cors");
-
+const http = require('http');
+const socketIo = require('socket.io');
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 const port = 3001;
 const secretKey= "secret_key" //Will change this later
 app.use(express.json())
 app.use(express.urlencoded({ extended: true })); // Might not need this
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  }));
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -638,30 +645,70 @@ app.get('/video-rating', (req,res)=>{
         }
     })
   })
+  const authenticateUserForChat = (socket, next)=>{
+    const token= socket.handshake.query.token;
+    if (!token) {
+        return next(new Error('Authentication error: Token missing'));
+    }
+    jwt.verify(token, secretKey, (err, value)=>{
+        if(err){
+            return next(new Error('Authentication error: Invalid token'));
+        }
+        else{
+            socket.request.user= {username:value.username};
+            db.query("SELECT * FROM users WHERE username = ?", [value.username], (error1, results1)=>{
+                if(error1){
+                    console.log(error1)
+                }
+                else{
+                    socket.request.user.UserId = results1[0].id;
+                    next();
+                }
+            })    
+        }
+    })
+  }
+  io.use(authenticateUserForChat);
+
+
+  const queryTheDatabaseWithCallback= (theQuery, theArray, res, callback)=>{
+    db.query(theQuery, theArray, (error, results)=>{
+        if(error){
+            console.log(error)
+            res.status(500).send("Internal Server Error");
+        }
+        callback(results)
+    })
+  }
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  app.listen(port, () => {
+  io.on('connection', (socket) => {
+    console.log(`A user connected ${socket.id}`);
+    const {UserId}= socket.request.user;
+
+    socket.join(`UserId_${UserId}`);
+
+    socket.on('disconnect', () => {
+        console.log(`User disconnected ${socket.id}`);
+    });
+  });
+
+
+  app.post("/chatMessage", (req, res)=>{
+    const {SenderUserId, ReceiverUserId, Message} = req.body;
+    queryTheDatabaseWithCallback("INSERT INTO ChatMessage (SenderUserId, ReceiverUserId, Message) VALUES (?,?,?)", [SenderUserId, ReceiverUserId, Message], res, (results)=>{        
+        io.to(`UserId_${SenderUserId}`).emit("newMessage", { SenderUserId, ReceiverUserId, Message });
+        io.to(`UserId_${ReceiverUserId}`).emit("newMessage", { SenderUserId, ReceiverUserId, Message });
+        res.send(results);
+    }); 
+  })
+
+  app.get("/chatMessages", (req, res)=>{
+    const {UserId1, UserId2} = req.query;
+    queryTheDatabaseWithCallback("SELECT * FROM ChatMessage WHERE (SenderUserId = ? AND ReceiverUserId = ?) OR (SenderUserId = ? AND ReceiverUserId = ?) ORDER BY SentAt", [UserId1, UserId2, UserId2, UserId1], res, (results)=>{
+        res.send(results)
+    });
+  })
+
+  server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
