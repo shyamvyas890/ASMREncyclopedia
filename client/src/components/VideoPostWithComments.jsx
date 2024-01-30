@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from "react-router-dom";
 import { VideoCommentContainerComponent } from './VideoCommentContainer';
+import { Link } from 'react-router-dom';
 const VideoPostWithCommentsComponent = ()=>{
     const hostname= "http://localhost:3001";
     const navigate= useNavigate();
@@ -166,7 +167,7 @@ const VideoPostWithCommentsComponent = ()=>{
 
     return (
         allTheVideoPostInformation!==null && (<div>
-            <h5>{allTheVideoPostInformation.username}</h5>
+            <h5><Link to={`/username/${allTheVideoPostInformation.username}`}>{allTheVideoPostInformation.username}</Link></h5>
             <h6>{allTheVideoPostInformation.Title}</h6>
             <div>{allTheVideoPostInformation.VideoLinkId}</div>
             <h4>Tags</h4>

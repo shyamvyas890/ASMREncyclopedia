@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import {Link} from "react-router-dom";
 const PostComponent = (props) =>{
     const hostname= "http://localhost:3001";
     const [theGenres, setTheGenres]= useState(null);
@@ -93,9 +94,11 @@ const PostComponent = (props) =>{
       border: '1px solid #153e59', 
       borderRadius: '4px'
     };
+
+
     return (
         <div>
-            <h5>{props.username}</h5>
+            <h5><Link to={`/username/${props.username}`}>{props.username}</Link></h5>
             <h6>{props.title}</h6>
             {/* <iframe width="420" height="315" title= "Title" allow="fullscreen;"
                 src={`https://www.youtube.com/embed/${props.VideoLinkId}`}>

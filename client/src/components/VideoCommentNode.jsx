@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react"
 import { TreeNode } from "./VideoCommentContainer";
 import axios from "axios";
+import { Link } from "react-router-dom";
 const VideoCommentNodeComponent = (props) =>{
     const [showReplyBox, setShowReplyBox]= useState(false);
     const [showEditBox, setShowEditBox] = useState(false);
@@ -151,7 +152,7 @@ const VideoCommentNodeComponent = (props) =>{
     return (
         <div style={{marginLeft:"50px"}}>
             {props.tn.data.DELETED===1 && <p><strong>{`Deleted Comment`}</strong></p>}
-            {props.tn.data.DELETED===0 && <p><strong>{`${props.tn.data.username}: `}</strong>{props.tn.data.Comment}</p>}
+            {props.tn.data.DELETED===0 && <p><strong>{<Link to={`/username/${props.tn.data.username}`}>{`${props.tn.data.username}: `}</Link>}</strong>{props.tn.data.Comment}</p>}
             {props.tn.data.DELETED===0 && <><button onClick={handleLike} style={highlightLikeButtonRating}>Like comment</button>
             <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike comment</button></>}
             {props.tn.children.length>0 && <button onClick={collapseAndExpand}>{collapsed? "Expand":"Collapse"}</button>}
