@@ -558,6 +558,45 @@ app.get('/video-rating', (req,res)=>{
     queryTheDatabase("SELECT * FROM Friendships WHERE UserId1 = ? OR UserId2 = ?", [UserId,UserId], res)
   })
 
+  app.get("/FriendRelationship", (req,res)=>{
+    const {LoggedInUserId, VisitorUserId}= req.query;
+    let val1, val2;
+    if(LoggedInUserId>VisitorUserId){
+        val1=VisitorUserId;
+        val2=LoggedInUserId;
+    }
+    else{
+        val1=LoggedInUserId;
+        val2=VisitorUserId;
+    }
+    db.query("SELECT * FROM Friendships WHERE UserId1 = ? && UserId2 = ?", [val1, val2], (err, results)=>{
+        if (err){
+            console.log(err);
+            return res.status(500).send("Internal Server Error");
+        }
+        else if(results.length>0){
+            return res.send(results);
+        }
+        db.query("SELECT * FROM FriendRequests WHERE SenderUserId = ? && ReceiverUserId = ?", [val1,val2], (err1,results1)=>{
+            if(err1){
+                console.log(err1);
+                return res.status(500).send("Internal Server Error");
+            }
+            else if(results1.length>0){
+                return res.send(results1);
+            }
+            db.query("SELECT * FROM FriendRequests WHERE SenderUserId = ? && ReceiverUserId = ?", [val2,val1], (err2,results2)=>{
+                if(err2){
+                    console.log(err2);
+                    return res.status(500).send("Internal Server Error");
+                }
+                return res.send(results2);
+            })
+        })
+    })
+    
+  })
+
   app.post('/video-genre', (req,res)=>{
     const {VideoPostId, Genre}= req.body
     db.query('SELECT * FROM Genre Where Genre = ?', [Genre.toLowerCase()], (err, results)=>{
@@ -688,7 +727,10 @@ app.get('/video-rating', (req,res)=>{
     socket.join(`UserId_${UserId}`);
 
     socket.on('disconnect', () => {
+
         console.log(`User disconnected ${socket.id}`);
+
+        socket.leave(`UserId_${UserId}`);
     });
   });
 
