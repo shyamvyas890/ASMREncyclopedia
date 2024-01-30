@@ -8,6 +8,7 @@ import FriendsComponent from './components/Friends';
 import SettingsComponent from './components/Settings';
 import VideoPostWithCommentsComponent from './components/VideoPostWithComments';
 import ChatComponent from './components/Chat';
+import ProfilePageComponent from './components/ProfilePage';
 function App() {
   const [token, setToken]= React.useState("");
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/messages" element= {<ChatComponent />}/>
             <Route path="/settings" element= {<SettingsComponent />} />
             <Route path="/video/:VideoPostId" element={<VideoPostWithCommentsComponent />} />
+            <Route path="/username/:ProfileUsername" element={<ProfilePageComponent />} />
           </Routes>
       </BrowserRouter>
       
