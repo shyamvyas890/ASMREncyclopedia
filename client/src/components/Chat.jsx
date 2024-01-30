@@ -38,8 +38,18 @@ const ChatComponent =()=>{
             navigate("/");
         }
     }
+
+    const disconnectSocket = () => {
+        if (socket) {
+            socket.disconnect();
+        }
+    };
+
     React.useEffect(()=>{
         tokenVerify();
+        return ()=>{
+            disconnectSocket();   
+        }
     }, []);
 
     React.useEffect( ()=>{
