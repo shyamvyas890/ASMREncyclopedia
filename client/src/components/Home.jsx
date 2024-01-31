@@ -4,14 +4,13 @@ import PostComponent from './Post';
 import axios from 'axios';
 import AddVideoPostComponent from './AddVideoPost';
 import {axiosRequest} from "../utils/utils.js";
-//Re-render is broken when deleting posts now, so I will fix it later
-
+import { useNavigate } from 'react-router-dom';
 const HomeComponent= () => {
     const [username, setUsername] = useState('');
     const [userIdOfCurrentUser, setUserIdOfCurrentUser]= useState(null);
     const [isLoggedIn, setIsLoggedIn]= useState(false);
     const [videoPostsAndRatings, setVideoPostsAndRatings] = useState(null);
-    const [filteredVideoPostsAndRatings, setFilteredVideoPostsAndRatings]= useState(null);
+    const navigate = useNavigate();
     const fetchVideoPosts = async ()=>{
         try {
             const thePosts = await axios.get("http://localhost:3001/video");
@@ -48,11 +47,10 @@ const HomeComponent= () => {
             for(const vid of theUnfilteredPostsData){
                 vid.genreIds= (await axiosRequest(3,2,"video-by-genre-or-user", {VideoPostId:vid.VideoPostId})).data.map(genreInfo=>genreInfo.GenreId);
             }
-            console.log(theUnfilteredPostsData);
             const filters= {};
             filters.only = (await axiosRequest(3,2,"videoSubscriptionOnly", {UserId:tempHolderOfUserIdOfCurrentUser})).data
             filters.subscriptions= (await axiosRequest(3,2, "videoSubscriptions", {UserId:tempHolderOfUserIdOfCurrentUser})).data.map(subInfo=>subInfo.GenreId);
-            console.log(filters);
+            
 
             let thePostsData=[];
             if(filters.only.length===0){
@@ -110,8 +108,6 @@ const HomeComponent= () => {
                 }
             }
             setVideoPostsAndRatings(thePostsData);
-            setFilteredVideoPostsAndRatings(thePostsData);
-
         }
         catch(err){
             console.log(err);
@@ -122,10 +118,9 @@ const HomeComponent= () => {
             fetchVideoPosts();
         }
     }, [isLoggedIn])
-    const handleSearch = async(e)=>{
-        console.log(e.target.value)
-        setFilteredVideoPostsAndRatings(videoPostsAndRatings.filter(post=>(post.Title.toLowerCase().includes(e.target.value.toLowerCase()))))
-
+    const handleSearchButton = (e)=>{
+        e.preventDefault();
+        navigate(`/search/videos/${e.target.elements.inputElement.value}`);
     }
     return (
         <div>
@@ -135,17 +130,19 @@ const HomeComponent= () => {
             isLoggedIn={isLoggedIn}
             setIsLoggedIn={setIsLoggedIn}
             />
-            {(isLoggedIn && filteredVideoPostsAndRatings && userIdOfCurrentUser) ? (
+            {(isLoggedIn && videoPostsAndRatings && userIdOfCurrentUser) ? (
                 <>
-                    
                     <h3>Add a new Video!</h3>
                     <AddVideoPostComponent 
                     userIdOfCurrentUser={userIdOfCurrentUser}
                     fetchVideoPosts={fetchVideoPosts}    
                     />
-                    <input type="text" placeholder="Search" onChange={handleSearch} />
-                    {filteredVideoPostsAndRatings.map((post, index)=>(
-                        <div key={index+filteredVideoPostsAndRatings.length} >
+                    <form onSubmit={handleSearchButton}>    
+                        <input type='text' placeholder='Search videos...' name='inputElement' />
+                        <button type='submit'>🔍</button>
+                    </form>
+                    {videoPostsAndRatings.map((post, index)=>(
+                        <div key={index+videoPostsAndRatings.length} >
                             <PostComponent 
                                 key={index}
                                 index={index} 
@@ -155,7 +152,7 @@ const HomeComponent= () => {
                                 usernameOfCurrentUser= {username}
                                 VideoLinkId= {post.VideoLinkId}
                                 VideoPostId= {post.VideoPostId}
-                                rating= {filteredVideoPostsAndRatings[index].feedback}
+                                rating= {videoPostsAndRatings[index].feedback}
                                 setVideoPostsAndRatings= {setVideoPostsAndRatings}
                             />
                         </div>

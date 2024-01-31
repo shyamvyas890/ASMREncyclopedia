@@ -9,6 +9,7 @@ import SettingsComponent from './components/Settings';
 import VideoPostWithCommentsComponent from './components/VideoPostWithComments';
 import ChatComponent from './components/Chat';
 import ProfilePageComponent from './components/ProfilePage';
+import SearchVideosComponent from './components/SearchVideos';
 function App() {
   const [token, setToken]= React.useState("");
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/settings" element= {<SettingsComponent />} />
             <Route path="/video/:VideoPostId" element={<VideoPostWithCommentsComponent />} />
             <Route path="/username/:ProfileUsername" element={<ProfilePageComponent />} />
+            <Route path="/search/videos/:keyword" element={<SearchVideosComponent />} />
           </Routes>
       </BrowserRouter>
       
