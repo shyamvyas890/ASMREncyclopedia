@@ -15,21 +15,21 @@ const VideoPostWithCommentsComponent = ()=>{
     const handleLike = async (e) => {
         e.preventDefault();
         if(allTheVideoPostInformation.rating===0){
-          const axiosResponse = await axios.post(`http://localhost:3001/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: username.userIdOfCurrentUser, LikeStatus: true})
+          const axiosResponse = await axios.post(`${hostname}/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: username.userIdOfCurrentUser, LikeStatus: true})
           changeTheRating(1);      
         }
         else if (allTheVideoPostInformation.rating===-1){
-          const getLikeDislikeId= await axios.get(`http://localhost:3001/video-rating`, {params: {UserId: username.userIdOfCurrentUser, VideoPostId: allTheVideoPostInformation.VideoPostId}});
+          const getLikeDislikeId= await axios.get(`${hostname}/video-rating`, {params: {UserId: username.userIdOfCurrentUser, VideoPostId: allTheVideoPostInformation.VideoPostId}});
           const LikeDislikeId= getLikeDislikeId.data[0].LikeDislikeId;
-          const deleteOldRating = await axios.delete('http://localhost:3001/video', {params: {LikeDislikeId}});
-          const addUpdatedRating = await axios.post(`http://localhost:3001/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: username.userIdOfCurrentUser, LikeStatus: true})
+          const deleteOldRating = await axios.delete(`${hostname}/video`, {params: {LikeDislikeId}});
+          const addUpdatedRating = await axios.post(`${hostname}/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: username.userIdOfCurrentUser, LikeStatus: true})
           changeTheRating(1); 
           
         }
         else if (allTheVideoPostInformation.rating===1){
-          const getLikeDislikeId= await axios.get(`http://localhost:3001/video-rating`, {params: {UserId: username.userIdOfCurrentUser, VideoPostId: allTheVideoPostInformation.VideoPostId}});
+          const getLikeDislikeId= await axios.get(`${hostname}/video-rating`, {params: {UserId: username.userIdOfCurrentUser, VideoPostId: allTheVideoPostInformation.VideoPostId}});
           const LikeDislikeId= getLikeDislikeId.data[0].LikeDislikeId;
-          const deleteOldRating = await axios.delete('http://localhost:3001/video', {params: {LikeDislikeId}});
+          const deleteOldRating = await axios.delete(`${hostname}/video`, {params: {LikeDislikeId}});
           changeTheRating(0)
         }
     }
@@ -37,21 +37,21 @@ const VideoPostWithCommentsComponent = ()=>{
     const handleDislike= async (e)=>{
         e.preventDefault();
         if(allTheVideoPostInformation.rating===0){
-          const axiosResponse = await axios.post(`http://localhost:3001/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: username.userIdOfCurrentUser, LikeStatus: false})
+          const axiosResponse = await axios.post(`${hostname}/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: username.userIdOfCurrentUser, LikeStatus: false})
           changeTheRating(-1);   
         }
         else if (allTheVideoPostInformation.rating===1){
-          const getLikeDislikeId= await axios.get(`http://localhost:3001/video-rating`, {params: {UserId: username.userIdOfCurrentUser, VideoPostId: allTheVideoPostInformation.VideoPostId}});
+          const getLikeDislikeId= await axios.get(`${hostname}/video-rating`, {params: {UserId: username.userIdOfCurrentUser, VideoPostId: allTheVideoPostInformation.VideoPostId}});
           const LikeDislikeId= getLikeDislikeId.data[0].LikeDislikeId;
-          const deleteOldRating = await axios.delete('http://localhost:3001/video', {params: {LikeDislikeId}});
-          const addUpdatedRating = await axios.post(`http://localhost:3001/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: username.userIdOfCurrentUser, LikeStatus: false})
+          const deleteOldRating = await axios.delete(`${hostname}/video`, {params: {LikeDislikeId}});
+          const addUpdatedRating = await axios.post(`${hostname}/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: username.userIdOfCurrentUser, LikeStatus: false})
           changeTheRating(-1);
           
         }
         else if (allTheVideoPostInformation.rating===-1){
-          const getLikeDislikeId= await axios.get(`http://localhost:3001/video-rating`, {params: {UserId: username.userIdOfCurrentUser, VideoPostId: allTheVideoPostInformation.VideoPostId}});
+          const getLikeDislikeId= await axios.get(`${hostname}/video-rating`, {params: {UserId: username.userIdOfCurrentUser, VideoPostId: allTheVideoPostInformation.VideoPostId}});
           const LikeDislikeId= getLikeDislikeId.data[0].LikeDislikeId;
-          const deleteOldRating = await axios.delete('http://localhost:3001/video', {params: {LikeDislikeId}});
+          const deleteOldRating = await axios.delete(`${hostname}/video`, {params: {LikeDislikeId}});
           changeTheRating(0);
 
         }
@@ -60,7 +60,7 @@ const VideoPostWithCommentsComponent = ()=>{
     const handleDelete = async (e) => {
         e.preventDefault();
         try {
-          const deletionResponse = await axios.delete(`http://localhost:3001/video`, {params: {VideoPostId: allTheVideoPostInformation.VideoPostId}});
+          const deletionResponse = await axios.delete(`${hostname}/video`, {params: {VideoPostId: allTheVideoPostInformation.VideoPostId}});
           navigate("/");
         }
         catch(err){
@@ -72,7 +72,7 @@ const VideoPostWithCommentsComponent = ()=>{
         const theToken= localStorage.getItem("token");
         if(theToken){
             try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
+                const response= await axios.get(`${hostname}/verify-token/${theToken}`)
                 if(response.data.username){
                     const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
                     setUsername({userIdOfCurrentUser, username:response.data.username})
@@ -94,7 +94,7 @@ const VideoPostWithCommentsComponent = ()=>{
     const fetchInformation = async ()=>{
         try{
             const videoBasicInfo= await axiosRequest(3,2, "video/id", {VideoPostId});
-            videoBasicInfo.data[0].username= (await axios.get("http://localhost:3001/users/id", 
+            videoBasicInfo.data[0].username= (await axios.get(`${hostname}/users/id`, 
             {
                 params:{ UserId:videoBasicInfo.data[0].UserId }
             })).data.username;
