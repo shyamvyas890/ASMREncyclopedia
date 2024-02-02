@@ -10,6 +10,8 @@ const HomeComponent= () => {
     const [userIdOfCurrentUser, setUserIdOfCurrentUser]= useState(null);
     const [isLoggedIn, setIsLoggedIn]= useState(false);
     const [videoPostsAndRatings, setVideoPostsAndRatings] = useState(null);
+    const [sortOption, setSortOption]= useState("latest");
+    const [sortedVideos, setSortedVideos]= useState(null);
     const navigate = useNavigate();
     const fetchVideoPosts = async ()=>{
         try {
@@ -79,33 +81,40 @@ const HomeComponent= () => {
                 }
             }
             for(let i=0;i<thePostsData.length;i++){
-                try{
-                    const rating= await axios.get("http://localhost:3001/video-rating", 
-                    {
-                        params:{ VideoPostId:thePostsData[i].VideoPostId }
-                    }
-                    );
-                    for(let j=0; j<rating.data.length; j=j+1){
-                        if(rating.data[j].UserId===tempHolderOfUserIdOfCurrentUser){
-                            if(rating.data[j].LikeStatus){
-                                thePostsData[i].feedback=1
-                            }
-                            else {
-                                thePostsData[i].feedback=-1
-                            }
-                            break;
+                const rating= await axios.get("http://localhost:3001/video-rating", 
+                {
+                    params:{ VideoPostId:thePostsData[i].VideoPostId }
+                }
+                );
+                for(let j=0; j<rating.data.length; j=j+1){
+                    if(rating.data[j].UserId===tempHolderOfUserIdOfCurrentUser){
+                        if(rating.data[j].LikeStatus===1){
+                            thePostsData[i].feedback=1
                         }
-                        else if(j===rating.data.length - 1){
-                            thePostsData[i].feedback=0;
+                        else {
+                            thePostsData[i].feedback=-1
                         }
+                        break;
                     }
-                    if(rating.data.length===0){
+                    else if(j===rating.data.length - 1){
                         thePostsData[i].feedback=0;
-                    }    
+                    }
                 }
-                catch(err){
-                    console.log(err)
+                if(rating.data.length===0){
+                    thePostsData[i].feedback=0;
                 }
+                let totalLikes=0;
+                let totalDislikes=0;
+                for(const theRating of rating.data){
+                    if(theRating.LikeStatus===0){
+                        totalDislikes++;
+                    }
+                    else if(theRating.LikeStatus===1){
+                        totalLikes++;
+                    }
+                }
+                thePostsData[i].totalLikes=totalLikes;
+                thePostsData[i].totalDislikes=totalDislikes;
             }
             setVideoPostsAndRatings(thePostsData);
         }
@@ -117,10 +126,79 @@ const HomeComponent= () => {
         if(isLoggedIn){
             fetchVideoPosts();
         }
-    }, [isLoggedIn])
+    }, [isLoggedIn]);
+    React.useEffect(()=>{
+        if(videoPostsAndRatings!==null){
+            handleSort({
+                target:{
+                    value:sortOption
+                }
+            });
+        }
+    },[videoPostsAndRatings]);
+
     const handleSearchButton = (e)=>{
         e.preventDefault();
         navigate(`/search/videos/${e.target.elements.inputElement.value}`);
+    }
+
+    const handleSort = (e)=>{
+        let newVideosArray = [...videoPostsAndRatings];
+        if(e.target.value==="latest"){
+            newVideosArray.sort((a,b)=>{
+                const dateA= new Date(a.PostedAt);
+                const dateB = new Date(b.PostedAt);
+                if(dateA.getTime()>dateB.getTime()){
+                    return -1;
+                }
+                else if(dateA.getTime()<dateB.getTime()){
+                    return 1;
+                }
+                return 0;
+            })
+        }
+        else if (e.target.value==="oldest"){
+            newVideosArray.sort((a,b)=>{
+                const dateA= new Date(a.PostedAt);
+                const dateB = new Date(b.PostedAt);
+                if(dateA.getTime()>dateB.getTime()){
+                    return 1;
+                }
+                else if(dateA.getTime()<dateB.getTime()){
+                    return -1;
+                }
+                return 0;
+            })
+        }
+        else if(e.target.value==="best"){
+            newVideosArray.sort((a,b)=>{
+                const AScore = a.totalLikes-a.totalDislikes;
+                const BScore = b.totalLikes-b.totalDislikes;
+                if(AScore>BScore){
+                    return -1;
+                }
+                else if (BScore>AScore){
+                    return 1;
+                }
+                return 0;
+            })
+        }
+        else if (e.target.value==="worst"){
+            newVideosArray.sort((a,b)=>{
+                const AScore = a.totalLikes-a.totalDislikes;
+                const BScore = b.totalLikes-b.totalDislikes;
+                if(AScore>BScore){
+                    return 1;
+                }
+                else if (BScore>AScore){
+                    return -1;
+                }
+                return 0;
+            })
+        }
+        const theSortOption = e.target.value;
+        setSortOption(theSortOption);
+        setSortedVideos(newVideosArray);
     }
     return (
         <div>
@@ -130,7 +208,7 @@ const HomeComponent= () => {
             isLoggedIn={isLoggedIn}
             setIsLoggedIn={setIsLoggedIn}
             />
-            {(isLoggedIn && videoPostsAndRatings && userIdOfCurrentUser) ? (
+            {(isLoggedIn && videoPostsAndRatings && sortedVideos && userIdOfCurrentUser) ? (
                 <>
                     <h3>Add a new Video!</h3>
                     <AddVideoPostComponent 
@@ -141,19 +219,31 @@ const HomeComponent= () => {
                         <input type='text' placeholder='Search videos...' name='inputElement' />
                         <button type='submit'>🔍</button>
                     </form>
-                    {videoPostsAndRatings.map((post, index)=>(
-                        <div key={index+videoPostsAndRatings.length} >
+                    <div>
+                        <label>Sort By:</label>
+                        <select value={sortOption} onChange={handleSort}>
+                            <option value="latest">Latest</option>
+                            <option value="oldest">Oldest</option>
+                            <option value="best">Best</option>
+                            <option value="worst">Worst</option>
+                        </select>
+                    </div>
+                    {sortedVideos.map((post, index)=>(
+                        <div key={index+sortedVideos.length} >
                             <PostComponent 
                                 key={index}
-                                index={index} 
+                                index={videoPostsAndRatings.indexOf(post)} 
                                 username={post.username} 
                                 title={post.Title} 
                                 userIdOfCurrentUser= {userIdOfCurrentUser}
                                 usernameOfCurrentUser= {username}
                                 VideoLinkId= {post.VideoLinkId}
                                 VideoPostId= {post.VideoPostId}
-                                rating= {videoPostsAndRatings[index].feedback}
+                                rating= {sortedVideos[index].feedback}
                                 setVideoPostsAndRatings= {setVideoPostsAndRatings}
+                                timestamp={post.PostedAt}
+                                totalLikes={sortedVideos[index].totalLikes}
+                                totalDislikes={sortedVideos[index].totalDislikes}
                             />
                         </div>
                     ))}
