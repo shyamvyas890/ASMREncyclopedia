@@ -6,15 +6,17 @@ const hostname= "http://localhost:3001"
 const ChatComponent =()=>{
     const [username, setUsername]= useState(null);
     const [socket,setSocket]= useState(null);
-
-    if(socket){
-        console.log(socket.id)
-    }
-    else{
-        console.log(socket)
-    }
     
     const navigate= useNavigate();
+
+    const disconnectSocket = () => {
+        console.log(`socket is ${socket}`)
+        if (socket) {
+            
+            socket.disconnect();
+        }
+    };
+
     const tokenVerify= async () => {
         const theToken= localStorage.getItem("token");
         if(theToken){
@@ -39,17 +41,8 @@ const ChatComponent =()=>{
         }
     }
 
-    const disconnectSocket = () => {
-        if (socket) {
-            socket.disconnect();
-        }
-    };
-
     React.useEffect(()=>{
         tokenVerify();
-        return ()=>{
-            disconnectSocket();   
-        }
     }, []);
 
     React.useEffect( ()=>{
@@ -63,9 +56,16 @@ const ChatComponent =()=>{
             socket.on('newMessage', (message) => {
                 console.log('New message received:', message);
             });
+            return ()=>{
+                console.log("hello world")
+                disconnectSocket();   
+            }
         }
     },[socket]
     );
+
+    
+    
 
 
 }
