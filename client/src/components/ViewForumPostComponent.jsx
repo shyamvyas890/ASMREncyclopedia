@@ -41,8 +41,15 @@ export const ViewForumPostComponent = () =>{
         <p> {postObject[0].body} </p>
  
         <div>
+          Tag(s) 
+          <br></br>
+          {postObject[0].forums}
+        </div> 
+        <div>
             <FourmPostCommentSection currentUser = {currentUsername} />
+            <br></br>
         </div>
+        
       </div>
       : <p> Loading... </p>)
    )
