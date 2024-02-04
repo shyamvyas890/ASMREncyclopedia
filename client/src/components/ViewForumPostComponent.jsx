@@ -57,9 +57,16 @@ export const ViewForumPostComponent = () =>{
         <p> {postObject[0].body} </p>
         <button className="like" onClick={()=>handleLikeDislike(postID, userID, 1)}>{postLikes.get(postObject[0].id)} Likes</button>
         <button className="dislike" onClick={()=>handleLikeDislike(postID, userID, 0)}>{postDislikes.get(postObject[0].id)} Dislikes</button>
+        <div>
+          Tag(s) 
+          <br></br>
+          {postObject[0].forums}
+        </div> 
       <div>
             <FourmPostCommentSection currentUser = {currentUsername} />
+            <br></br>
         </div>
+        
       </div>
       : <p> Loading... </p>)
    )

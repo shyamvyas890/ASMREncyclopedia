@@ -13,7 +13,7 @@ app.use(cors());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'password',
+    password: '#jySJSU2024',
     database: 'ASMR_DB',
   });
   db.connect((err) => {
@@ -411,8 +411,11 @@ app.post("/forumPostCreate", async (req, res) => {
     const username = req.body.username
     const title = req.body.title
     const body = req.body.body
-    const forums = req.body.forums //currently only selecting 1 forum
-    
+    const forums = req.body.forums.join(", ")
+    if(forums === ''){
+        forums === null
+    }
+     
     db.query('INSERT INTO ForumPost(username, title, body, post_timestamp, forums) VALUES (?, ?, ?, NOW(), ?)', [username, title, body, forums], function(err) {
         if(err){
             console.log(err)

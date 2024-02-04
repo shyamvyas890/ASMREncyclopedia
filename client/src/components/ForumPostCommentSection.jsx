@@ -8,6 +8,21 @@ export const FourmPostCommentSection = (props) => {
    const {postID} = useParams()
    const [parentCommentsObject, setParentCommentsObject] = useState([])
    const [commentText, setCommentText] = useState()
+   const [username, setUsername] = useState()
+
+   //gets the username of the current user
+   useEffect( () => {
+    const token = localStorage.getItem("token")
+    const fetchUsername = async () => {
+        try {
+          const response = await axios.get(`http://localhost:3001/verify-token/${token}`);
+          setUsername(response.data.username);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    fetchUsername()
+   }, [])
 
    //get all comments associated with the post
    useEffect(() => {
@@ -28,13 +43,13 @@ export const FourmPostCommentSection = (props) => {
       //adding a "parent comment" (initial comment with no replies)
       const addParentComment = () =>{
          axios.post(`http://localhost:3001/forumPostComment/${postID}`, {
-             username: props.currentUser,
+             username: username,
              body: commentText,
          }).then( (res) => {
              const commentToAdd = {
                  id: res.data.id,
                  body: commentText, 
-                 username: props.currentUser, 
+                 username: username, 
                  comment_timestamp: new Date().toLocaleString()
              }
              setParentCommentsObject([...parentCommentsObject, commentToAdd])

@@ -50,8 +50,13 @@ return <div>
 <div className="feed-posts">
     {allPosts.map(post=>(
         <div className="user-posts" key={post.id}>
-            <h2>{post.title} by {post.username} @ {post.post_timestamp} </h2>
+            <h2>{post.title} by {post.username} @ {new Date(post.post_timestamp).toLocaleString()}</h2>
             <p>{post.body}</p>
+            <div>
+              Tag(s)
+              <br></br>
+              {post.forums}
+            </div>
             <button onClick={ () => navigate(`/forumPost/${post.id}/viewing/${props.userID}/user`, {state: {username: props.username}})}> View Post </button>
             <button 
                 className={`like ${userLikedPosts.includes(post.id) ? "liked" : ""}`} 

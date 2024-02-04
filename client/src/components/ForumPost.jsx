@@ -10,28 +10,19 @@ export const ForumPostComponent = (props) =>{
         title: yup.string().required("You must have a title"),
         body: yup.string().required("You must have a body")
     })
-    const [forumOptions, setForumOptions] = useState([])
 
-    //get all current forums for creating a post
-    useEffect(()=>{
-        const fetchAllForums = async ()=>{
-            try{
-                const res = await axios.get("http://localhost:3001/forums")
-                setForumOptions(res.data);
-            }catch(err){
-                console.log(err)
-            }
-        } 
-        fetchAllForums()
-    }, [])
-    
+    const [tagOptions, setTagOptions] = useState([])
+    const [title, setTitle] = useState()
+    const [body, setBody] = useState()
+    const [tagInput, setTagInput] = useState()
+
     //get data from form (e.target.elements.<>.<>) and post to server
     const onSubmit =  async (e) => {
         e.preventDefault()
         const data = {
-            title: e.target.elements.title.value,
-            body: e.target.elements.title.value,
-            forums: e.target.elements.forum.value,
+            title: title,
+            body: body,
+            forums: tagOptions,
             username: props.username
         }
         const isValid = await schema.isValid(data)
@@ -47,22 +38,42 @@ export const ForumPostComponent = (props) =>{
         }
     }
 
+    const handleInputKeyDown = (e) =>{
+        if(e.key === 'Enter' && tagInput.trim() != ''){
+            e.preventDefault()
+            setTagOptions([...tagOptions, tagInput])
+            setTagInput('')
+        }
+    }
+
+    const handleTagDelete = (tagToRemove) =>{
+        setTagOptions(tagOptions.filter(tag => tag !== tagToRemove))
+    }
     //render fields for title, body and a select menu for all current forums
     return(
-        <form onSubmit={onSubmit}> 
+        <form> 
           <label> Post Title </label>
-          <input type="text" name="title"/>
+          <input type="text" onChange= {(event) => {setTitle(event.target.value)}} name="title"/>
+          <br></br>
           <label> Post Body </label>
-          <input type="text" name="body"/>
-          <label> Forum </label>
-          {forumOptions.length > 0 ? <select name="forum"> 
-            <option value="NULL"> None </option>
-            {forumOptions.map((forum) => (
-                <option value={forum.title}> {forum.title} </option>
-            ))}
-          </select>: (<p> Loading Forums...</p>)}
-
-         <input type="submit"/>
+          <input type="text" onChange= {(event) => {setBody(event.target.value)}} name="body"/>
+          <br>
+          </br>
+          <div>
+           <label> Press "Enter" to create post tag(s) </label>
+           <input type="text" onChange={ (event) => {setTagInput(event.target.value)}} onKeyDown={handleInputKeyDown}/>
+           <br>
+           </br>
+           <div>
+             {tagOptions.map( (tag, index) => (
+                <div>
+                    {tag}
+                    <button onClick={() => handleTagDelete(tag)}> x </button>
+                </div>
+             ))}
+           </div>
+          </div>
+         <button onClick={onSubmit}> Create Post </button>
         </form>
     )
 }
