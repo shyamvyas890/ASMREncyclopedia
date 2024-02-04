@@ -452,11 +452,33 @@ app.get("/forumPostsById/:postID", async (req,res)=>{
 })
 
 app.delete("/forumPostDelete/:id", (req,res)=>{
-    const forumPostID = req.params.id;
+    const forumPostID = req.params.id
     const query = "DELETE FROM forumpost WHERE id = ?"
     db.query(query, [forumPostID], (err,data)=>{
-        if (err) return res.send(err);
+        if (err) return res.send(err)
         return res.json("Post has been deleted successfully");
+    });
+});
+
+app.get("/forumPostsLikedByUser/", async (req,res)=>{
+    const userID = req.query.userID
+    const forumPostID = req.query.postID
+    console.log("user ID: ", userID)
+    const query = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND userID = ? AND LikeStatus = 1"
+    db.query(query, [forumPostID, userID], (err,data)=>{
+        if (err) return res.send(err)
+        return res.json(data);
+    });
+});
+
+app.get("/forumPostsDislikedByUser/", async (req,res)=>{
+    const userID = req.query.userID
+    const forumPostID = req.query.postID
+    console.log("user ID: ", userID)
+    const query = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND userID = ? AND LikeStatus = 0"
+    db.query(query, [forumPostID, userID], (err,data)=>{
+        if (err) return res.send(err)
+        return res.json(data);
     });
 });
 
@@ -467,13 +489,13 @@ app.get("/fetchAllPostLikes/", async(req,res)=>{
     const queryLikes = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND LikeStatus = 1"
         db.query(queryLikes, [forumPostID], (err, data)=>{
             if (err){
-                return res.send("error");
+                return res.send("error")
             }
             else { 
                 return res.json(data)
             }
-        })
-})
+        });
+});
 
 //gets dislikes from post
 app.get("/fetchAllPostDislikes/", async(req,res)=>{
@@ -512,9 +534,9 @@ app.post("/forumPostLikeDislike/", async (req,res)=>{
     const query = "INSERT INTO ForumPostLikeDislike (ForumPostID, UserID, LikeStatus) VALUES (?, ?, ?)"
     db.query(query, [forumPostID, userID, rating], (err, data) => {
         if (err) {
-            return res.status(500).send("Internal Server Error");
+            return res.status(500).send("Internal Server Error")
         } else {
-            return res.status(201).send("Like/Dislike Successful!");
+            return res.status(201).send("Like/Dislike Successful!")
         }
     });
 });
@@ -526,9 +548,9 @@ app.put("/forumChangeLikeDislike/", async (req,res)=>{
     const query = "UPDATE ForumPostLikeDislike SET LikeStatus = ? WHERE LikeDislikeID = ?"
     db.query(query, [rating, LikeDislikeID], (err, data) => {
         if (err) {
-            return res.status(500).send("Internal Server Error");
+            return res.status(500).send("Internal Server Error")
         } else {
-            return res.status(201).send("Like/Dislike Update Successful!");
+            return res.status(201).send("Like/Dislike Update Successful!")
         }
     });
 });
@@ -539,9 +561,9 @@ app.delete("/forumDeleteLikeDislike/", async (req,res)=>{
     const query = "DELETE FROM ForumPostLikeDislike WHERE LikeDislikeID = ?"
     db.query(query, [LikeDislikeID], (err, data) => {
         if (err) {
-            return res.status(500).send("Internal Server Error");
+            return res.status(500).send("Internal Server Error")
         } else {
-            return res.status(201).send("Like/Dislike Update Successful!");
+            return res.status(201).send("Like/Dislike Update Successful!")
         }
     });
 });
