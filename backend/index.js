@@ -737,9 +737,8 @@ app.get('/video-rating', (req,res)=>{
 
   app.post("/chatMessage", (req, res)=>{
     const {SenderUserId, ReceiverUserId, Message} = req.body;
-    queryTheDatabaseWithCallback("INSERT INTO ChatMessage (SenderUserId, ReceiverUserId, Message) VALUES (?,?,?)", [SenderUserId, ReceiverUserId, Message], res, (results)=>{        
-        io.to(`UserId_${SenderUserId}`).emit("newMessage", { SenderUserId, ReceiverUserId, Message });
-        io.to(`UserId_${ReceiverUserId}`).emit("newMessage", { SenderUserId, ReceiverUserId, Message });
+    queryTheDatabaseWithCallback("INSERT INTO ChatMessage (SenderUserId, ReceiverUserId, Message) VALUES (?,?,?)", [SenderUserId, ReceiverUserId, Message], res, (results)=>{
+        io.to(`UserId_${ReceiverUserId}`).emit("newMessage", { SenderUserId, ReceiverUserId, Message, ChatMessageId:results.insertId, SentAt:new Date().toISOString()});
         res.send(results);
     }); 
   })
