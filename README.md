@@ -5,23 +5,26 @@ Welcome to the ASMR Encyclopedia, a meticulously crafted social media platform f
 ## Table of Contents
 - [Features](#features)
   - [Video Uploads](#video-uploads)
+  - [Forum Posts Section](#forum-posts)
   - [User Authentication](#user-authentication)
   - [Likes and Dislikes](#likes-and-dislikes)
-  - [Comments and Nested Comments](#comments-and-nested-comments)
+  - [Comments and Nested Comments](#comments)
   - [Friendship System](#friendship-system)
   - [Chat with Friends](#chat-with-friends)
   - [Search Functionality](#search-functionality)
   - [Video Feed](#video-feed)
   - [Sorting Options](#sorting-options)
   - [Account Settings](#account-settings)
-  - [Random Video Option](#random-video-option)
-  - [Forum Posts Section](#forum-posts-section)
+  - [Random Video Option](#random-video)
 - [Upcoming Features](#upcoming-features)
 
 ## Features
 
 ### Video Uploads
 Users can [upload](#video-uploads) their ASMR videos, each equipped with tags to describe the content.
+
+### Forum Posts
+Engage in forum discussions by [posting topics](#forum-posts) with titles, bodies, and tags.
 
 ### User Authentication
 - **Register and Login:** Secure [user registration and login](#user-authentication) system.
@@ -30,7 +33,7 @@ Users can [upload](#video-uploads) their ASMR videos, each equipped with tags to
 Users can express their appreciation or disapproval by [liking and disliking](#likes-and-dislikes) videos and comments.
 
 ### Comments and Nested Comments
-Engage in discussions with [infinitely nested comments](#comments-and-nested-comments), fostering rich conversations.
+Engage in discussions with [comments](#comments), fostering rich conversations.
 
 ### Friendship System
 - **Friend Requests:** Users can [send, accept, or decline](#friendship-system) friend requests.
@@ -46,16 +49,13 @@ Efficiently find desired videos using a robust [search bar](#search-functionalit
 Tailor your video feed by [subscribing to specific tags](#video-feed) and customizing preferences.
 
 ### Sorting Options
-Sort videos based on criteria like [oldest, latest, best-rated, and worst-rated](#sorting-options).
+Sort videos based on criteria like [oldest, latest, best, and worst](#sorting-options).
 
 ### Account Settings
 Users can manage their [account settings](#account-settings), including changing their email and password.
 
 ### Random Video Option
-Discover something new with a [random video](#random-video-option) option.
-
-### Forum Posts Section
-Engage in forum discussions by [posting topics](#forum-posts-section) with titles, bodies, and tags.
+Discover something new with a [random video](#random-video) option.
 
 ## Upcoming Features
 
@@ -63,7 +63,7 @@ Engage in forum discussions by [posting topics](#forum-posts-section) with title
 - **Playlists Feature:** Create and curate [playlists](#upcoming-features) for a personalized viewing experience.
 - **Profile Page:** Explore [user profiles](#upcoming-features) with post and comment history.
 - **About Us Page:** Learn more about the platform and its creators in the [About Us](#upcoming-features) page.
-- **Styling Enhancement:** Implementing heavy styling to elevate the visual appeal of ASMR Encyclopedia.
+- **Styling Enhancement:** Implementing heavy styling to enhance the visual appeal of ASMR Encyclopedia.
 
 Please note that these upcoming features are not an exhaustive list; we will continuously add more enhancements to create an even more immersive ASMR experience.
 
@@ -81,6 +81,6 @@ ASMR Encyclopedia is built using the following technologies:
 - React Router
 - Socket.io
 - Bcrypt
-- JWT (JSON Web Tokens)
+- JWT (JSONWebToken)
 
 Thank you for your interest in exploring the ASMR Encyclopedia! We appreciate you taking the time to view our work. 
