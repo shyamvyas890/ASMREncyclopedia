@@ -32,7 +32,7 @@ Engage in forum discussions by [posting topics](#forum-posts) with titles, bodie
 ### Likes and Dislikes
 Users can express their appreciation or disapproval by [liking and disliking](#likes-and-dislikes) videos and comments.
 
-### Comments and Nested Comments
+### Comments
 Engage in discussions with [comments](#comments), fostering rich conversations.
 
 ### Friendship System
@@ -46,13 +46,13 @@ A dedicated [chat](#chat-with-friends) feature allows users to communicate priva
 Efficiently find desired videos using a robust [search bar](#search-functionality).
 
 ### Video Feed
-Tailor your video feed by [subscribing to specific tags](#video-feed) and customizing preferences.
+Tailor your video and forum feed by [subscribing to specific tags](#video-feed) and customizing preferences.
 
 ### Sorting Options
 Sort videos based on criteria like [oldest, latest, best, and worst](#sorting-options).
 
 ### Account Settings
-Users can manage their [account settings](#account-settings), including changing their email and password.
+Users can manage their [account settings](#account-settings), including changing their email, password, and video and forum post subscription preferences.
 
 ### Random Video Option
 Discover something new with a [random video](#random-video) option.
