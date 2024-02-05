@@ -55,15 +55,17 @@ Sort videos based on criteria like [oldest, latest, best, and worst](#sorting-op
 Users can manage their [account settings](#account-settings), including changing their email, password, and video and forum post subscription preferences.
 
 ### Random Video Option
-Discover something new with a [random video](#random-video) option.
+Discover something new with a [random video](#random-video) option, which displays a random video from a vast collection of ASMR videos.
 
 ## Upcoming Features
-
+- **Forum Post Features Completion:** We're actively working on finalizing the remaining forum post features, ensuring a comprehensive and seamless experience for our users.
 - **Real-Time Notification System:** Stay updated with [real-time notifications](#upcoming-features) for likes, comments, and friend requests.
 - **Playlists Feature:** Create and curate [playlists](#upcoming-features) for a personalized viewing experience.
 - **Profile Page:** Explore [user profiles](#upcoming-features) with post and comment history.
 - **About Us Page:** Learn more about the platform and its creators in the [About Us](#upcoming-features) page.
 - **Styling Enhancement:** Implementing heavy styling to enhance the visual appeal of ASMR Encyclopedia.
+
+
 
 Please note that these upcoming features are not an exhaustive list; we will continuously add more enhancements to create an even more immersive ASMR experience.
 
