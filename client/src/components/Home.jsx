@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 const HomeComponent= () => {
     const [username, setUsername] = useState('');
     const [userIdOfCurrentUser, setUserIdOfCurrentUser]= useState(null);
-    const [isLoggedIn, setIsLoggedIn]= useState(false);
+    const [isLoggedIn, setIsLoggedIn]= useState(null);
     const [videoPostsAndRatings, setVideoPostsAndRatings] = useState(null);
     const [sortOption, setSortOption]= useState("latest");
     const [sortedVideos, setSortedVideos]= useState(null);

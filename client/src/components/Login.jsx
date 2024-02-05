@@ -62,7 +62,7 @@ const LoginComponent = (props) => {
             <button onClick={handleLogout}>Logout</button>
             </div>
 
-        ) : (<div>
+        ) : props.isLoggedIn===false?(<div>
         <h2>Login</h2>
         <form onSubmit={handleLogin}>
             <label>
@@ -77,7 +77,7 @@ const LoginComponent = (props) => {
             <br />
             <button type="submit">Login</button>
         </form>
-        </div>)
+        </div>):null
         }
 
     </div>
