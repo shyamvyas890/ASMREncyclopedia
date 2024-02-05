@@ -18,6 +18,9 @@ const NavigationComponent= () => {
             <li>
                 <Link to="/settings">Settings</Link>
             </li>
+            <li>
+                <Link to="/random">Random</Link>
+            </li>
         </ul>
     </nav>)
 }
