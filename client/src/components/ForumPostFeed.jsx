@@ -6,14 +6,11 @@ import '../App.css';
 
 export const ForumPostFeedComponent = (props) =>{
     const [allPosts, setAllPosts] = useState([])
-    //Maps contain {[postID, #of likes]}
+    //Maps contain {[postID, #of likes/dislikes]}
     const [allPostLikes, setAllPostLikes] = useState(new Map())
     const [allPostDislikes, setAllPostDislikes] = useState(new Map())
     const [userLikedPosts, setUserLikedPosts] = useState([])
     const [userDislikedPosts, setUserDislikedPosts] = useState([])
-
-    console.log("posts liked by user ", userLikedPosts)
-
     const navigate = useNavigate()
     
     useEffect(()=>{

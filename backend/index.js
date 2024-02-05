@@ -13,7 +13,7 @@ app.use(cors());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '#jySJSU2024',
+    password: 'password',
     database: 'ASMR_DB',
   });
   db.connect((err) => {
@@ -429,7 +429,6 @@ app.post("/forumPostCreate", async (req, res) => {
 
 //viewing all posts, mainly for testing purposes can change the condition later
 app.get("/forumPostsAll", async (req,res)=>{
-
     db.query('SELECT * FROM forumpost', (err, data)=>{
         if(err){
             res.send(err)
@@ -440,7 +439,6 @@ app.get("/forumPostsAll", async (req,res)=>{
 
 //viewing a post by its id
 app.get("/forumPostsById/:postID", async (req,res)=>{
-
     const id = parseInt(req.params.postID, 10)
     console.log(typeof(id))
     console.log(id)
@@ -463,10 +461,10 @@ app.delete("/forumPostDelete/:id", (req,res)=>{
     });
 });
 
+//gets forum posts liked by a user
 app.get("/forumPostsLikedByUser/", async (req,res)=>{
     const userID = req.query.userID
     const forumPostID = req.query.postID
-    console.log("user ID: ", userID)
     const query = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND userID = ? AND LikeStatus = 1"
     db.query(query, [forumPostID, userID], (err,data)=>{
         if (err) return res.send(err)
@@ -474,10 +472,10 @@ app.get("/forumPostsLikedByUser/", async (req,res)=>{
     });
 });
 
+//gets forum posts disliked by a user
 app.get("/forumPostsDislikedByUser/", async (req,res)=>{
     const userID = req.query.userID
     const forumPostID = req.query.postID
-    console.log("user ID: ", userID)
     const query = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND userID = ? AND LikeStatus = 0"
     db.query(query, [forumPostID, userID], (err,data)=>{
         if (err) return res.send(err)
@@ -486,7 +484,7 @@ app.get("/forumPostsDislikedByUser/", async (req,res)=>{
 });
 
 //gets likes from post
-app.get("/fetchAllPostLikes/", async(req,res)=>{
+app.get("/fetchAllForumPostLikes/", async(req,res)=>{
     //holds number of likes for each post
     const forumPostID = req.query.postID
     const queryLikes = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND LikeStatus = 1"
@@ -501,7 +499,7 @@ app.get("/fetchAllPostLikes/", async(req,res)=>{
 });
 
 //gets dislikes from post
-app.get("/fetchAllPostDislikes/", async(req,res)=>{
+app.get("/fetchAllForumPostDislikes/", async(req,res)=>{
     //holds number of dislikes for each post
     const forumPostID = req.query.postID
     const queryLikes = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND LikeStatus = 0"
@@ -515,6 +513,7 @@ app.get("/fetchAllPostDislikes/", async(req,res)=>{
         })
 })
 
+//Gets posts that has a dislike/like in db by user
 app.get("/forumPostLikeStatus/", async (req,res)=>{
     const forumPostID = req.query.postID
     const userID = req.query.userID

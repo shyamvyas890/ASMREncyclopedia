@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const handleLikeDislike = async (postID, userID, rating, setAllPostLikes, setAllPostDislikes, allPosts)=>{
+const handleLikeDislike = async (postID, userID, rating)=>{
     try{
         console.log("gooo")
         //checks if user has already liked post
@@ -35,12 +35,12 @@ const handleLikeDislike = async (postID, userID, rating, setAllPostLikes, setAll
 
 //gets likes for all posts
 const fetchAllPostsLikes = async (allPosts, setAllPostLikes)=>{
-    console.log("testing")
-    console.log("allPosts: ", allPosts)
+    console.log("setAllPostLikes: ", setAllPostLikes)
     try{
         let likesMap = new Map();
-        for(const post of allPosts){
-            const likesData = await axios.get("http://localhost:3001/fetchAllPostLikes", {
+        const postsArray = Array.isArray(allPosts) ? allPosts : [allPosts];
+        for(const post of postsArray){
+            const likesData = await axios.get("http://localhost:3001/fetchAllForumPostLikes", {
                 params: {postID: post.id}
             });
             likesMap.set(post.id, likesData.data.length)
@@ -53,11 +53,11 @@ const fetchAllPostsLikes = async (allPosts, setAllPostLikes)=>{
 
 //gets dislikes for all posts
 const fetchAllPostsDislikes = async (allPosts, setAllPostDislikes)=>{
-    console.log("testing")
     try{
         let dislikesMap = new Map();
-        for(const post of allPosts){
-            const dislikesData = await axios.get("http://localhost:3001/fetchAllPostDislikes", {
+        const postsArray = Array.isArray(allPosts) ? allPosts : [allPosts];
+        for(const post of postsArray){
+            const dislikesData = await axios.get("http://localhost:3001/fetchAllForumPostDislikes", {
                 params: {postID: post.id}
             });
             dislikesMap.set(post.id, dislikesData.data.length)
@@ -71,7 +71,8 @@ const fetchAllPostsDislikes = async (allPosts, setAllPostDislikes)=>{
 const fetchUserLikedPosts = async (userID, allPosts, setUserLikedPosts)=>{
     try{
         let likedPosts = []
-        for(const post of allPosts){
+        const postsArray = Array.isArray(allPosts) ? allPosts : [allPosts];
+        for(const post of postsArray){
             const res = await axios.get("http://localhost:3001/forumPostsLikedByUser", {
                 params: {postID: post.id, userID: userID}
             });
@@ -88,7 +89,8 @@ const fetchUserLikedPosts = async (userID, allPosts, setUserLikedPosts)=>{
 const fetchUserDislikedPosts = async (userID, allPosts, setUserDislikedPosts)=>{
     try{
         let dislikedPosts = []
-        for(const post of allPosts){
+        const postsArray = Array.isArray(allPosts) ? allPosts : [allPosts];
+        for(const post of postsArray){
             const res = await axios.get("http://localhost:3001/forumPostsDislikedByUser", {
                 params: {postID: post.id, userID: userID}
             });
