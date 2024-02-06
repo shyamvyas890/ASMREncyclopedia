@@ -212,14 +212,6 @@ const HomeComponent= () => {
             setIsLoggedIn={setIsLoggedIn}
             />
 
-//             {(isLoggedIn) ?  <ForumPostComponent username={username} /> : null}
-
-//             {(isLoggedIn && userIdOfCurrentUser) ?  <ForumPostFeedComponent userID={userIdOfCurrentUser} setVideoPosts={setVideoPosts}/> : null}
-
-//             {(isLoggedIn && videoPosts && userRatings && userIdOfCurrentUser) ? (
-//                 videoPosts.map((post, index)=>{
-                    
-//                     return <PostComponent 
             {(isLoggedIn && videoPostsAndRatings && sortedVideos && userIdOfCurrentUser) ? (
                 <>
                     <h3>Add a new Video!</h3>
@@ -256,10 +248,7 @@ const HomeComponent= () => {
                                 timestamp={post.PostedAt}
                                 totalLikes={sortedVideos[index].totalLikes}
                                 totalDislikes={sortedVideos[index].totalDislikes}
-                            />
-//                             }
-//                         )
-//                         ):null }
+                            />    
                         </div>
                     ))}
                 </>

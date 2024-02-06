@@ -20,7 +20,7 @@ app.use(cors({
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'password',
+    password: '#jySJSU2024',
     database: 'ASMR_DB',
   });
   db.connect((err) => {
