@@ -9,9 +9,20 @@ const NavigationComponent= () => {
             <li>
                 <Link to="/register">Register</Link>
             </li>
-
             <li>
                 <Link to="/UserPosts">My Posts</Link>
+            </li>
+            <li>
+                <Link to="/friends">Friends</Link>
+            </li>
+            <li>
+                <Link to="/messages">Messages</Link>
+            </li>
+            <li>
+                <Link to="/settings">Settings</Link>
+            </li>
+            <li>
+                <Link to="/random">Random</Link>
             </li>
         </ul>
     </nav>)

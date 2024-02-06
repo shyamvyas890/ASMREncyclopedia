@@ -46,7 +46,8 @@ const LoginComponent = (props) => {
   }, []);
 
   const handleLogout = async (e) => {
-    await axios.post(`http://localhost:3001/logout/${localStorage.getItem("token")}`);
+    const tokenLogout= await axios.post(`http://localhost:3001/logout/${localStorage.getItem("token")}`);
+    console.log(tokenLogout);
     localStorage.removeItem("token");
     props.setIsLoggedIn(false);
     props.setUsername("");
@@ -61,7 +62,7 @@ const LoginComponent = (props) => {
             <button onClick={handleLogout}>Logout</button>
             </div>
 
-        ) : (<div>
+        ) : props.isLoggedIn===false?(<div>
         <h2>Login</h2>
         <form onSubmit={handleLogin}>
             <label>
@@ -76,7 +77,7 @@ const LoginComponent = (props) => {
             <br />
             <button type="submit">Login</button>
         </form>
-        </div>)
+        </div>):null
         }
 
     </div>
