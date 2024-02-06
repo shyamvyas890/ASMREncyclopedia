@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Garamond', sans-serif;
+      margin: 0;
+      background-color: #ecf0f1;
+      color: #2c3e50;
+    }
+
+    html {
+      box-sizing: border-box;
+    }
+
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
+
+    .about-section {
+      padding: 50px;
+      text-align: center;
+      background-color: #9F2B68;
+      color: white;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: #2c3e50;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 0 -15px;
+    }
+
+    .column {
+      flex: 0 0 30%;
+      max-width: 30%;
+      padding: 0 15px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .title {
+      color: #777;
+    }
+
+    .button {
+      border: none;
+      outline: 0;
+      display: inline-block;
+      padding: 10px 20px;
+      color: white;
+      background-color: #2c3e50;
+      text-align: center;
+      text-decoration: none;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    .button:hover {
+      background-color: #34495e;
+    }
+
+    @media screen and (max-width: 768px) {
+      .column {
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="about-section">
+  <h1>About Us</h1>
+  <p>Get to know the braintrust of ASMR Encyclopedia, our foundation, and what we hope to accomplish.</p>
+</div>
+
+<h2 style="text-align:center; color: #2c3e50;">The Team</h2>
+
+<div class="row">
+  <div class="column">
+    <div class="card">
+      <img src="/allenpicture.jpg" alt="Allen" style="width:100%">
+      <div class="container">
+        <h2>Allen Tran</h2>
+        <p class="title">Founder</p>
+        <p>ADD BRIEF DESCRIPTION HERE</p>
+        <p>ADD EMAIL HERE</p>
+        <p><a href="#" class="button">Contact</a></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="card">
+      <img src="/shyampicture.jpg" alt="Shyam" style="width:100%">
+      <div class="container">
+        <h2>Shyam Vyas</h2>
+        <p class="title">Founder</p>
+        <p>ADD BRIEF DESCRIPTION HERE</p>
+        <p>ADD EMAIL HERE</p>
+        <p><a href="#" class="button">Contact</a></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="column">
+    <div class="card">
+      <img src="/ayazpicture.jpg" alt="Ayaz" style="width:100%">
+      <div class="container">
+        <h2>Ayaz Azhar</h2>
+        <p class="title">Founder</p>
+        <p>ADD BRIEF DESCRIPTION HERE</p>
+        <p>ADD EMAIL HERE</p>
+        <p><a href="#" class="button">Contact</a></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="card">
+      <img src="/justinpicture.jpg" alt="Justin" style="width:100%">
+      <div class="container">
+        <h2>Justin Yamamoto</h2>
+        <p class="title">Founder</p>
+        <p>ADD BRIEF DESCRIPTION HERE</p>
+        <p>ADD EMAIL HERE</p>
+        <p><a href="#" class="button">Contact</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
