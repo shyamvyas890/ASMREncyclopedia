@@ -50,7 +50,7 @@ export const ForumPostFeedComponent = (props) =>{
         fetchID()
     }, [currentUsername])
 
-    //get all forumposts, initially sort from newest to oldest 
+    //get all forumposts upon page load, initially sort from newest to oldest 
     useEffect(()=>{
     const fetchAllPosts = async ()=>{
         try{
@@ -94,16 +94,18 @@ const handleLikeDislike = async (postID, userID, rating) => {
     fetchAllPostsLikesAndDislikes();
 }
 
-//sort forumposts based off user choice 
-//sorting based on time uses post_timestamp attribute
-//sortinb based on likes uses allPostLikes map
+/*
+sort forumposts based off user choice 
+sorting based on time uses post_timestamp attribute
+sorting based on like - dislike count uses allPostLikes and allPostDislikes maps
+*/
 const sortForumPosts = (e) =>{
   e.preventDefault()
+  const copyOfAllPosts = [...allPosts]
   //newest to oldest
    if(sortType === '1'){
-    const postsOldToNew = [...allPosts].sort((a, b) => {
+    copyOfAllPosts.sort((a, b) => {
       if(a.post_timestamp > b.post_timestamp){
-        console.log(a.post_timestamp);
         return -1;
       }
       else if(a.post_timestamp < b.post_timestamp){
@@ -113,11 +115,10 @@ const sortForumPosts = (e) =>{
         return 0;
       }
     })
-    setAllPosts(postsOldToNew)
    }
    //oldest to newest
    else if(sortType === '2'){
-    const postsOldToNew = [...allPosts].sort((a, b) => {
+    copyOfAllPosts.sort((a, b) => {
       if(a.post_timestamp > b.post_timestamp){
         console.log(a.post_timestamp);
         return 1;
@@ -129,58 +130,51 @@ const sortForumPosts = (e) =>{
         return 0;
       }
     })
-    setAllPosts(postsOldToNew)
    }
-   //most liked to least liked
+   //highest like - dislike count
    else if(sortType === '3'){
-      allPosts.map(post => (
-        console.log(allPostLikes.get(post.id))
-      ))
-      const postsMostLiked = [...allPosts].sort( (a, b) =>{
-        if(allPostLikes.get(a.id) > allPostLikes.get(b.id)){
+      copyOfAllPosts.sort( (a, b) =>{
+        if(allPostLikes.get(a.id) - allPostDislikes.get(a.id) > allPostLikes.get(b.id) - allPostDislikes.get(b.id)){
           return -1;
         }
-        else if(allPostLikes.get(a.id) < allPostLikes.get(b.id)){
+        else if(allPostLikes.get(a.id) - allPostDislikes.get(a.id) < allPostLikes.get(b.id) - allPostDislikes.get(b.id)){
           return 1;
         }
         else{
           return 0;
         }
       })
-      setAllPosts(postsMostLiked)
-
    }
-   //least liked to most liked
+   //lowest like - dislike count
    else{
-    allPosts.map(post => (
-      console.log(allPostLikes.get(post.id))
-    ))
-    const postsLeastLiked = [...allPosts].sort( (a, b) =>{
-      if(allPostLikes.get(a.id) > allPostLikes.get(b.id)){
+    copyOfAllPosts.sort( (a, b) =>{
+      if(allPostLikes.get(a.id) - allPostDislikes.get(a.id) > allPostLikes.get(b.id) - allPostDislikes.get(b.id)){
         return 1;
       }
-      else if(allPostLikes.get(a.id) < allPostLikes.get(b.id)){
+      else if(allPostLikes.get(a.id) - allPostDislikes.get(a.id) < allPostLikes.get(b.id) - allPostDislikes.get(b.id)){
         return -1;
       }
       else{
         return 0;
       }
     })
-    setAllPosts(postsLeastLiked)
-
    }
+   setAllPosts(copyOfAllPosts)
 }
 
+//form schema to ensure users enter a post title and body
 const schema = yup.object().shape({
   title: yup.string().required("You must have a title"),
   body: yup.string().required("You must have a body")
 })
 
-//get data from form (e.target.elements.<>.<>) and post to server
+/*
+handles forum post submission
+posts data to server, then resorts the posts from newest to oldest for displaying
+*/
 const onSubmit =  async (e) => {
   e.preventDefault()
-  console.log(currentUsername)
-  console.log(tagOptions)
+  //form data from useStates for the server
   const data = {
       title: title,
       body: body,
@@ -188,12 +182,26 @@ const onSubmit =  async (e) => {
       username: currentUsername,
       post_timestamp: new Date()
   }
-  const isValid = await schema.isValid(data)
+  const isValid = await schema.isValid(data) //valid schema according to yup
   if(isValid){
-      const response = await axios.post('http://localhost:3001/forumPostCreate', data)
-      const postToAdd = response.data
-      postToAdd.post_timestamp = new Date()
-      setAllPosts([postToAdd, ...allPosts])
+      
+      await axios.post('http://localhost:3001/forumPostCreate', data) //post to database
+      //get all posts including new post, resort from newest to oldest
+      const response2 = await axios.get('http://localhost:3001/forumPostsAll') 
+      response2.data.sort((a, b) => {
+        if(a.post_timestamp > b.post_timestamp){
+          return -1;
+        }
+        else if(a.post_timestamp < b.post_timestamp){
+          return 1;
+        }
+        else{
+          return 0;
+        }
+      })
+      setAllPosts(response2.data)
+
+      //resetting useStates and text boxes
       setTitle("")
       setBody("")
       setTagOptions([])
@@ -203,10 +211,12 @@ const onSubmit =  async (e) => {
   }
 }
 
+//user removes a tag from their post
 const handleTagDelete = (tagToRemove) =>{
   setTagOptions(tagOptions.filter(tag => tag !== tagToRemove))
 }
 
+//user submits a tag for their post
 const handleInputKeyDown = (e) =>{
   if(e.key === 'Enter' && tagInput.trim() != ''){
       e.preventDefault()

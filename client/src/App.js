@@ -5,7 +5,7 @@ import RegistrationComponent from './components/Register';
 import HomeComponent from './components/Home';
 import NavigationComponent from './components/Navigation';
 import ForumComponent from './components/Forum';
-import { AllForumPostComponent } from './components/AllFroumPostComponent';
+import { AllForumPostComponent } from './components/AllForumPostComponent';
 import { ViewForumPostComponent } from './components/ViewForumPostComponent';
 import FriendsComponent from './components/Friends';
 import SettingsComponent from './components/Settings';
