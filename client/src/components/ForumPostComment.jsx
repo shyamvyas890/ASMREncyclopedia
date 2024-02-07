@@ -61,6 +61,7 @@ export const ForumPostComment = (props) => {
                 comment_timestamp: new Date().toLocaleString()
             }
             setReplies([...replies, replyToAdd])
+            setReplyText('')
             console.log("REPLY ID: " + res.data.id)
             console.log("REPLY USERNAME: " + res.data.username)
             setIsReplying(false)
@@ -85,7 +86,7 @@ export const ForumPostComment = (props) => {
             
             {(isReplying && replyCommentID === props.id && (
                 <div>
-                   <input type="text" placeholder="Reply here" onChange={ (event) => {setReplyText(event.target.value)}} />
+                   <input type="text" value={replyText} placeholder="Reply here" onChange={ (event) => {setReplyText(event.target.value)}} />
                    <button onClick={() => {postReply()}}> Reply </button>
                    <button onClick={ () => {setIsReplying(false)}}> Cancel Reply </button>
                 </div>)

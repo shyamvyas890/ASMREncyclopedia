@@ -53,6 +53,7 @@ export const FourmPostCommentSection = (props) => {
                  comment_timestamp: new Date().toLocaleString()
              }
              setParentCommentsObject([...parentCommentsObject, commentToAdd])
+             setCommentText('')
          })
  
      }
@@ -66,7 +67,7 @@ export const FourmPostCommentSection = (props) => {
     ))}
 
     <div>
-         <input type="text" placeholder="Comment here" autoComplete="off" onChange={ (event) => {setCommentText(event.target.value)}} />
+         <input type="text" value={commentText} placeholder="Comment here" autoComplete="off" onChange={ (event) => {setCommentText(event.target.value)}} />
          <button onClick={addParentComment}> Add Comment </button>
     </div>
    </div>)

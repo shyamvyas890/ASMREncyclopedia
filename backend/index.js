@@ -461,13 +461,21 @@ app.post("/forumPostCreate", async (req, res) => {
         forums === null
     }
      
-    db.query('INSERT INTO ForumPost(username, title, body, post_timestamp, forums) VALUES (?, ?, ?, NOW(), ?)', [username, title, body, forums], function(err) {
+    db.query('INSERT INTO ForumPost(username, title, body, post_timestamp, forums) VALUES (?, ?, ?, NOW(), ?)', [username, title, body, forums], function(err, insertResult) {
         if(err){
             console.log(err)
             res.status(500).send(err)
         }
         else{
-            return res.status(201).send("Post Successful!")
+            console.log(forums)
+            const postID = insertResult.insertId
+            return res.status(201).send({
+                username: username, 
+                title: title, 
+                body: body, 
+                id: postID,
+                forums: forums
+            })
         }
     })
 })

@@ -8,17 +8,8 @@ import LikeDislikeComponent from "./LikeDislikeComponent"
 import '../App.css';
 
 export const ViewForumPostComponent = () =>{
-   let currentUsername = ""
    const location = useLocation()
    const state = location.state
-   console.log("state:: ", location.state)
-   if(state && state.username){
-      currentUsername = state.username
-      console.log("userName: ", currentUsername)
-   }
-   else{
-    console.log("NONE")
-   }
 
    const {postID} = useParams()
    const {userID} = useParams()
@@ -27,6 +18,21 @@ export const ViewForumPostComponent = () =>{
    const [postDislikes, setPostDislikes] = useState(new Map())
    const [userLikedPosts, setUserLikedPosts] = useState([])
    const [userDislikedPosts, setUserDislikedPosts] = useState([])
+   const [currentUsername, setCurrentUsername] = useState()
+
+   useEffect( () => {
+    const token = localStorage.getItem("token")
+    const fetchUsername = async () => {
+        try {
+          const response = await axios.get(`http://localhost:3001/verify-token/${token}`);
+          setCurrentUsername(response.data.username);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    fetchUsername()
+   }, [])
+
    useEffect(() => {
     const getForumPost = async () => {
         try{
