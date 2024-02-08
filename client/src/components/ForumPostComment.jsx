@@ -62,8 +62,6 @@ export const ForumPostComment = (props) => {
             }
             setReplies([...replies, replyToAdd])
             setReplyText('')
-            console.log("REPLY ID: " + res.data.id)
-            console.log("REPLY USERNAME: " + res.data.username)
             setIsReplying(false)
         })    
     }

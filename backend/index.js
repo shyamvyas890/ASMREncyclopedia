@@ -130,8 +130,6 @@ const db = mysql.createConnection({
     })
   })
 
-  
-
   app.get('/users',(req,res)=>{
     db.query('SELECT * FROM users', (err, results)=>{
         if(err){
@@ -691,7 +689,6 @@ app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
 app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
     const forumPostID = parseInt(req.params.id, 10)
     const parentCommentID = parseInt(req.params.commentID, 10)
-    //debugging 
 
     if(isNaN(parentCommentID)){
         return;
@@ -704,6 +701,18 @@ app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
     else{
         return res.json(data)
     }
+    })
+})
+
+app.get("/forumPostSearch/:searchTitle", (req, res) => {
+    const searchTitle = req.params.searchTitle
+    db.query("SELECT * FROM forumpost WHERE title LIKE ?",['%' + searchTitle + '%'], function (err, data){
+        if(err){
+            console.log(err)
+        }
+        else{
+            return res.json(data)
+        }
     })
 })
 

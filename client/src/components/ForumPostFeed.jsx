@@ -15,6 +15,7 @@ export const ForumPostFeedComponent = (props) =>{
     const [currentUsername, setCurrentUsername] = useState()
     const [currentUserID, setCurrentUserID] = useState()
     const [sortType, setSortType] = useState()
+    const [searchInput, setSearchInput] = useState()
 
     const [tagOptions, setTagOptions] = useState([])
     const [title, setTitle] = useState()
@@ -146,7 +147,7 @@ const sortForumPosts = (e) =>{
       })
    }
    //lowest like - dislike count
-   else{
+   else if(sortType === '4'){
     copyOfAllPosts.sort( (a, b) =>{
       if(allPostLikes.get(a.id) - allPostDislikes.get(a.id) > allPostLikes.get(b.id) - allPostDislikes.get(b.id)){
         return 1;
@@ -218,11 +219,26 @@ const handleTagDelete = (tagToRemove) =>{
 
 //user submits a tag for their post
 const handleInputKeyDown = (e) =>{
-  if(e.key === 'Enter' && tagInput.trim() != ''){
-      e.preventDefault()
-      setTagOptions([...tagOptions, tagInput])
-      setTagInput('')
+  if(e.key === 'Enter' && tagInput.trim() != '' ){
+      //tag not yet included
+      if(!tagOptions.includes(tagInput)){
+        e.preventDefault()
+        setTagOptions([...tagOptions, tagInput])
+        setTagInput('')
+      }
+      //trying to submit a duplicate tag
+      else{
+        e.preventDefault()
+        console.log("TAGS: " + tagOptions)
+        alert(`You already included the tag '${tagInput}'`)
+        setTagInput('')
+        console.log("TAGS: " + tagOptions)
+      }
   }
+}
+
+const searchForumPosts = () =>{
+   navigate(`/forumPost/search_by/${searchInput}`)
 }
 
 return(<div>
@@ -241,7 +257,7 @@ return(<div>
            </br>
            <div>
              {tagOptions.map( (tag) => (
-                <div>
+                <div key={tag}>
                     {tag}
                     <button onClick={() => handleTagDelete(tag)}> x </button>
                 </div>
@@ -255,13 +271,18 @@ return(<div>
 
 <form onSubmit={sortForumPosts}>
  <select onChange={(e) => setSortType(e.target.value)}>
-    <option> Sort posts by... </option>
+    <option value="none"> Sort posts by... </option>
     <option value="1"> Newest to Oldest (default) </option>
     <option value="2"> Oldest To Newest </option>
     <option value="3"> Most Liked to Least Liked </option>
     <option value="4"> Least Liked to Most Liked </option>
  </select>
  <button> Sort </button>
+</form>
+
+<form onSubmit={searchForumPosts}>
+  <input value={searchInput} type="text" placeholder="Search posts by title..." onChange={ (e) => setSearchInput(e.target.value)}/>
+  <button> Search </button>
 </form>
 
 <div className="feed-posts">

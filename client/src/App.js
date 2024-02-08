@@ -7,6 +7,7 @@ import NavigationComponent from './components/Navigation';
 import ForumComponent from './components/Forum';
 import { AllForumPostComponent } from './components/AllForumPostComponent';
 import { ViewForumPostComponent } from './components/ViewForumPostComponent';
+import { SearchForumPostComponent } from './components/SearchForumPostComponent';
 import FriendsComponent from './components/Friends';
 import SettingsComponent from './components/Settings';
 import VideoPostWithCommentsComponent from './components/VideoPostWithComments';
@@ -26,6 +27,7 @@ function App() {
             <Route path="/forums" element={<ForumComponent/>}/>
             <Route path="/forumPosts" element={<AllForumPostComponent />} />
             <Route path="/forumPost/:postID/viewing/:userID/user" element={<ViewForumPostComponent />} />
+            <Route path="/forumPost/search_by/:searchTitle" element={<SearchForumPostComponent />} />
             <Route path="/friends" element= {<FriendsComponent />}/>
             <Route path="/messages" element= {<ChatComponent />}/>
             <Route path="/settings" element= {<SettingsComponent />} />
@@ -35,7 +37,6 @@ function App() {
             <Route path="/random" element={<RandomVideoComponent />}/>
           </Routes>
       </BrowserRouter>
-      
     </div>
   );
 }
