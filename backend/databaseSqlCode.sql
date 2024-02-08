@@ -77,7 +77,7 @@ body text NOT NULL,
 comment_timestamp timestamp NOT NULL,
 parent_comment_id INT DEFAULT NULL, 
 PRIMARY KEY (id), 
-FOREIGN KEY (forum_post_id) REFERENCES ForumPost(id), 
+FOREIGN KEY (forum_post_id) REFERENCES ForumPost(id) ON DELETE CASCADE,
 FOREIGN KEY (parent_comment_id) REFERENCES ForumPostComments(id) ON DELETE CASCADE);
 
 CREATE TABLE VideoPostComments (

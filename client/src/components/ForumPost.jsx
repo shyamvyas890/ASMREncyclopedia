@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import * as yup from "yup"
 
 //props contains the username 
-export const ForumPostComponent = (props) =>{
+export const ForumPostComponent = () =>{
     const schema = yup.object().shape({
         title: yup.string().required("You must have a title"),
         body: yup.string().required("You must have a body")
@@ -15,15 +15,30 @@ export const ForumPostComponent = (props) =>{
     const [title, setTitle] = useState()
     const [body, setBody] = useState()
     const [tagInput, setTagInput] = useState()
+    const [currentUsername, setCurrentUsername] = useState()
+
+    useEffect( () => {
+        const token = localStorage.getItem("token")
+        const fetchUsername = async () => {
+            try {
+              const response = await axios.get(`http://localhost:3001/verify-token/${token}`);
+              setCurrentUsername(response.data.username);
+            } catch (error) {
+              console.log(error);
+            }
+          };
+        fetchUsername()
+    }, [])
 
     //get data from form (e.target.elements.<>.<>) and post to server
     const onSubmit =  async (e) => {
         e.preventDefault()
+        console.log(currentUsername)
         const data = {
             title: title,
             body: body,
             forums: tagOptions,
-            username: props.username
+            username: currentUsername
         }
         const isValid = await schema.isValid(data)
         if(isValid){
@@ -65,7 +80,7 @@ export const ForumPostComponent = (props) =>{
            <br>
            </br>
            <div>
-             {tagOptions.map( (tag, index) => (
+             {tagOptions.map( (tag) => (
                 <div>
                     {tag}
                     <button onClick={() => handleTagDelete(tag)}> x </button>
