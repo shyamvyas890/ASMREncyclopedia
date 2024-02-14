@@ -105,11 +105,6 @@ const fetchUserDislikedPosts = async (userID, allPosts, setUserDislikedPosts)=>{
 
 const handleCommentsLikeDislike = async (commentID, userID, rating)=>{
     try{
-        console.log("liking/disliking comment now")
-        console.log("commentID: ", commentID)
-        console.log("userID: ", userID)
-        console.log("rating: ", rating)
-
         //checks if user has already liked post
         const res = await axios.get("http://localhost:3001/forumPostCommentLikeStatus/", {
             params: { commentID: commentID, userID: userID }
@@ -164,5 +159,37 @@ const fetchAllCommentDislikes = async (commentID, setCommentDislikes)=>{
     };
 };
 
+//gets user liked comments
+const fetchUserLikedComments = async (userID, commentID, setUserLikedComments)=>{
+    try{
+        const res = await axios.get("http://localhost:3001/forumPostCommentsLikedByUser", {
+            params: {commentID: commentID, userID: userID}
+        });
+        if(res.data.length !== 0){
+            setUserLikedComments(commentID)
+        }else{
+            setUserLikedComments(null)
+        }
+    }catch(err){
+        console.log(err)
+    };
+};
+
+//gets user disliked comments
+const fetchUserDislikedComments = async (userID, commentID, setUserDislikedComments)=>{
+    try{
+        const res = await axios.get("http://localhost:3001/forumPostCommentsDislikedByUser", {
+            params: {commentID: commentID, userID: userID}
+        });
+        if(res.data.length !== 0){
+            setUserDislikedComments(commentID)
+        } else{
+            setUserDislikedComments(null)
+        }
+    }catch(err){
+        console.log(err)
+    };
+};
+
 export default { handleForumPostLikeDislike, fetchAllPostsLikes, fetchAllPostsDislikes, fetchUserLikedPosts, fetchUserDislikedPosts,
-                handleCommentsLikeDislike, fetchAllCommentsLikes, fetchAllCommentDislikes}
+                handleCommentsLikeDislike, fetchAllCommentsLikes, fetchAllCommentDislikes, fetchUserLikedComments, fetchUserDislikedComments}

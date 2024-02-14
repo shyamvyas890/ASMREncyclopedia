@@ -13,6 +13,8 @@ export const ForumPostComment = (props) => {
     const [currentUsername, setCurrentUsername] = useState() //username of the current user
     const [commentLikes, setCommentLikes] = useState()
     const [commentDislikes, setCommentDislikes] = useState()
+    const [userLikedComments, setUserLikedComments] = useState()
+    const [userDislikedComments, setUserDislikedComments] = useState()
 
     //runs everytime a comment is rendered. gets the replies to that comment (parent or reply)
     useEffect( () => {
@@ -73,8 +75,8 @@ export const ForumPostComment = (props) => {
     const fetchAllPostsLikesAndDislikes = async () => {
         await LikeDislikeComponent.fetchAllCommentsLikes(props.id, setCommentLikes);
         await LikeDislikeComponent.fetchAllCommentDislikes(props.id, setCommentDislikes);
-        //await LikeDislikeComponent.fetchUserLikedPosts(currentUserID, allPosts, setUserLikedPosts);
-        //await LikeDislikeComponent.fetchUserDislikedPosts(currentUserID, allPosts, setUserDislikedPosts);
+        await LikeDislikeComponent.fetchUserLikedComments(props.userID, props.id, setUserLikedComments);
+        await LikeDislikeComponent.fetchUserDislikedComments(props.userID, props.id, setUserDislikedComments);
     };
 
     const handleCommentLikeDislike = async (commentID, userID, rating) => {
@@ -93,10 +95,12 @@ export const ForumPostComment = (props) => {
             {props.username} @ {new Date(props.timestamp).toLocaleString()}: {props.body}
             <button onClick={() => handleReply(props.id)}> Reply to {props.username} </button>
             <button 
+                className={`like ${userLikedComments ? "liked" : ""}`} 
                 onClick={()=>handleCommentLikeDislike(props.id, props.userID, 1)}>
                 {commentLikes} Likes
             </button>
-            <button 
+            <button
+                className={`dislike ${userDislikedComments ? "disliked" : ""}`}
                 onClick={()=>handleCommentLikeDislike(props.id, props.userID, 0)}>
                 {commentDislikes} Dislikes
             </button>

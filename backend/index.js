@@ -722,6 +722,29 @@ app.delete("/forumPostCommentDeleteLikeDislike/", async (req,res)=>{
         }
     });
 });
+
+//gets forum comments liked by a user
+app.get("/forumPostCommentsLikedByUser/", async (req,res)=>{
+    const userID = req.query.userID
+    const forumPostCommentID = req.query.commentID
+    const query = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND userID = ? AND LikeStatus = 1"
+    db.query(query, [forumPostCommentID, userID], (err,data)=>{
+        if (err) return res.send(err)
+        return res.json(data);
+    });
+});
+
+//gets forum comments disliked by a user
+app.get("/forumPostCommentsDislikedByUser/", async (req,res)=>{
+    const userID = req.query.userID
+    const forumPostCommentID = req.query.commentID
+    const query = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND userID = ? AND LikeStatus = 0"
+    db.query(query, [forumPostCommentID, userID], (err,data)=>{
+        if (err) return res.send(err)
+        return res.json(data);
+    });
+});
+
 app.get("/forumPostParentCommentGetByID/:id", (req, res) =>{
     const forumPostID = parseInt(req.params.id, 10)
     db.query("SELECT * FROM forumpostcomments WHERE forum_post_id=? AND parent_comment_id IS NULL", [forumPostID], function (err, data){
