@@ -1,6 +1,7 @@
 import { useEffect, useState} from "react"
 import axios from "axios"
 import { useParams } from "react-router-dom"
+import LikeDislikeComponent from "./LikeDislikeComponent"
 
 export const ForumPostComment = (props) => {
 
@@ -10,6 +11,8 @@ export const ForumPostComment = (props) => {
     const [isReplying, setIsReplying] = useState(false) //user is replying or not
     const [replyText, setReplyText] = useState() //the text the user replies with
     const [currentUsername, setCurrentUsername] = useState() //username of the current user
+    const [commentLikes, setCommentLikes] = useState()
+    const [commentDislikes, setCommentDislikes] = useState()
 
     //runs everytime a comment is rendered. gets the replies to that comment (parent or reply)
     useEffect( () => {
@@ -23,6 +26,7 @@ export const ForumPostComment = (props) => {
              }
         }
         getReplies()
+        fetchAllPostsLikesAndDislikes()
     }, [props.id])
 
     //gets the username of the current user
@@ -66,6 +70,19 @@ export const ForumPostComment = (props) => {
         })    
     }
 
+    const fetchAllPostsLikesAndDislikes = async () => {
+        await LikeDislikeComponent.fetchAllCommentsLikes(props.id, setCommentLikes);
+        await LikeDislikeComponent.fetchAllCommentDislikes(props.id, setCommentDislikes);
+        //await LikeDislikeComponent.fetchUserLikedPosts(currentUserID, allPosts, setUserLikedPosts);
+        //await LikeDislikeComponent.fetchUserDislikedPosts(currentUserID, allPosts, setUserDislikedPosts);
+    };
+
+    const handleCommentLikeDislike = async (commentID, userID, rating) => {
+        await LikeDislikeComponent.handleCommentsLikeDislike(commentID, userID, rating);
+        //updates the likes/dislikes
+        fetchAllPostsLikesAndDislikes();
+    }
+
     //styling for nested look
     const replyStyle = {
         marginLeft: '20px', 
@@ -75,9 +92,18 @@ export const ForumPostComment = (props) => {
         <div>
             {props.username} @ {new Date(props.timestamp).toLocaleString()}: {props.body}
             <button onClick={() => handleReply(props.id)}> Reply to {props.username} </button>
+            <button 
+                onClick={()=>handleCommentLikeDislike(props.id, props.userID, 1)}>
+                {commentLikes} Likes
+            </button>
+            <button 
+                onClick={()=>handleCommentLikeDislike(props.id, props.userID, 0)}>
+                {commentDislikes} Dislikes
+            </button>
+            
             <div style={replyStyle}>
             {replies && replies.map( (reply) => (
-                <ForumPostComment id = {reply.id} postID = {reply.forum_post_id} username = {reply.username} timestamp = {reply.comment_timestamp} body = {reply.body}/>
+                <ForumPostComment id = {reply.id} postID = {reply.forum_post_id} username = {reply.username} timestamp = {reply.comment_timestamp} body = {reply.body} userID = {props.userID}/>
             ))}
             </div> 
 

@@ -22,7 +22,7 @@ export const ForumPostFeedComponent = (props) =>{
     const [body, setBody] = useState()
     const [tagInput, setTagInput] = useState()
     const navigate = useNavigate()
-    
+    console.log("liked posts ", userLikedPosts)
 
     //gets the username of the current user
     useEffect( () => {
@@ -85,12 +85,12 @@ useEffect(() => {
 const fetchAllPostsLikesAndDislikes = async () => {
     await LikeDislikeComponent.fetchAllPostsLikes(allPosts, setAllPostLikes);
     await LikeDislikeComponent.fetchAllPostsDislikes(allPosts, setAllPostDislikes);
-    await LikeDislikeComponent.fetchUserLikedPosts(props.userID, allPosts, setUserLikedPosts);
-    await LikeDislikeComponent.fetchUserDislikedPosts(props.userID, allPosts, setUserDislikedPosts);
+    await LikeDislikeComponent.fetchUserLikedPosts(currentUserID, allPosts, setUserLikedPosts);
+    await LikeDislikeComponent.fetchUserDislikedPosts(currentUserID, allPosts, setUserDislikedPosts);
 };
 
-const handleLikeDislike = async (postID, userID, rating) => {
-    await LikeDislikeComponent.handleLikeDislike(postID, userID, rating);
+const handlePostLikeDislike = async (postID, userID, rating) => {
+    await LikeDislikeComponent.handleForumPostLikeDislike(postID, userID, rating);
     //updates the likes/dislikes
     fetchAllPostsLikesAndDislikes();
 }
@@ -298,11 +298,11 @@ return(<div>
             <button onClick={ () => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)}> View Post </button>
             <button 
                 className={`like ${userLikedPosts.includes(post.id) ? "liked" : ""}`} 
-                onClick={()=>handleLikeDislike(post.id, currentUserID, 1)}>
+                onClick={()=>handlePostLikeDislike(post.id, currentUserID, 1)}>
                 {allPostLikes.get(post.id)} Likes
             </button>
             <button className={`dislike ${userDislikedPosts.includes(post.id) ? "disliked" : ""}`}
-                onClick={()=>handleLikeDislike(post.id, currentUserID, 0)}>
+                onClick={()=>handlePostLikeDislike(post.id, currentUserID, 0)}>
                 {allPostDislikes.get(post.id)} Dislikes</button>
         </div>
     ))}

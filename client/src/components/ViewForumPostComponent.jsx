@@ -59,8 +59,8 @@ export const ViewForumPostComponent = () =>{
       await LikeDislikeComponent.fetchUserDislikedPosts(userID, postObject, setUserDislikedPosts);
   };
 
-    const handleLikeDislike = async (postID, userID, rating) => {
-        await LikeDislikeComponent.handleLikeDislike(postID, userID, rating);
+    const handleForumPostLikeDislike = async (postID, userID, rating) => {
+        await LikeDislikeComponent.handleForumPostLikeDislike(postID, userID, rating);
         fetchAllPostsLikesAndDislikes();
     }
 
@@ -70,11 +70,11 @@ export const ViewForumPostComponent = () =>{
         <p> {postObject[0].body} </p>
         <button 
           className={`like ${userLikedPosts.includes(postObject[0].id) ? "liked" : ""}`}
-          onClick={()=>handleLikeDislike(postObject[0].id, userID, 1)}>
+          onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 1)}>
           {postLikes.get(postObject[0].id)} Likes</button>
         <button 
           className={`dislike ${userDislikedPosts.includes(postObject[0].id) ? "disliked" : ""}`}
-          onClick={()=>handleLikeDislike(postObject[0].id, userID, 0)}>
+          onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 0)}>
           {postDislikes.get(postObject[0].id)} Dislikes</button>
         <div>
           Tag(s) 
@@ -82,7 +82,7 @@ export const ViewForumPostComponent = () =>{
           {postObject[0].forums}
         </div> 
       <div>
-            <FourmPostCommentSection currentUser = {currentUsername} />
+            <FourmPostCommentSection currentUser = {currentUsername} userID = {userID}/>
             <br></br>
         </div>
         

@@ -595,7 +595,7 @@ app.post("/forumPostLikeDislike/", async (req,res)=>{
 });
 
 //Changes like to dislike and vice versa with user and post
-app.put("/forumChangeLikeDislike/", async (req,res)=>{
+app.put("/forumPostChangeLikeDislike/", async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
     const rating = req.query.rating
     const query = "UPDATE ForumPostLikeDislike SET LikeStatus = ? WHERE LikeDislikeID = ?"
@@ -609,7 +609,7 @@ app.put("/forumChangeLikeDislike/", async (req,res)=>{
 });
 
 //Deletes like/dislike from database
-app.delete("/forumDeleteLikeDislike/", async (req,res)=>{
+app.delete("/forumPostDeleteLikeDislike/", async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
     const query = "DELETE FROM ForumPostLikeDislike WHERE LikeDislikeID = ?"
     db.query(query, [LikeDislikeID], (err, data) => {
@@ -636,6 +636,92 @@ app.post("/forumPostComment/:id", (req, res) => {
    })
 })
 
+//gets likes from comment
+app.get("/fetchAllForumPostCommentLikes/", async(req,res)=>{
+    //holds number of likes for each post
+    const forumPostCommentID = req.query.commentID
+    const queryLikes = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND LikeStatus = 1"
+        db.query(queryLikes, [forumPostCommentID], (err, data)=>{
+            if (err){
+                return res.send("error")
+            }
+            else { 
+                return res.json(data)
+            }
+        });
+});
+
+//gets dislikes from comment
+app.get("/fetchAllForumPostCommentDislikes/", async(req,res)=>{
+    //holds number of dislikes for each post
+    const forumPostCommentID = req.query.commentID
+    const queryDislikes = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND LikeStatus = 0"
+        db.query(queryDislikes, [forumPostCommentID], (err, data)=>{
+            if (err){
+                return res.send("error");
+            }
+            else { 
+                return res.json(data)
+            }
+        })
+})
+
+//Gets post's comments that has a dislike/like in db by user
+app.get("/forumPostCommentLikeStatus/", async (req,res)=>{
+    const forumPostCommentID = req.query.commentID
+    const userID = req.query.userID
+    const check = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND UserID = ?"
+    db.query(check, [forumPostCommentID, userID], (err,data)=>{
+        if (err){
+            return res.send("error");
+        }
+        else { 
+            return res.json(data)
+        }
+    })
+})
+
+//Posts a like/dislike with user and comment
+app.post("/forumPostCommentLikeDislike/", async (req,res)=>{
+    const forumPostCommentID = req.query.commentID
+    const userID = req.query.userID
+    const rating = req.query.rating
+    const query = "INSERT INTO ForumPostCommentLikeDislike (forumPostCommentID, UserID, LikeStatus) VALUES (?, ?, ?)"
+    db.query(query, [forumPostCommentID, userID, rating], (err, data) => {
+        if (err) {
+            return res.status(500).send("Internal Server Error")
+        } else {
+            return res.status(201).send("Like/Dislike Successful!")
+        }
+    });
+});
+
+//Changes like to dislike and vice versa with user and comment
+app.put("/forumPostCommentChangeLikeDislike/", async (req,res)=>{
+    const LikeDislikeID = req.query.LikeDislikeID
+    const rating = req.query.rating
+    const query = "UPDATE ForumPostCommentLikeDislike SET LikeStatus = ? WHERE LikeDislikeID = ?"
+    db.query(query, [rating, LikeDislikeID], (err, data) => {
+        if (err) {
+            return res.status(500).send("Internal Server Error")
+        } else {
+            return res.status(201).send("Like/Dislike Update Successful!")
+        }
+    });
+});
+
+//Deletes like/dislike from database
+app.delete("/forumPostCommentDeleteLikeDislike/", async (req,res)=>{
+    const LikeDislikeID = req.query.LikeDislikeID
+    const query = "DELETE FROM ForumPostCommentLikeDislike WHERE LikeDislikeID = ?"
+    db.query(query, [LikeDislikeID], (err, data) => {
+        if (err) {
+            return res.status(500).send("Internal Server Error")
+        } else {
+            return res.status(201).send("Like/Dislike Update Successful!")
+        }
+    });
+});
 app.get("/forumPostParentCommentGetByID/:id", (req, res) =>{
     const forumPostID = parseInt(req.params.id, 10)
     db.query("SELECT * FROM forumpostcomments WHERE forum_post_id=? AND parent_comment_id IS NULL", [forumPostID], function (err, data){
