@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+  /*text-align: center;*/
 }
 
 .App-logo {
@@ -14,7 +14,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  /*background-color: #282c34; */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -26,6 +26,23 @@
 
 .App-link {
   color: #61dafb;
+}
+
+.like,
+.dislike{
+  padding: 8px 12px;
+  margin: 4px;
+  cursor: pointer;
+}
+
+.like.liked {
+  background-color: #4caf50;
+  color: white;
+}
+
+.dislike.disliked{
+  background-color:red;
+  color: white;
 }
 
 @keyframes App-logo-spin {

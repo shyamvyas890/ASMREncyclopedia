@@ -188,6 +188,7 @@ const db = mysql.createConnection({
 
   app.get('/users/id', (req, res)=> {
         const {username, UserId}= req.query
+        console.log(username)
         if(username){
             db.query('SELECT * FROM users WHERE username = ?', [username], (err, results)=>{
                 if(err){
@@ -412,6 +413,299 @@ app.get('/video-rating', (req,res)=>{
     }
 })
 
+
+app.post("/forumCreate", async (req,res)=>{
+    const title = req.body.title
+    const description = req.body.description 
+    db.query("INSERT INTO forums(title, description) VALUES(?, ?)", [title, description],(err)=>{
+        if(err){
+            if(err.errno === 1062){
+                res.status(500).send("This forum already exists.")
+            }
+            else{
+                res.send(err)
+            }
+        } 
+        return res.status(201).send("Forum created successfully")
+    })
+})
+
+app.get("/forums", (req,res)=>{
+    const query = "SELECT * FROM forums"
+    db.query(query,(err,data)=>{
+        if(err){
+            res.send(err)
+        }
+        return res.json(data)
+    })
+})
+
+app.get("/UserPosts", async (req,res)=>{
+    const username = req.query.username
+    console.log(username)
+    db.query('SELECT * FROM forumpost WHERE username = ?', [username], (err, data)=>{
+        if(err){
+            res.send(err)
+        }
+        return res.json(data)
+    })
+})
+
+app.post("/forumPostCreate", async (req, res) => {
+    console.log(req.body) //for debugging
+    const username = req.body.username
+    const title = req.body.title
+    const body = req.body.body
+    const forums = req.body.forums.join(", ")
+    if(forums === ''){
+        forums === null
+    }
+     
+    db.query('INSERT INTO ForumPost(username, title, body, post_timestamp, forums) VALUES (?, ?, ?, NOW(), ?)', [username, title, body, forums], function(err, insertResult) {
+        if(err){
+            console.log(err)
+            res.status(500).send(err)
+        }
+        else{
+            console.log(forums)
+            const postID = insertResult.insertId
+            return res.status(201).send({
+                username: username, 
+                title: title, 
+                body: body, 
+                id: postID,
+                forums: forums
+            })
+        }
+    })
+})
+
+//viewing all posts, mainly for testing purposes can change the condition later
+app.get("/forumPostsAll", async (req,res)=>{
+    db.query('SELECT * FROM forumpost', (err, data)=>{
+        if(err){
+            res.send(err)
+        }
+        return res.json(data)
+    })
+})
+
+//viewing a post by its id
+app.get("/forumPostsById/:postID", async (req,res)=>{
+    const id = parseInt(req.params.postID, 10)
+    console.log(typeof(id))
+    console.log(id)
+    db.query('SELECT * FROM forumpost WHERE id=?', [id], (err, data)=>{
+        if(err){
+            res.send(err)
+        }
+        console.log(data)
+        console.log("hi")
+        return res.json(data)
+    })
+})
+
+app.delete("/forumPostDelete/:id", (req,res)=>{
+    const forumPostID = req.params.id
+    const query = "DELETE FROM forumpost WHERE id = ?"
+    db.query(query, [forumPostID], (err,data)=>{
+        if (err) return res.send(err)
+        return res.json("Post has been deleted successfully");
+    });
+});
+
+//gets forum posts liked by a user
+app.get("/forumPostsLikedByUser/", async (req,res)=>{
+    const userID = req.query.userID
+    const forumPostID = req.query.postID
+    const query = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND userID = ? AND LikeStatus = 1"
+    db.query(query, [forumPostID, userID], (err,data)=>{
+        if (err) return res.send(err)
+        return res.json(data);
+    });
+});
+
+//gets forum posts disliked by a user
+app.get("/forumPostsDislikedByUser/", async (req,res)=>{
+    const userID = req.query.userID
+    const forumPostID = req.query.postID
+    const query = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND userID = ? AND LikeStatus = 0"
+    db.query(query, [forumPostID, userID], (err,data)=>{
+        if (err) return res.send(err)
+        return res.json(data);
+    });
+});
+
+//gets likes from post
+app.get("/fetchAllForumPostLikes/", async(req,res)=>{
+    //holds number of likes for each post
+    const forumPostID = req.query.postID
+    const queryLikes = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND LikeStatus = 1"
+        db.query(queryLikes, [forumPostID], (err, data)=>{
+            if (err){
+                return res.send("error")
+            }
+            else { 
+                return res.json(data)
+            }
+        });
+});
+
+//gets dislikes from post
+app.get("/fetchAllForumPostDislikes/", async(req,res)=>{
+    //holds number of dislikes for each post
+    const forumPostID = req.query.postID
+    const queryLikes = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND LikeStatus = 0"
+        db.query(queryLikes, [forumPostID], (err, data)=>{
+            if (err){
+                return res.send("error");
+            }
+            else { 
+                return res.json(data)
+            }
+        })
+})
+
+//Gets posts that has a dislike/like in db by user
+app.get("/forumPostLikeStatus/", async (req,res)=>{
+    const forumPostID = req.query.postID
+    const userID = req.query.userID
+    const check = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND UserID = ?"
+    db.query(check, [forumPostID, userID], (err,data)=>{
+        if (err){
+            return res.send("error");
+        }
+        else { 
+            return res.json(data)
+        }
+    });
+});
+
+//Posts a like/dislike with user and post
+app.post("/forumPostLikeDislike/", async (req,res)=>{
+    const forumPostID = req.query.postID
+    const userID = req.query.userID
+    const rating = req.query.rating
+    const query = "INSERT INTO ForumPostLikeDislike (ForumPostID, UserID, LikeStatus) VALUES (?, ?, ?)"
+    db.query(query, [forumPostID, userID, rating], (err, data) => {
+        if (err) {
+            return res.status(500).send("Internal Server Error")
+        } else {
+            return res.status(201).send("Like/Dislike Successful!")
+        }
+    });
+});
+
+//Changes like to dislike and vice versa with user and post
+app.put("/forumChangeLikeDislike/", async (req,res)=>{
+    const LikeDislikeID = req.query.LikeDislikeID
+    const rating = req.query.rating
+    const query = "UPDATE ForumPostLikeDislike SET LikeStatus = ? WHERE LikeDislikeID = ?"
+    db.query(query, [rating, LikeDislikeID], (err, data) => {
+        if (err) {
+            return res.status(500).send("Internal Server Error")
+        } else {
+            return res.status(201).send("Like/Dislike Update Successful!")
+        }
+    });
+});
+
+//Deletes like/dislike from database
+app.delete("/forumDeleteLikeDislike/", async (req,res)=>{
+    const LikeDislikeID = req.query.LikeDislikeID
+    const query = "DELETE FROM ForumPostLikeDislike WHERE LikeDislikeID = ?"
+    db.query(query, [LikeDislikeID], (err, data) => {
+        if (err) {
+            return res.status(500).send("Internal Server Error")
+        } else {
+            return res.status(201).send("Like/Dislike Update Successful!")
+        }
+    });
+});
+
+app.post("/forumPostComment/:id", (req, res) => {
+   const forumPostID = parseInt(req.params.id, 10)
+   //debugging purposes
+   const username = req.body.username
+   const body = req.body.body
+
+   db.query("INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp) VALUES (?, ?, ?, NOW())", [forumPostID, username, body], function (err){
+    if(err){
+        console.log(err)
+    }else{
+        return res.status(201).send("Comment Successful")
+    }
+   })
+})
+
+app.get("/forumPostParentCommentGetByID/:id", (req, res) =>{
+    const forumPostID = parseInt(req.params.id, 10)
+    db.query("SELECT * FROM forumpostcomments WHERE forum_post_id=? AND parent_comment_id IS NULL", [forumPostID], function (err, data){
+    if(err){
+        console.log(err)
+    }
+    return res.json(data)
+    })
+})
+
+app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
+    const forumPostID = parseInt(req.params.id, 10)
+    const commentID = parseInt(req.params.commentID, 10)
+    const username = req.body.username
+    const body = req.body.body
+    const timestamp = new Date().toISOString()
+
+    console.log("FORUM POST COMMENT REPLY FOR POST " + forumPostID)
+    console.log("TYPE OF FORUM POST ID " + typeof(forumPostID))
+    console.log("PARENT COMMENT " + commentID)
+    console.log()
+    const reply = {
+        username,
+        body,
+        timestamp
+    }
+    const insertQuery = "INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp, parent_comment_id) VALUES (?, ?, ?, NOW(),?)"
+
+           db.query(insertQuery, [forumPostID, username, body, commentID], (err, insertResult) =>{
+            if(err){
+                console.log(err)
+            }
+            else{
+                const replyID = insertResult.insertId
+                const selectQuery = "SELECT username from forumpostcomments where id=?"
+                db.query(selectQuery, [replyID], (err, selectResult) => {
+                    if(err){
+                        console.log(err)
+                    }
+                    else
+                    {
+                        const replyUsername = selectResult[0].username
+                        console.log("USERNAME: " + replyUsername)
+                        return res.status(201).send({id: replyID, username: replyUsername, message:"Reply Successful"})
+                    }
+                })
+            }
+           })
+})
+
+app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
+    const forumPostID = parseInt(req.params.id, 10)
+    const parentCommentID = parseInt(req.params.commentID, 10)
+    //debugging 
+
+    if(isNaN(parentCommentID)){
+        return;
+    }
+
+    db.query("SELECT * FROM forumpostcomments WHERE parent_comment_id=?", [parentCommentID], function (err, data){
+    if(err){
+        console.log(err)
+    }
+    else{
+        return res.json(data)
+    }
+    })
+})
 
   app.get("/videoComments/:VideoPostId", (req,res)=>{
     const VideoPostId= req.params.VideoPostId;

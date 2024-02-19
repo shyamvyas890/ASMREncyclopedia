@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import LoginComponent from './Login';
 import PostComponent from './Post';
 import axios from 'axios';
+import { ForumPostComponent } from './ForumPost';
+import UserPostsComponent from './UserPosts';
+import { ForumPostFeedComponent } from './ForumPostFeed';
 import AddVideoPostComponent from './AddVideoPost';
 import {axiosRequest} from "../utils/utils.js";
 import { useNavigate } from 'react-router-dom';
@@ -208,6 +211,7 @@ const HomeComponent= () => {
             isLoggedIn={isLoggedIn}
             setIsLoggedIn={setIsLoggedIn}
             />
+
             {(isLoggedIn && videoPostsAndRatings && sortedVideos && userIdOfCurrentUser) ? (
                 <>
                     <h3>Add a new Video!</h3>
@@ -244,7 +248,7 @@ const HomeComponent= () => {
                                 timestamp={post.PostedAt}
                                 totalLikes={sortedVideos[index].totalLikes}
                                 totalDislikes={sortedVideos[index].totalDislikes}
-                            />
+                            />    
                         </div>
                     ))}
                 </>
