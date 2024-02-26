@@ -3,6 +3,7 @@ import { useState } from "react"
 import { useParams } from "react-router-dom"
 import { useEffect } from "react"
 import { useLocation } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { FourmPostCommentSection } from "./ForumPostCommentSection"
 import LikeDislikeComponent from "./LikeDislikeComponent"
 import '../App.css';
@@ -10,6 +11,7 @@ import '../App.css';
 export const ViewForumPostComponent = () =>{
    const location = useLocation()
    const state = location.state
+   const navigate = useNavigate()
 
    const {postID} = useParams()
    const {userID} = useParams()
@@ -19,6 +21,20 @@ export const ViewForumPostComponent = () =>{
    const [userLikedPosts, setUserLikedPosts] = useState([])
    const [userDislikedPosts, setUserDislikedPosts] = useState([])
    const [currentUsername, setCurrentUsername] = useState()
+
+   const [recommendedPosts, setRecommendedPosts] = useState([])
+
+   useEffect( () =>{
+      const fetchRecommendedPosts = async() =>{
+        try{
+          const response = await axios.get(`http://localhost:3001/forumPostRecommendedPost/${postID}`)
+          setRecommendedPosts(response.data.recommendedPosts)
+        }catch(error){
+          console.log(error)
+        }
+      }
+      fetchRecommendedPosts()
+   }, [])
 
    useEffect( () => {
     const token = localStorage.getItem("token")
@@ -64,8 +80,10 @@ export const ViewForumPostComponent = () =>{
         fetchAllPostsLikesAndDislikes();
     }
 
-   return (
-    (postObject ? <div>
+    console.log(recommendedPosts)
+    return (
+    (postObject ?
+    <div>
         <h1> {postObject[0].title} by {postObject[0].username} @ {new Date(postObject[0].post_timestamp).toLocaleString()} </h1>
         <p> {postObject[0].body} </p>
         <button 
@@ -83,10 +101,27 @@ export const ViewForumPostComponent = () =>{
         </div> 
       <div>
             <FourmPostCommentSection currentUser = {currentUsername} />
-            <br></br>
-        </div>
-        
+            <br></br>    
       </div>
+
+      <div>
+        <h2> Recommended Posts </h2>
+        {recommendedPosts.length > 0 ? <div>
+           {recommendedPosts.map( (post) => (
+            <div>
+              <h3> {post.title} by {post.username} @ {new Date(post.post_timestamp).toLocaleString()} </h3>
+              <button onClick={ () => {
+                 navigate(`/forumPost/${post.id}/viewing/${userID}/user`)
+                 window.location.reload()
+              }}> View Post </button>
+            </div>
+           ))}
+         </div> : <h3> No similar posts were found </h3>}
+      </div>
+    </div>
+      
+
+  
       : <p> Loading... </p>)
    )
 }

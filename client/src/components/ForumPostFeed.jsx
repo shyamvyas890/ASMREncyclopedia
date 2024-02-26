@@ -181,7 +181,8 @@ const onSubmit =  async (e) => {
       body: body,
       forums: tagOptions,
       username: currentUsername,
-      post_timestamp: new Date()
+      post_timestamp: new Date(),
+      allPosts: allPosts
   }
   const isValid = await schema.isValid(data) //valid schema according to yup
   if(isValid){
