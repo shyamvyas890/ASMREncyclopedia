@@ -80,6 +80,16 @@ PRIMARY KEY (id),
 FOREIGN KEY (forum_post_id) REFERENCES ForumPost(id) ON DELETE CASCADE,
 FOREIGN KEY (parent_comment_id) REFERENCES ForumPostComments(id) ON DELETE CASCADE);
 
+CREATE TABLE ForumCommentLikeDislike(
+  LikeDislikeID INT AUTO_INCREMENT PRIMARY KEY,
+  ForumPostCommentID INT NOT NULL,
+  UserID INT NOT NULL,
+  LikeStatus BOOLEAN NOT NULL,
+  FOREIGN KEY (ForumCommentID) REFERENCES ForumPostComments(id) ON DELETE CASCADE,
+  FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE (ForumPostComments, UserId)
+);
+
 CREATE TABLE VideoPostComments (
   VideoPostCommentId INT AUTO_INCREMENT PRIMARY KEY,
   UserId INT NOT NULL,

@@ -63,7 +63,7 @@ export const FourmPostCommentSection = (props) => {
     Comments for post {props.forumPostID}
 
     {parentCommentsObject && parentCommentsObject.map( (parentComment) => (
-      <ForumPostComment id = {parentComment.id} postID = {props.forumPostID} username = {parentComment.username} currentUser = {props.currentUser} timestamp = {parentComment.comment_timestamp} body = {parentComment.body}/>
+      <ForumPostComment id = {parentComment.id} postID = {props.forumPostID} username = {parentComment.username} currentUser = {props.currentUser} userID = {props.userID} timestamp = {parentComment.comment_timestamp} body = {parentComment.body}/>
     ))}
 
     <div>
