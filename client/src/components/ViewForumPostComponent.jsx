@@ -84,6 +84,7 @@ export const ViewForumPostComponent = () =>{
     return (
     (postObject ?
     <div>
+    <div>
         <h1> {postObject[0].title} by {postObject[0].username} @ {new Date(postObject[0].post_timestamp).toLocaleString()} </h1>
         <p> {postObject[0].body} </p>
         <button 
@@ -120,10 +121,7 @@ export const ViewForumPostComponent = () =>{
            ))}
          </div> : <h3> No similar posts were found </h3>}
       </div>
-    <
-      
-
-  
+    </div>
       : <p> Loading... </p>)
    )
 }
