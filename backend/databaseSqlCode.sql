@@ -70,15 +70,18 @@ CREATE TABLE ForumPostLikeDislike(
 );
 
 CREATE TABLE ForumPostComments(
-id INT AUTO_INCREMENT UNIQUE, 
-forum_post_id INT, 
-username varchar(255), 
-body text NOT NULL, 
-comment_timestamp timestamp NOT NULL,
-parent_comment_id INT DEFAULT NULL, 
-PRIMARY KEY (id), 
-FOREIGN KEY (forum_post_id) REFERENCES ForumPost(id) ON DELETE CASCADE,
-FOREIGN KEY (parent_comment_id) REFERENCES ForumPostComments(id) ON DELETE CASCADE);
+  id INT AUTO_INCREMENT UNIQUE, 
+  forum_post_id INT, 
+  username varchar(255), 
+  body text NOT NULL, 
+  comment_timestamp timestamp NOT NULL,
+  parent_comment_id INT DEFAULT NULL,
+  NotificationRead BOOLEAN DEFAULT FALSE, 
+  PRIMARY KEY (id), 
+  FOREIGN KEY (forum_post_id) REFERENCES ForumPost(id) ON DELETE CASCADE,
+  FOREIGN KEY (parent_comment_id) REFERENCES ForumPostComments(id) ON DELETE CASCADE,
+  FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+);
 
 CREATE TABLE VideoPostComments (
   VideoPostCommentId INT AUTO_INCREMENT PRIMARY KEY,
@@ -88,6 +91,7 @@ CREATE TABLE VideoPostComments (
   ReplyToVideoPostCommentId INT,
   CommentedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   DELETED BOOLEAN NOT NULL,
+  NotificationRead BOOLEAN DEFAULT FALSE,
   FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (VideoPostId) REFERENCES VideoPost(VideoPostId) ON DELETE CASCADE,
   FOREIGN KEY (ReplyToVideoPostCommentId) REFERENCES VideoPostComments(VideoPostCommentId) ON DELETE CASCADE
