@@ -124,7 +124,7 @@ const db = mysql.createConnection({
         async (err, results) => {
             if(err){
                 console.log(err);
-                res.status(500).send("Error logging in")
+                res.status(500).send("Error logging in.")
             }
             else if (results.length>0){
                 const match = await bcrypt.compare(password, results[0].password);
@@ -134,11 +134,11 @@ const db = mysql.createConnection({
                     return res.status(200).json({ token });
                 } 
                 else {
-                    res.status(401).send('Incorrect password');
+                    res.status(401).send('Your password is incorrect.');
                 }
             }
             else {
-                res.status(404).send('User not found');
+                res.status(404).send('This username does not exist.');
             }
         }
     );
