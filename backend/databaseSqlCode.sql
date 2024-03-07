@@ -55,6 +55,7 @@ title varchar(255) NOT NULL,
 body TEXT NOT NULL, 
 post_timestamp timestamp NOT NULL, 
 forums TEXT,
+tfidf_vector TEXT,
 PRIMARY KEY(id),
 FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );
@@ -85,9 +86,9 @@ CREATE TABLE ForumCommentLikeDislike(
   ForumPostCommentID INT NOT NULL,
   UserID INT NOT NULL,
   LikeStatus BOOLEAN NOT NULL,
-  FOREIGN KEY (ForumCommentID) REFERENCES ForumPostComments(id) ON DELETE CASCADE,
+  FOREIGN KEY (ForumPostCommentID) REFERENCES ForumPostComments(id) ON DELETE CASCADE,
   FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE,
-  UNIQUE (ForumPostComments, UserId)
+  UNIQUE (ForumPostCommentID, UserId)
 );
 
 CREATE TABLE VideoPostComments (

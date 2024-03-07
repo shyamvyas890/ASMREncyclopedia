@@ -10,6 +10,25 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const port = 3001;
 const secretKey= "secret_key" //Will change this later
+
+var natural = require('natural');
+var TfIdf = natural.TfIdf;
+var tfidf = new TfIdf();
+var tokenizer = new natural.WordTokenizer()
+var stopwords = require('stopword');
+const { constrainedMemory } = require('process');
+const enStopwords = [
+    "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves",
+    "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their",
+    "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are",
+    "was", "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an",
+    "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about",
+    "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down",
+    "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where",
+    "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not",
+    "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"
+  ];
+  
 app.use(express.json())
 app.use(express.urlencoded({ extended: true })); // Might not need this
 app.use(cors({
@@ -20,7 +39,7 @@ app.use(cors({
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'password',
+    password: '#jySJSU2024',
     database: 'ASMR_DB',
   });
   db.connect((err) => {
@@ -449,23 +468,64 @@ app.get("/UserPosts", async (req,res)=>{
     })
 })
 
+/*
+- add new post
+- recalculate tfidf vector for previous posts
+- 
+*/
 app.post("/forumPostCreate", async (req, res) => {
-    console.log(req.body) //for debugging
+    const allPosts = req.body.allPosts
     const username = req.body.username
     const title = req.body.title
     const body = req.body.body
     const forums = req.body.forums.join(", ")
-    if(forums === ''){
-        forums === null
+    const tfidfVector = {}
+
+    //add all previous posts to the corpus
+    allPosts.forEach(post => {
+        var tokenedPreviousPost = tokenizer.tokenize(post.body)
+        tokenedPreviousPost = stopwords.removeStopwords(tokenedPreviousPost, enStopwords)
+        tfidf.addDocument(tokenedPreviousPost)
+        tfidf.documents[tfidf.documents.length - 1].__key = post.id //key for idenfying which post is from
+    });
+
+    //add current post to the corpus
+    var tokenedCurrentPost = tokenizer.tokenize(body)
+    tokenedCurrentPost = stopwords.removeStopwords(tokenedCurrentPost, enStopwords)
+    tfidf.addDocument(tokenedCurrentPost)
+
+    //recalculate previous post tfidf vector
+    for(i = 0; i < tfidf.documents.length; i++){
+        let pastTfidfVector = {}
+        tfidf.listTerms(i).forEach(function(item){
+            pastTfidfVector[item.term] = item.tfidf
+        })
+        const stringTfidfVector = JSON.stringify(pastTfidfVector)
+        db.query('UPDATE forumpost SET tfidf_vector=? WHERE id=?', [stringTfidfVector, tfidf.documents[i].__key], function(err){
+            if(err){
+                console.log(err)
+                res.status(500).send(err)
+            }
+            else{
+                console.log("COMPLETE")
+            }
+        })
     }
-     
-    db.query('INSERT INTO ForumPost(username, title, body, post_timestamp, forums) VALUES (?, ?, ?, NOW(), ?)', [username, title, body, forums], function(err, insertResult) {
+    
+    //calculate currnent post tfidf vector
+    tfidf.listTerms(tfidf.documents.length - 1).forEach(function(item) {
+        tfidfVector[item.term] = item.tfidf
+    });
+
+    //update tfidf vector for previous posts
+    //add current post to database
+    const tfidfVectorString = JSON.stringify(tfidfVector)
+    db.query('INSERT INTO ForumPost(username, title, body, post_timestamp, forums, tfidf_vector) VALUES (?, ?, ?, NOW(), ?, ?)', [username, title, body, forums, tfidfVectorString], function(err, insertResult) {
         if(err){
             console.log(err)
             res.status(500).send(err)
         }
         else{
-            console.log(forums)
             const postID = insertResult.insertId
             return res.status(201).send({
                 username: username, 
@@ -478,6 +538,9 @@ app.post("/forumPostCreate", async (req, res) => {
     })
 })
 
+function updateTFI_DFVector(allPosts){
+
+}
 //viewing all posts, mainly for testing purposes can change the condition later
 app.get("/forumPostsAll", async (req,res)=>{
     db.query('SELECT * FROM forumpost', (err, data)=>{
@@ -824,6 +887,64 @@ app.get("/forumPostSearch/:searchTitle", (req, res) => {
         }
     })
 })
+
+/*
+to see if a post should be recommended, take the consine similarity of the tfidf_vector
+if it meets the threshold, recommend it
+*/
+
+app.get("/forumPostRecommendedPost/:postID", (req, res) =>{
+    const postID = req.params.postID
+    const recommendedPosts = []
+    db.query("SELECT * from forumpost WHERE ID=?", [postID], function(err, data){
+        if(err){
+            console.log(err)
+        }
+        else{
+            const post = data[0]
+            console.log(post)
+            db.query("SELECT * from forumpost WHERE ID!=?", [postID], function(err, data){
+                if(err){
+                    console.log(err)
+                }
+                else{
+                    const similarityThreshold = 0.10
+                    data.forEach(otherPost =>{
+                        if(cosineSimilarity(post.tfidf_vector, otherPost.tfidf_vector) >= similarityThreshold){
+                            recommendedPosts.push(otherPost)
+                            console.log(recommendedPosts)
+                        }
+                    })
+                    return res.status(201).send({recommendedPosts: recommendedPosts})
+                }
+            })
+            
+        }
+    })
+})
+
+function cosineSimilarity(tfidfVector1, tfidfVector2) {
+    const parsedVector1 = JSON.parse(tfidfVector1)
+    const parsedVector2 = JSON.parse(tfidfVector2)
+
+    let dotProduct = 0
+    for(let term in parsedVector1){
+        if(parsedVector2.hasOwnProperty(term)){
+            dotProduct += (parsedVector1[term] * parsedVector2[term])
+        }
+    }
+
+    const magnitude1 = Math.sqrt(
+        Object.values(parsedVector1).reduce((acc, val) => acc + val ** 2, 0)
+    );
+
+    const magnitude2 = Math.sqrt(
+        Object.values(parsedVector2).reduce((acc, val) => acc + val ** 2, 0)
+    );
+
+    return dotProduct / (magnitude1 * magnitude2).toFixed(2)
+}
+
 
 app.get("/fetchAllPlaylistVideosID", (req, res)=>{
     const playlistID = req.query.playlistID
