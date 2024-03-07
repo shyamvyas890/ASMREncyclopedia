@@ -24,6 +24,9 @@ const NavigationComponent= () => {
             <li>
                 <Link to="/random">Random</Link>
             </li>
+            <li>
+                <Link to="/userPlaylists">Playlists</Link>
+            </li>
         </ul>
     </nav>)
 }

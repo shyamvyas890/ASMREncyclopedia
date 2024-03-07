@@ -825,6 +825,101 @@ app.get("/forumPostSearch/:searchTitle", (req, res) => {
     })
 })
 
+app.get("/fetchAllPlaylistVideosID", (req, res)=>{
+    const playlistID = req.query.playlistID
+    const query = "SELECT VideoPostID FROM playlistvideoposts WHERE PlaylistID = ?"
+    db.query(query, [playlistID], (err, data)=>{
+        if(err){
+            console.log(err)
+        } else{
+            return res.json(data)
+        }
+    })
+})
+
+app.get("/fetchAllVideos", (req, res)=>{
+    const videoPostID = req.query.videoPostID
+    console.log(videoPostID)
+    const query = "SELECT * FROM VideoPost WHERE VideoPostID = ?"
+    db.query(query, [videoPostID], (err, data)=>{
+        if(err){
+            console.log(err)
+        } else{
+            return res.json(data)
+        }
+    })
+})
+
+app.get("/fetchVideoInPlaylist", (req, res)=>{
+    const playlistID = req.query.playlistID
+    const videoPostID = req.query.videoPostID
+    const query = "SELECT * FROM playlistvideoposts WHERE PlaylistID = ? AND VideoPostID = ?"
+    db.query(query, [playlistID, videoPostID], (err, data)=>{
+        if(err){
+            console.log(err)
+        } else{
+            return res.json(data)
+        }
+    })
+})
+
+app.post("/addVideoToPlaylist", (req, res)=>{
+    const playlistID = req.query.playlistID
+    const videoPostID = req.query.videoPostID
+    console.log("playlistID: ", playlistID)
+    console.log("videoPostID: ", videoPostID)
+    const query = "INSERT INTO playlistvideoposts (DateAdded, PlaylistID, VideoPostID) VALUES (NOW(), ?, ?)"
+    db.query(query, [playlistID, videoPostID], (err, data)=>{
+        if (err) {
+            return res.status(500).send("Internal Server Error")
+        } else {
+            return res.status(201).send("Video Added to Playlist!")
+        }
+    })
+})
+
+app.delete("/deleteVideoFromPlaylist", (req, res)=>{
+    const playlistID = req.query.playlistID
+    const videoPostID = req.query.videoPostID
+    console.log("playlistID: ", playlistID)
+    console.log("videoPostID: ", videoPostID)
+    const query = "DELETE FROM playlistvideoposts WHERE PlaylistID = ? AND VideoPostID = ?"
+    db.query(query, [playlistID, videoPostID], (err)=>{
+        if (err) {
+            return res.status(500).send(err)
+        } else {
+            return res.status(201).send("Video Deleted from Playlist!")
+        }
+    })
+})
+
+app.get("/fetchAllUserPlaylists", (req, res)=>{
+    const userID = req.query.userID
+    console.log("userID ", userID)
+    const query = "SELECT * FROM Playlist"
+    db.query(query, [userID], (err, data)=>{
+        if(err){
+            console.log(err)
+        } else{
+            return res.json(data)
+        }
+    })
+})
+
+app.post("/createPlaylist", (req, res)=>{
+    const playlistName = req.query.playlistName
+    const userID = req.query.userID
+    console.log(playlistName)
+    const query = "INSERT INTO Playlist (playlistName, dateCreated, userID) VALUES (?, NOW(), ?)"
+    db.query(query, [playlistName, userID], (err, data)=>{
+        if(err){
+            console.log(err)
+        } else{
+            return res.json(data)
+        }
+    })
+})
+
   app.get("/videoComments/:VideoPostId", (req,res)=>{
     const VideoPostId= req.params.VideoPostId;
     db.query('SELECT * FROM VideoPostComments WHERE VideoPostId = ?',[VideoPostId], (err, results)=>{
