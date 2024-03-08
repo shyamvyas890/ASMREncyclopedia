@@ -5,7 +5,7 @@ import { useEffect } from "react"
 import { useLocation } from "react-router-dom"
 import { FourmPostCommentSection } from "./ForumPostCommentSection"
 import LikeDislikeComponent from "./LikeDislikeComponent"
-import '../App.css';
+import '../index.css';
 
 export const ViewForumPostComponent = () =>{
    const location = useLocation()
