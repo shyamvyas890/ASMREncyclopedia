@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
-import {useNavigate, useParams } from "react-router-dom";
-import {axiosRequest} from "../utils/utils.js";
-
-import * as yup from "yup"
+import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import PostComponent from "./Post";
 
 export const ViewUserPlaylistComponent = ()=>{
     const {playlistID} = useParams()
@@ -13,52 +9,52 @@ export const ViewUserPlaylistComponent = ()=>{
     const [playlistVideos, setPlaylistVideos] = useState([])
 
     useEffect(()=> {
-        //gets all videoIDs in the playlist
-        const fetchAllPlaylistVideosID = async () => {
-            try{
-                const res = await axios.get("http://localhost:3001/fetchAllPlaylistVideosID", {
-                    params: { playlistID: playlistID, userID: userID}
-                })
-                setPlaylistVideosID(res.data)
-            } catch (error) {
-                console.log(error)
-            }
-        }
-
         fetchAllPlaylistVideosID()
     }, [])
 
-    useEffect(()=>{
-    const fetchPlaylistVideos = async ()=>{
+    //gets all videoIDs in the playlist
+    const fetchAllPlaylistVideosID = async () => {
         try{
-            let arr = []
-            for(const videoPost of playlistVideosID){
-                const res = await axios.get("http://localhost:3001/fetchAllVideos", {
-                    params: {videoPostID: videoPost.VideoPostID}
-                })
-                arr.push(res.data[0])
-            }
-            for(let  i = 0; i < arr.length; i++){
-                console.log("arr ", arr[i])
-            }
-            setPlaylistVideos(arr)
+            const res = await axios.get("http://localhost:3001/fetchAllPlaylistVideosID", {
+                params: { playlistID: playlistID, userID: userID}
+            })
+            setPlaylistVideosID(res.data)
         } catch (error) {
             console.log(error)
         }
     }
-    fetchPlaylistVideos()
+
+    useEffect(()=>{
+        const fetchPlaylistVideos = async ()=>{
+            try{
+                let arr = []
+                for(const videoPost of playlistVideosID){
+                    const res = await axios.get("http://localhost:3001/fetchAllVideos", {
+                        params: {videoPostID: videoPost.VideoPostID}
+                    })
+                    arr.push(res.data[0])
+                }
+                for(let  i = 0; i < arr.length; i++){
+                    console.log("arr ", arr[i])
+                }
+                setPlaylistVideos(arr)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        fetchPlaylistVideos()
     }, [playlistVideosID])
 
-    const fetchUsername = async ()=>{
+    const removeVideoFromPlaylist = async (videoPostID)=>{
         try{
-            const res = await axios.get("http://localhost:3001/users/id", {
-                params: {UserId: userID}
+            await axios.delete("http://localhost:3001/deleteVideoFromPlaylist", {
+                params: {playlistID: playlistID, videoPostID: videoPostID}
             })
-            console.log(res.data)
-            return res.data
-        } catch{
-
+        } catch (error){
+            console.log("Can't remove video")
         }
+        fetchAllPlaylistVideosID()
+        
     }
     
     return (
@@ -66,10 +62,14 @@ export const ViewUserPlaylistComponent = ()=>{
             <h1>Playlist Videos</h1>
             <div classname="playlist-videos">
                 {playlistVideos.map(video=>(
-                    <div className="video" key={video.VideoPostID}>
-                        <h2>{video.Title}</h2>
-                        <p>Posted at {video.PostedAt}</p>
+                    <div className="video" key={video.VideoPostId}>
+                    <h5><Link to={`/video/${video.VideoPostId}`}>{video.Title}</Link></h5>
                         <p>{video.VideoLinkId}</p>
+                        <button 
+                            className="remove-video-from-playlist"
+                            onClick={()=>removeVideoFromPlaylist(video.VideoPostId)}>
+                            Remove Video
+                        </button>
                     </div>
                 ))}
             </div>

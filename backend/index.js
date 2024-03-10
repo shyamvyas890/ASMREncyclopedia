@@ -39,7 +39,7 @@ app.use(cors({
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '#jySJSU2024',
+    password: 'password',
     database: 'ASMR_DB',
   });
   db.connect((err) => {
@@ -1013,11 +1013,11 @@ app.delete("/deleteVideoFromPlaylist", (req, res)=>{
         }
     })
 })
-
+    
 app.get("/fetchAllUserPlaylists", (req, res)=>{
     const userID = req.query.userID
     console.log("userID ", userID)
-    const query = "SELECT * FROM Playlist"
+    const query = "SELECT * FROM Playlist WHERE userID = ?"
     db.query(query, [userID], (err, data)=>{
         if(err){
             console.log(err)
