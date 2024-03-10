@@ -48,6 +48,7 @@ export const ForumPostFeedComponent = (props) =>{
             }
           };
         fetchID()
+        
     }, [currentUsername])
 
     //get all forumposts upon page load, initially sort from newest to oldest 
@@ -79,7 +80,7 @@ export const ForumPostFeedComponent = (props) =>{
 //get like/dislike information for posts
 useEffect(() => {
     fetchAllPostsLikesAndDislikes();
-}, [allPosts]);
+}, [currentUserID]);
 
 const fetchAllPostsLikesAndDislikes = async () => {
     await LikeDislikeComponent.fetchAllPostsLikes(allPosts, setAllPostLikes);
