@@ -48,7 +48,7 @@ const HomeComponent= () => {
                 console.log(err);
             }
 
-            
+        
             for(const vid of theUnfilteredPostsData){
                 vid.genreIds= (await axiosRequest(3,2,"video-by-genre-or-user", {VideoPostId:vid.VideoPostId})).data.map(genreInfo=>genreInfo.GenreId);
             }

@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom"
 //props contains ID of forum post and current username
 export const FourmPostCommentSection = (props) => {
    const {postID} = useParams()
+   const {userID} = useParams()
    const [parentCommentsObject, setParentCommentsObject] = useState([])
    const [commentText, setCommentText] = useState()
    const [username, setUsername] = useState()
@@ -63,7 +64,7 @@ export const FourmPostCommentSection = (props) => {
     Comments for post {props.forumPostID}
 
     {parentCommentsObject && parentCommentsObject.map( (parentComment) => (
-      <ForumPostComment id = {parentComment.id} postID = {props.forumPostID} username = {parentComment.username} currentUser = {props.currentUser} userID = {props.userID} timestamp = {parentComment.comment_timestamp} body = {parentComment.body}/>
+      <ForumPostComment id = {parentComment.id} postID = {props.forumPostID} username = {parentComment.username} currentUser = {props.currentUser} userID = {userID} timestamp = {parentComment.comment_timestamp} body = {parentComment.body}/>
     ))}
 
     <div>

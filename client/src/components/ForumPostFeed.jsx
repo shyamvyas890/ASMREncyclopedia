@@ -22,7 +22,6 @@ export const ForumPostFeedComponent = (props) =>{
     const [body, setBody] = useState()
     const [tagInput, setTagInput] = useState()
     const navigate = useNavigate()
-    console.log("liked posts ", userLikedPosts)
 
     //gets the username of the current user
     useEffect( () => {
