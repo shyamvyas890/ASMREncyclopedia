@@ -1041,7 +1041,35 @@ app.post("/createPlaylist", (req, res)=>{
     })
 })
 
-  app.get("/videoComments/:VideoPostId", (req,res)=>{
+app.delete("/deletePlaylist", (req, res)=>{
+    const playlistID = req.query.playlistID
+    console.log(playlistID)
+    const query = "DELETE FROM Playlist WHERE PlaylistID = ?"
+    db.query(query, [playlistID], (err)=>{
+        if (err) {
+            return res.status(500).send(err)
+        } else {
+            return res.status(201).send("Playlist Deleted!")
+        }
+    })
+})
+
+app.put("/editPlaylistName", (req, res)=>{
+    const playlistID = req.query.playlistID
+    const newPlaylistName = req.query.newPlaylistName
+    console.log("ID: ", playlistID)
+    console.log("new name: ", newPlaylistName)
+    const query = "UPDATE Playlist SET PlaylistName = ? WHERE PlaylistID = ?"
+    db.query(query, [newPlaylistName, playlistID], (err)=>{
+        if (err) {
+            return res.status(500).send(err)
+        } else {
+            return res.status(201).send("Playlist Name Edited!")
+        }
+    })
+})
+
+app.get("/videoComments/:VideoPostId", (req,res)=>{
     const VideoPostId= req.params.VideoPostId;
     db.query('SELECT * FROM VideoPostComments WHERE VideoPostId = ?',[VideoPostId], (err, results)=>{
         if(err) {

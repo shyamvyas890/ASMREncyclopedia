@@ -127,6 +127,7 @@ const PostComponent = (props) =>{
 
     const toggleModal = () => {
       setModal(!modal)
+      console.log(modal)
     }
 
   const fetchAllUserPlaylist = async () => {
@@ -216,7 +217,7 @@ const PostComponent = (props) =>{
                         />
                       </label>
                   </div>
-              ))}
+                  ))}
                 <button className="close-modal"onClick={toggleModal}>Close</button>
               </div>
             </div>
