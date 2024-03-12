@@ -110,7 +110,7 @@ export const ViewForumPostComponent = () =>{
           {postObject[0].forums}
         </div> 
       <div>
-            <FourmPostCommentSection currentUser = {currentUsername} />
+            <FourmPostCommentSection currentUser = {currentUsername} userID = {userID}/>
             <br></br>
         </div>
         

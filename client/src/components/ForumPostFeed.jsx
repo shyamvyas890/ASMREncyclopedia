@@ -22,7 +22,6 @@ export const ForumPostFeedComponent = (props) =>{
     const [body, setBody] = useState()
     const [tagInput, setTagInput] = useState()
     const navigate = useNavigate()
-    console.log("liked posts ", userLikedPosts)
 
     //gets the username of the current user
     useEffect( () => {
@@ -49,6 +48,7 @@ export const ForumPostFeedComponent = (props) =>{
             }
           };
         fetchID()
+        
     }, [currentUsername])
 
     //get all forumposts upon page load, initially sort from newest to oldest 
@@ -80,7 +80,7 @@ export const ForumPostFeedComponent = (props) =>{
 //get like/dislike information for posts
 useEffect(() => {
     fetchAllPostsLikesAndDislikes();
-}, [allPosts]);
+}, [currentUserID]);
 
 const fetchAllPostsLikesAndDislikes = async () => {
     await LikeDislikeComponent.fetchAllPostsLikes(allPosts, setAllPostLikes);

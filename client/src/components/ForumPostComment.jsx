@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom"
 export const ForumPostComment = (props) => {
 
     const {postID} = useParams() //ID of the forum post
+    const {userID} = useParams()
     const [replies, setReplies] = useState([]) //replies to a given comment
     const [replyCommentID, setReplyCommentID] = useState() //ID of comment user is replying to
     const [isReplying, setIsReplying] = useState(false) //user is replying or not
@@ -76,8 +77,8 @@ export const ForumPostComment = (props) => {
     const fetchAllPostsLikesAndDislikes = async () => {
         await LikeDislikeComponent.fetchAllCommentsLikes(props.id, setCommentLikes);
         await LikeDislikeComponent.fetchAllCommentDislikes(props.id, setCommentDislikes);
-        await LikeDislikeComponent.fetchUserLikedComments(props.userID, props.id, setUserLikedComments);
-        await LikeDislikeComponent.fetchUserDislikedComments(props.userID, props.id, setUserDislikedComments);
+        await LikeDislikeComponent.fetchUserLikedComments(userID, props.id, setUserLikedComments);
+        await LikeDislikeComponent.fetchUserDislikedComments(userID, props.id, setUserDislikedComments);
     };
 
     const handleCommentLikeDislike = async (commentID, userID, rating) => {
@@ -104,12 +105,12 @@ export const ForumPostComment = (props) => {
             <button onClick={() => handleReply(props.id)}> Reply to {props.username} </button>
             <button 
                 className={`like ${userLikedComments ? "liked" : ""}`} 
-                onClick={()=>handleCommentLikeDislike(props.id, props.userID, 1)}>
+                onClick={()=>handleCommentLikeDislike(props.id, userID, 1)}>
                 {commentLikes} Likes
             </button>
             <button
                 className={`dislike ${userDislikedComments ? "disliked" : ""}`}
-                onClick={()=>handleCommentLikeDislike(props.id, props.userID, 0)}>
+                onClick={()=>handleCommentLikeDislike(props.id, userID, 0)}>
                 {commentDislikes} Dislikes
             </button>
             
@@ -124,7 +125,7 @@ export const ForumPostComment = (props) => {
                 <div>
                    <input type="text" value={replyText} placeholder="Reply here" onChange={ (event) => {setReplyText(event.target.value)}} />
                    <button onClick={() => {postReply()}}> Reply </button>
-                   <button onClick={ () => {setIsReplying(false)}}> Cancel Reply </button>
+                   <button onClick={() => {setIsReplying(false)}}> Cancel Reply </button>
                 </div>)
             )}
         </div>
