@@ -39,7 +39,7 @@ app.use(cors({
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '#jySJSU2024',
+    password: 'password',
     database: 'ASMR_DB',
   });
   db.connect((err) => {
@@ -205,7 +205,7 @@ const db = mysql.createConnection({
 
   app.get('/users/id', (req, res)=> {
         const {username, UserId}= req.query
-        console.log(username)
+        console.log("USERNAME: " + username)
         if(username){
             db.query('SELECT * FROM users WHERE username = ?', [username], (err, results)=>{
                 if(err){
@@ -459,7 +459,7 @@ app.get("/forums", (req,res)=>{
 
 app.get("/UserPosts", async (req,res)=>{
     const username = req.query.username
-    console.log(username)
+    console.log("USER POSTS USERNAME: " + username)
     db.query('SELECT * FROM forumpost WHERE username = ?', [username], (err, data)=>{
         if(err){
             res.send(err)
@@ -538,9 +538,6 @@ app.post("/forumPostCreate", async (req, res) => {
     })
 })
 
-function updateTFI_DFVector(allPosts){
-
-}
 //viewing all posts, mainly for testing purposes can change the condition later
 app.get("/forumPostsAll", async (req,res)=>{
     db.query('SELECT * FROM forumpost', (err, data)=>{
@@ -697,6 +694,28 @@ app.post("/forumPostComment/:id", (req, res) => {
         return res.status(201).send("Comment Successful")
     }
    })
+})
+
+app.get("/getForumPostComments", async(req, res) =>{
+    const username = req.query.username
+    db.query("SELECT * FROM ForumPostComments WHERE username=?", [username], function(err, data){
+        if(err){
+            console.log(err)
+        }else{
+            return res.json(data)
+        }
+    })
+})
+
+app.get("/getVideoPostComments", async(req, res) =>{
+    const userID = req.query.userID
+    db.query("SELECT * FROM VideoPostComments WHERE UserId=?", [userID], function(err, data){
+        if(err){
+            console.log(err)
+        }else{
+            return res.json(data)
+        }
+    })
 })
 
 //gets likes from comment

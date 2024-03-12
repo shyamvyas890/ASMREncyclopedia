@@ -15,6 +15,8 @@ import ChatComponent from './components/Chat';
 import ProfilePageComponent from './components/ProfilePage';
 import SearchVideosComponent from './components/SearchVideos';
 import RandomVideoComponent from './components/RandomVideo';
+import { UserProfileComponent } from './components/UserProfileComponent';
+
 function App() {
   const [token, setToken]= React.useState("");
   return (
@@ -35,6 +37,8 @@ function App() {
             <Route path="/username/:ProfileUsername" element={<ProfilePageComponent />} />
             <Route path="/search/videos/:keyword" element={<SearchVideosComponent />} />
             <Route path="/random" element={<RandomVideoComponent />}/>
+            <Route path="/userHistory/:username" element={<UserProfileComponent />} />
+            <Route path="/username/:username" element={<ProfilePageComponent />} />
           </Routes>
       </BrowserRouter>
     </div>

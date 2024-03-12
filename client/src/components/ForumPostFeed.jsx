@@ -289,7 +289,15 @@ return(<div>
 <div className="feed-posts">
     {allPosts.map(post=>(
         <div className="user-posts" key={post.id}>
-            <h2>{post.title} by {post.username} @ {new Date(post.post_timestamp).toLocaleString()}</h2>
+            <h2>{post.title} by <a 
+          style={{textDecoration: 'none'}}
+          onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+          onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+          onClick={() => {navigate(`/userHistory/${post.username}`)}}
+          >
+          {post.username}
+         </a> 
+         @ {new Date(post.post_timestamp).toLocaleString()}</h2>
             <p>{post.body}</p>
             <div>
               Tag(s)

@@ -2,7 +2,7 @@ import { useEffect, useState} from "react"
 import axios from "axios"
 import { useParams } from "react-router-dom"
 import LikeDislikeComponent from "./LikeDislikeComponent"
-
+import { useNavigate } from "react-router-dom"
 export const ForumPostComment = (props) => {
 
     const {postID} = useParams() //ID of the forum post
@@ -15,7 +15,8 @@ export const ForumPostComment = (props) => {
     const [commentDislikes, setCommentDislikes] = useState()
     const [userLikedComments, setUserLikedComments] = useState()
     const [userDislikedComments, setUserDislikedComments] = useState()
-
+    const navigate = useNavigate()
+    
     //runs everytime a comment is rendered. gets the replies to that comment (parent or reply)
     useEffect( () => {
         const getReplies = async () =>{
@@ -92,7 +93,14 @@ export const ForumPostComment = (props) => {
 
     return(
         <div>
-            {props.username} @ {new Date(props.timestamp).toLocaleString()}: {props.body}
+            <a 
+          style={{textDecoration: 'none'}}
+          onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+          onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+          onClick={() => {navigate(`/userHisotry/${props.username}`)}}
+          >
+          {props.username}
+         </a>  @ {new Date(props.timestamp).toLocaleString()}: {props.body}
             <button onClick={() => handleReply(props.id)}> Reply to {props.username} </button>
             <button 
                 className={`like ${userLikedComments ? "liked" : ""}`} 

@@ -85,7 +85,16 @@ export const ViewForumPostComponent = () =>{
     (postObject ?
     <div>
     <div>
-        <h1> {postObject[0].title} by {postObject[0].username} @ {new Date(postObject[0].post_timestamp).toLocaleString()} </h1>
+        <h1> {postObject[0].title} by <a 
+          style={{textDecoration: 'none'}}
+          onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+          onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+          onClick={() => {navigate(`/userHistory/${postObject[0].username}`)}}
+          >
+          {postObject[0].username}
+         </a>
+
+        @ {new Date(postObject[0].post_timestamp).toLocaleString()} </h1>
         <p> {postObject[0].body} </p>
         <button 
           className={`like ${userLikedPosts.includes(postObject[0].id) ? "liked" : ""}`}
@@ -112,7 +121,14 @@ export const ViewForumPostComponent = () =>{
         {recommendedPosts.length > 0 ? <div>
            {recommendedPosts.map( (post) => (
             <div>
-              <h3> {post.title} by {post.username} @ {new Date(post.post_timestamp).toLocaleString()} </h3>
+              <h3> {post.title} by <a 
+          style={{textDecoration: 'none'}}
+          onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+          onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+          onClick={() => {navigate(`/userProfile/${post.username}`)}}
+          >
+          {post.username}
+         </a>  @ {new Date(post.post_timestamp).toLocaleString()} </h3>
               <button onClick={ () => {
                  navigate(`/forumPost/${post.id}/viewing/${userID}/user`)
                  window.location.reload()

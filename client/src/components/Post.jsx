@@ -138,8 +138,8 @@ const PostComponent = (props) =>{
                 <div>{genre.GenreName}</div>
               </React.Fragment>
             ))}
-            <button onClick={handleLike} style={highlightLikeButtonRating}>Like ({props.totalLikes}) </button>
-            <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike ({props.totalDislikes})</button>
+            {props.totalLikes != null ? <button onClick={handleLike} style={highlightLikeButtonRating}>Like ({props.totalLikes}) </button> :<div></div>}
+            {props.totalDislikes != null ? <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike ({props.totalDislikes})</button> : <div></div>}
             {props.username === props.usernameOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
             <button onClick={()=>navigate(`/video/${props.VideoPostId}`)}>Comments</button>
         </div>
