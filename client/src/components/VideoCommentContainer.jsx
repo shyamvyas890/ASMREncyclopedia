@@ -1,25 +1,7 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import VideoCommentNodeComponent from "./VideoCommentNode";
-class TreeNode {
-    constructor(data){
-        this._data=data;
-        this._children=[]
-    }
-    get data() {
-        return this._data;
-    }
-    get children() {
-        return this._children;
-    }
-    addChild(child) {
-        this._children = [...this._children, child]
-    }
-    set setChildren(childs) {
-        this._children= childs;
-    }
-}
-
+import { TreeNode } from "../utils/utils";
 const VideoCommentContainerComponent = (props)=>{
     const [roots, setRoots]= useState(null);
     const commentRef = useRef("");
