@@ -832,6 +832,24 @@ app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
     })
   })
 
+  app.get("/video-comment-parent/:VideoPostCommentId", (req,res)=>{
+    const VideoPostCommentId = req.params.VideoPostCommentId;
+    queryTheDatabase("SELECT ReplyToVideoPostCommentId FROM VideoPostComments WHERE VideoPostCommentId = ?",[VideoPostCommentId], res );
+  })
+
+  app.get("/video-comment", (req,res)=>{
+    const VideoPostCommentId = req.query.VideoPostCommentId;
+    queryTheDatabase("SELECT * FROM VideoPostComments WHERE VideoPostCommentId = ?", [VideoPostCommentId], res)
+  })
+
+  app.get("/video-comment-descendants/:VideoPostCommentId", (req,res)=>{
+    queryTheDatabase(`WITH RECURSIVE VideoCommentDescendants AS (
+        SELECT * FROM VideoPostComments WHERE VideoPostCommentId = ?
+        UNION
+        SELECT VPC.* FROM VideoPostComments VPC INNER JOIN VideoCommentDescendants VCD ON VPC.ReplyToVideoPostCommentId = VCD.VideoPostCommentId
+    ) SELECT * FROM VideoCommentDescendants`,[req.params.VideoPostCommentId],res);
+  })
+
   app.post("/videoComments", (req,res)=>{
     const {UserId, Comment, VideoPostId, ReplyToVideoPostCommentId}= req.body;
     if(ReplyToVideoPostCommentId!==null){

@@ -4,9 +4,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { VideoCommentContainerComponent } from './VideoCommentContainer';
 import { Link } from 'react-router-dom';
 import { axiosRequest, hostname } from '../utils/utils';
-const VideoPostWithCommentsComponent = ()=>{
+const VideoPostWithCommentsComponent = (props)=>{
     const navigate= useNavigate();
-    const {VideoPostId}=useParams();
+    const routerVideoPostId=useParams().VideoPostId;
+    const propsVideoPostId = props.VideoPostId;
+    const VideoPostId = routerVideoPostId || propsVideoPostId;
     const [username, setUsername]= React.useState(null);
     const [allTheVideoPostInformation, setAllTheVideoPostInformation]= useState(null);
     function changeTheRating(rating){
@@ -151,11 +153,11 @@ const VideoPostWithCommentsComponent = ()=>{
             <button style={highlightLikeButtonRating} onClick={handleLike}>Like</button>
             <button style={highlightDislikeButtonRating} onClick={handleDislike}>Dislike</button>
             {allTheVideoPostInformation.UserId===username.userIdOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
-            <VideoCommentContainerComponent 
+            {routerVideoPostId && <VideoCommentContainerComponent 
                 VideoPostId= {allTheVideoPostInformation.VideoPostId}
                 userIdOfCurrentUser= {username.userIdOfCurrentUser}
                 usernameOfCurrentUser= {username.username}
-            />
+            />}
         </div>)
     )
 
