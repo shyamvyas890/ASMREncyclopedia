@@ -1,6 +1,7 @@
 // RegistrationComponent.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 const RegistrationComponent = () => {
   const [feedback, setFeedback] = useState('');
   const handleRegister = async (e) => {
@@ -40,6 +41,7 @@ const RegistrationComponent = () => {
         <br />
         <button type="submit">Register</button>
       </form>
+      <div>Already have an account? <Link to="/">Login here!</Link></div>
       {feedback && feedback==="This username is already taken. Please choose a different username." && <p style={{color:'red'}}>{feedback}</p>}
       {feedback && feedback=== "User registered successfully" && <p style={{color:'green'}}>{feedback}</p>}
     </div>

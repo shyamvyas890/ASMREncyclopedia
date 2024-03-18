@@ -1,7 +1,7 @@
 // LoginComponent.js
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import { Link } from 'react-router-dom';
 const LoginComponent = (props) => {
   const [feedback, setFeedback]= useState("");
   const handleLogin = async (e) => {
@@ -80,6 +80,7 @@ const LoginComponent = (props) => {
             <br />
             <button type="submit">Login</button>
         </form>
+        <div>Don't have an account? <Link to="/register">Register here!</Link></div>
         {feedback && (feedback==="Your password is incorrect." || feedback==="This username does not exist." || feedback==="Error logging in.") && <p style={{color:'red'}}>{feedback}</p>}
         {feedback && feedback ==="Login Successful" && <p style={{color:'green'}}>{feedback}</p>}
         </div>):null
