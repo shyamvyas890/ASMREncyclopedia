@@ -7,7 +7,6 @@ const PostComponent = (props) =>{
     const [theGenres, setTheGenres]= useState(null);
     const [modal, setModal] = useState(false)
     const [userPlaylists, setUserPlaylists] = useState([])
-    const [selectedPlaylists, setSelectedPlaylists] = useState([]);
     //contains [playlistID, bool] video is in playlist -> true
     const [userPlaylistIncludesVideo, setUserPlaylistIncludesVideo] = useState([])
     const navigate = useNavigate();
@@ -179,7 +178,7 @@ const PostComponent = (props) =>{
 
   useEffect(()=>{
     fetchAllUserPlaylist()
-  }, [])
+  }, [modal])
 
   useEffect(()=>{
     fetchVideoInPlaylist()
