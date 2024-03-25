@@ -7,6 +7,7 @@ const PostComponent = (props) =>{
     const [theGenres, setTheGenres]= useState(null);
     const [modal, setModal] = useState(false)
     const [userPlaylists, setUserPlaylists] = useState([])
+    const [selectedPlaylists, setSelectedPlaylists] = useState([]);
     //contains [playlistID, bool] video is in playlist -> true
     const [userPlaylistIncludesVideo, setUserPlaylistIncludesVideo] = useState([])
     const navigate = useNavigate();
@@ -127,7 +128,6 @@ const PostComponent = (props) =>{
 
     const toggleModal = () => {
       setModal(!modal)
-      console.log(modal)
     }
 
   const fetchAllUserPlaylist = async () => {
@@ -140,6 +140,7 @@ const PostComponent = (props) =>{
           console.log(error)
     }
   }
+
   //gets all user playlists that has the video
   const fetchVideoInPlaylist = async ()=>{
     try{
@@ -158,8 +159,8 @@ const PostComponent = (props) =>{
     }
   }
   
+  //When clicked, removes/adds from playlist
   const handleCheckBox = async (PlaylistID)=>{
-    console.log("client playlistID: ", PlaylistID)
     try{
       if(userPlaylistIncludesVideo.includes(PlaylistID)){
         await axios.delete("http://localhost:3001/deleteVideoFromPlaylist", {
@@ -179,6 +180,7 @@ const PostComponent = (props) =>{
   useEffect(()=>{
     fetchAllUserPlaylist()
   }, [])
+
   useEffect(()=>{
     fetchVideoInPlaylist()
   }, [userPlaylists])
@@ -198,8 +200,8 @@ const PostComponent = (props) =>{
                 <div>{genre.GenreName}</div>
               </React.Fragment>
             ))}
-            {props.totalLikes != null ? <button onClick={handleLike} style={highlightLikeButtonRating}>Like ({props.totalLikes}) </button> :<div></div>}
-            {props.totalDislikes != null ? <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike ({props.totalDislikes})</button> : <div></div>}
+            <button onClick={handleLike} style={highlightLikeButtonRating}>Like ({props.totalLikes}) </button>
+            <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike ({props.totalDislikes})</button>
             {props.username === props.usernameOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
             <button onClick={()=>navigate(`/video/${props.VideoPostId}`)}>Comments</button>
             <button onClick={toggleModal} className="btn-Modal"> Add to Playlist</button>
