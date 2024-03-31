@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { axiosRequest } from "../utils/utils";
+
 const SettingsComponent = ()=>{
     const hostname= "http://localhost:3001";
     const [username, setUsername]= React.useState(null);
@@ -132,6 +133,32 @@ const SettingsComponent = ()=>{
             setVideoTags(prevTags=>[...prevTags, newTag]);
         }
     }
+
+    const handleAccountDeletion = async () => {
+        const confirmDeletion = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
+        if (confirmDeletion) {
+            const enteredPassword = prompt("Please enter your password to confirm account deletion:");
+            if (enteredPassword !== null) {
+                try {
+                    const response = await axios.post("http://localhost:3001/delete-account", {
+                        username: username,
+                        password: enteredPassword
+                    });
+                    if (response.status === 200) {
+                        alert("Your account has been successfully deleted.");
+                        localStorage.removeItem("token");
+                        navigate("/register");
+                    }
+                } catch (error) {
+                    console.error("Error deleting account:", error);
+                    alert("An error occurred while deleting your account. Please try again later.");
+                }
+            }
+        }
+    };
+
+
+  
     return (
         <React.Fragment>
             {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password)? 
@@ -150,6 +177,7 @@ const SettingsComponent = ()=>{
                     <button onClick={changeEditSubscriptionPreferences}>Update Video Subscription Preferences</button>
                     <div>Security</div>
                     <button onClick={changeEditPassword}>Change Password</button>
+                    <button onClick={handleAccountDeletion}>Delete Account</button>
                 </>
                 ):
                 (username && emailAndSubscriptionPreferences && edit.email && !edit.subscriptionPreferences && !edit.password)?
