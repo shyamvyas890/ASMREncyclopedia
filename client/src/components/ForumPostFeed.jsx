@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { redirectDocument, useNavigate } from "react-router-dom";
 import LikeDislikeComponent from "./LikeDislikeComponent"
 import * as yup from "yup"
-import '../App.css';
+import '../index.css';
 
 export const ForumPostFeedComponent = (props) =>{
     const [allPosts, setAllPosts] = useState([])

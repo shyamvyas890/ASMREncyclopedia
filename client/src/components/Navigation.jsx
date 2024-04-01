@@ -1,13 +1,13 @@
 import React from 'react';
-import {Link} from "react-router-dom";
+import {Link, useLocation} from "react-router-dom";
+import NotificationsDropdownComponent from './NotificationsDropdown';
+
 const NavigationComponent= () => {
+    const location = useLocation().pathname;
     return (<nav>
         <ul>
             <li>
                 <Link to="/">Home</Link>
-            </li>
-            <li>
-                <Link to="/register">Register</Link>
             </li>
             <li>
                 <Link to="/forumPosts"> Forum Posts </Link>
@@ -25,6 +25,7 @@ const NavigationComponent= () => {
                 <Link to="/random">Random</Link>
             </li>
         </ul>
+        <NotificationsDropdownComponent />
     </nav>)
 }
 

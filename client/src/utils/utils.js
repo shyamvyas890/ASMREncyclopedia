@@ -27,5 +27,23 @@ const axiosRequest = async (reqNum, inputType, pathname, theInput )=>{ // reqNum
     }
     return response;
 }
+class TreeNode {
+    constructor(data){
+        this._data=data;
+        this._children=[]
+    }
+    get data() {
+        return this._data;
+    }
+    get children() {
+        return this._children;
+    }
+    addChild(child) {
+        this._children = [...this._children, child]
+    }
+    set setChildren(childs) {
+        this._children= childs;
+    }
+}
 
-export {axiosRequest, hostname};
+export {axiosRequest, hostname, TreeNode};

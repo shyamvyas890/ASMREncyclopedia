@@ -13,7 +13,6 @@ const ChatComponent =()=>{
     const disconnectSocket = () => {
         console.log(`socket is ${socket}`)
         if (socket) {
-            
             socket.disconnect();
         }
     };
@@ -68,19 +67,27 @@ const ChatComponent =()=>{
             )
         }   
     }
+    const handleNewNotification = (notification)=>{
+        console.log(notification);
+    }
+    const handleConnect = () => {
+        console.log('Connected to server:', socket.id);
+    };
+    const handleDisconnect = () => {
+        console.log('Disconnected from server');
+    }
 
     React.useEffect( ()=>{
         if(socket){
-            socket.on('connect', () => {
-                console.log('Connected to server:', socket.id);
-            });
-            socket.on('disconnect', () => {
-                console.log('Disconnected from server');
-            });
+            console.log("hey there");
+            socket.on('connect', handleConnect);
             socket.on('newMessage', handleNewMessage);
+            socket.on('newNotification', handleNewNotification);
             return ()=>{
                 console.log("hello world")
                 socket.off('newMessage', handleNewMessage);
+                socket.off('newNotification', handleNewNotification);
+                socket.off("connect", handleConnect);
             }
         }
     },[socket, selectedChat]
@@ -89,8 +96,10 @@ const ChatComponent =()=>{
 
     React.useEffect(()=>{
         if(socket){
+            socket.on('disconnect', handleDisconnect);
             return ()=>{
                 disconnectSocket();
+                socket.off("disconnect", handleDisconnect);
             }
         }
         

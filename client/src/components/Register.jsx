@@ -1,44 +1,49 @@
 // RegistrationComponent.js
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import { Link } from 'react-router-dom';
 const RegistrationComponent = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-
+  const [feedback, setFeedback] = useState('');
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:3001/register', 
       {
-        username,
-        password
+        username:e.target.elements.usernameInput.value,
+        password:e.target.elements.passwordInput.value
       }
       );
-
-      console.log('Registration successful:', response.data);
+      e.target.elements.usernameInput.value="";
+      e.target.elements.passwordInput.value="";
+      setFeedback(response.data);
     } catch (error) {
-      console.log('Registration error:', error);
-
+        if(error.response.data==="This username is already taken. Please choose a different username."){
+            e.target.elements.usernameInput.value="";
+            e.target.elements.passwordInput.value="";
+            setFeedback(error.response.data);
+            
+        }
     }
   };
-
   return (
     <div>
       <h2>Registration</h2>
       <form onSubmit={handleRegister}>
         <label>
           Username:
-          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+          <input type="text" name='usernameInput' />
         </label>
         <br />
         <label>
           Password:
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input type="password" name='passwordInput' />
         </label>
         <br />
         <button type="submit">Register</button>
       </form>
+      <div>Already have an account? <Link to="/">Login here!</Link></div>
+      {feedback && feedback==="This username is already taken. Please choose a different username." && <p style={{color:'red'}}>{feedback}</p>}
+      {feedback && feedback=== "User registered successfully" && <p style={{color:'green'}}>{feedback}</p>}
     </div>
   );
 };
