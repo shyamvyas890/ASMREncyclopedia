@@ -17,7 +17,10 @@
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
     "mysql2": "^3.6.5",
+    "natural": "^6.10.4",
     "nodemon": "^3.0.1",
-    "socket.io": "^4.7.4"
+    "react-tabs": "^6.0.2",
+    "socket.io": "^4.7.4",
+    "stopword": "^3.0.1"
   }
 }

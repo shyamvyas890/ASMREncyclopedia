@@ -2,6 +2,8 @@ import React from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { axiosRequest } from "../utils/utils";
+import { UserProfileComponent } from "./UserProfileComponent";
+
 const ProfilePageComponent = ()=>{
     const hostname= "http://localhost:3001";
     const [username, setUsername]= React.useState(null);
@@ -95,8 +97,6 @@ const ProfilePageComponent = ()=>{
         setFriendStatus(0);        
     }
     
-
-
     return (
         
             username!==null && profileUsername!==null && <>
@@ -111,13 +111,12 @@ const ProfilePageComponent = ()=>{
                 </div>
                 }
             </>}
-            
-            
+            <div>
+                <button onClick={ () => navigate(`/userHistory/${theirUsername}`)}> View History </button>
+            </div>        
             </> 
-        
-
+    
     )
-
 }
 
 export default ProfilePageComponent;

@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import {Link} from "react-router-dom";
 const PostComponent = (props) =>{
     const hostname= "http://localhost:3001";
     const [theGenres, setTheGenres]= useState(null);
+    const [modal, setModal] = useState(false)
+    const [userPlaylists, setUserPlaylists] = useState([])
+    //contains [playlistID, bool] video is in playlist -> true
+    const [userPlaylistIncludesVideo, setUserPlaylistIncludesVideo] = useState([])
     const navigate = useNavigate();
     function changeTheRating(theRating){
       console.log("hello world")
@@ -108,7 +112,6 @@ const PostComponent = (props) =>{
 
     }
 
-
     const highlightLikeButtonRating= {
         color: props.rating===1? "white":"black",
         backgroundColor: props.rating===1? "black": "white",
@@ -122,6 +125,64 @@ const PostComponent = (props) =>{
       borderRadius: '4px'
     };
 
+    const toggleModal = () => {
+      setModal(!modal)
+    }
+
+  const fetchAllUserPlaylist = async () => {
+    try{
+      const res = await axios.get("http://localhost:3001/fetchAllUserPlaylists", {
+        params: { userID: props.userIdOfCurrentUser}
+      })
+      setUserPlaylists(res.data)
+      } catch (error) {
+          console.log(error)
+    }
+  }
+
+  //gets all user playlists that has the video
+  const fetchVideoInPlaylist = async ()=>{
+    try{
+      let arr = [];
+      for(const playlist of userPlaylists){
+        const res = await axios.get("http://localhost:3001/fetchVideoInPlaylist", {
+          params: { playlistID: playlist.PlaylistID, videoPostID: props.VideoPostId }
+        })
+        if(res.data.length !== 0){
+          arr.push(playlist.PlaylistID)
+        } 
+      }
+      setUserPlaylistIncludesVideo(arr)
+    } catch (error) {
+        console.log(error)
+    }
+  }
+  
+  //When clicked, removes/adds from playlist
+  const handleCheckBox = async (PlaylistID)=>{
+    try{
+      if(userPlaylistIncludesVideo.includes(PlaylistID)){
+        await axios.delete("http://localhost:3001/deleteVideoFromPlaylist", {
+          params: { playlistID: PlaylistID, videoPostID: props.VideoPostId }
+        })
+      } else if(!userPlaylistIncludesVideo.includes(PlaylistID)){
+          await axios.post("http://localhost:3001/addVideoToPlaylist", {},  { 
+            params: { playlistID: PlaylistID, videoPostID: props.VideoPostId }
+          })
+      }
+    } catch (error) {
+      console.log(error)
+    }
+    fetchVideoInPlaylist()
+  }
+
+  useEffect(()=>{
+    fetchAllUserPlaylist()
+  }, [modal])
+
+  useEffect(()=>{
+    fetchVideoInPlaylist()
+  }, [userPlaylists])
 
     return (
         <div>
@@ -142,6 +203,26 @@ const PostComponent = (props) =>{
             <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike ({props.totalDislikes})</button>
             {props.username === props.usernameOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
             <button onClick={()=>navigate(`/video/${props.VideoPostId}`)}>Comments</button>
+            <button onClick={toggleModal} className="btn-Modal"> Add to Playlist</button>
+            {modal && (
+              <div className="modal">
+                <div onClick={toggleModal} className="overlay"></div>
+                <div className="modal-content">
+                  {userPlaylists.map(playlist=>(
+                  <div className="user-playlist" key={playlist.playlistID}>
+                      <h2>{playlist.PlaylistName}</h2>
+                      <label>
+                        <input type="checkbox" 
+                        checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
+                        onClick={()=>handleCheckBox(playlist.PlaylistID)}
+                        />
+                      </label>
+                  </div>
+                  ))}
+                <button className="close-modal"onClick={toggleModal}>Close</button>
+              </div>
+            </div>
+            )}
         </div>
     );
 }

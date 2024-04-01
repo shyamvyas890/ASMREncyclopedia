@@ -10,6 +10,25 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const port = 3001;
 const secretKey= "secret_key" //Will change this later
+
+var natural = require('natural');
+var TfIdf = natural.TfIdf;
+var tfidf = new TfIdf();
+var tokenizer = new natural.WordTokenizer()
+var stopwords = require('stopword');
+const { constrainedMemory } = require('process');
+const enStopwords = [
+    "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves",
+    "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their",
+    "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are",
+    "was", "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an",
+    "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about",
+    "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down",
+    "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where",
+    "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not",
+    "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"
+  ];
+  
 app.use(express.json())
 app.use(express.urlencoded({ extended: true })); // Might not need this
 app.use(cors({
@@ -177,8 +196,6 @@ const db = mysql.createConnection({
         }
     })
   })
-
-  
 
   app.get('/users',(req,res)=>{
     db.query('SELECT * FROM users', (err, results)=>{
@@ -497,16 +514,59 @@ app.get("/UserPosts", async (req,res)=>{
     })
 })
 
+/*
+- add new post
+- recalculate tfidf vector for previous posts
+- 
+*/
 app.post("/forumPostCreate", async (req, res) => {
+    const allPosts = req.body.allPosts
     const username = req.body.username
     const title = req.body.title
     const body = req.body.body
     const forums = req.body.forums.join(", ")
-    if(forums === ''){
-        forums === null
+    const tfidfVector = {}
+
+    //add all previous posts to the corpus
+    allPosts.forEach(post => {
+        var tokenedPreviousPost = tokenizer.tokenize(post.body)
+        tokenedPreviousPost = stopwords.removeStopwords(tokenedPreviousPost, enStopwords)
+        tfidf.addDocument(tokenedPreviousPost)
+        tfidf.documents[tfidf.documents.length - 1].__key = post.id //key for idenfying which post is from
+    });
+
+    //add current post to the corpus
+    var tokenedCurrentPost = tokenizer.tokenize(body)
+    tokenedCurrentPost = stopwords.removeStopwords(tokenedCurrentPost, enStopwords)
+    tfidf.addDocument(tokenedCurrentPost)
+
+    //recalculate previous post tfidf vector
+    for(i = 0; i < tfidf.documents.length; i++){
+        let pastTfidfVector = {}
+        tfidf.listTerms(i).forEach(function(item){
+            pastTfidfVector[item.term] = item.tfidf
+        })
+        const stringTfidfVector = JSON.stringify(pastTfidfVector)
+        db.query('UPDATE forumpost SET tfidf_vector=? WHERE id=?', [stringTfidfVector, tfidf.documents[i].__key], function(err){
+            if(err){
+                console.log(err)
+                res.status(500).send(err)
+            }
+            else{
+                console.log("COMPLETE")
+            }
+        })
     }
-     
-    db.query('INSERT INTO ForumPost(username, title, body, post_timestamp, forums) VALUES (?, ?, ?, NOW(), ?)', [username, title, body, forums], function(err, insertResult) {
+    
+    //calculate currnent post tfidf vector
+    tfidf.listTerms(tfidf.documents.length - 1).forEach(function(item) {
+        tfidfVector[item.term] = item.tfidf
+    });
+
+    //update tfidf vector for previous posts
+    //add current post to database
+    const tfidfVectorString = JSON.stringify(tfidfVector)
+    db.query('INSERT INTO ForumPost(username, title, body, post_timestamp, forums, tfidf_vector) VALUES (?, ?, ?, NOW(), ?, ?)', [username, title, body, forums, tfidfVectorString], function(err, insertResult) {
         if(err){
             console.log(err)
             res.status(500).send(err)
@@ -554,6 +614,19 @@ app.delete("/forumPostDelete/:id", (req,res)=>{
         return res.json("Post has been deleted successfully");
     });
 });
+
+app.put("/editForumPost/:id", (req, res) =>{
+    const forumPostID = req.params.id
+    const query = "UPDATE forumpost SET body=? WHERE id=?"
+    db.query(query, [req.body.newBody, forumPostID], (err, data)=>{
+        if(err){
+            return res.send(err)
+        }
+        else{
+            return res.json("Post Edit Successful")
+        }
+    })
+})
 
 //gets forum posts liked by a user
 app.get("/forumPostsLikedByUser/", async (req,res)=>{
@@ -638,7 +711,7 @@ app.post("/forumPostLikeDislike/", async (req,res)=>{
 });
 
 //Changes like to dislike and vice versa with user and post
-app.put("/forumChangeLikeDislike/", async (req,res)=>{
+app.put("/forumPostChangeLikeDislike/", async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
     const rating = req.query.rating
     const query = "UPDATE ForumPostLikeDislike SET LikeStatus = ? WHERE LikeDislikeID = ?"
@@ -652,7 +725,7 @@ app.put("/forumChangeLikeDislike/", async (req,res)=>{
 });
 
 //Deletes like/dislike from database
-app.delete("/forumDeleteLikeDislike/", async (req,res)=>{
+app.delete("/forumPostDeleteLikeDislike/", async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
     const query = "DELETE FROM ForumPostLikeDislike WHERE LikeDislikeID = ?"
     db.query(query, [LikeDislikeID], (err, data) => {
@@ -712,6 +785,165 @@ app.post("/forumPostComment/:id", (req, res) => {
     }
    })
 })
+
+app.put("/deleteForumPostComment/:commentID", (req, res) =>{
+    const commentID = parseInt(req.params.commentID, 10)
+    console.log(commentID)
+    db.query("UPDATE FORUMPOSTCOMMENTS SET DELETED=? WHERE id=?", [true, commentID], function(err){
+        if(err){
+            console.log(err)
+        }
+        else{
+            return res.status(201).send("Comment Deleted")
+        }
+    })
+})
+
+app.put("/editForumPostComment/:commentID", (req, res) =>{
+    console.log("HELLO")
+    const commentID = parseInt(req.params.commentID, 10)
+    const editedBody = req.body.editedBody
+    console.log(editedBody)
+    db.query("UPDATE FORUMPOSTCOMMENTS SET body=? WHERE id=?", [editedBody, commentID], function(err){
+        if(err){
+            console.log(err)
+        }
+        else{
+            return res.status(201).send("Comment Edited")
+        }
+    })
+})
+
+app.get("/getForumPostComments", async(req, res) =>{
+    const username = req.query.username
+    db.query("SELECT * FROM ForumPostComments WHERE username=?", [username], function(err, data){
+        if(err){
+            console.log(err)
+        }else{
+            return res.json(data)
+        }
+    })
+})
+
+app.get("/getVideoPostComments", async(req, res) =>{
+    const userID = req.query.userID
+    db.query("SELECT * FROM VideoPostComments WHERE UserId=?", [userID], function(err, data){
+        if(err){
+            console.log(err)
+        }else{
+            return res.json(data)
+        }
+    })
+})
+
+//gets likes from comment
+app.get("/fetchAllForumPostCommentLikes/", async(req,res)=>{
+    //holds number of likes for each post
+    const forumPostCommentID = req.query.commentID
+    const queryLikes = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND LikeStatus = 1"
+        db.query(queryLikes, [forumPostCommentID], (err, data)=>{
+            if (err){
+                return res.send("error")
+            }
+            else { 
+                return res.json(data)
+            }
+        });
+});
+
+//gets dislikes from comment
+app.get("/fetchAllForumPostCommentDislikes/", async(req,res)=>{
+    //holds number of dislikes for each post
+    const forumPostCommentID = req.query.commentID
+    const queryDislikes = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND LikeStatus = 0"
+        db.query(queryDislikes, [forumPostCommentID], (err, data)=>{
+            if (err){
+                return res.send("error");
+            }
+            else { 
+                return res.json(data)
+            }
+        })
+})
+
+//Gets post's comments that has a dislike/like in db by user
+app.get("/forumPostCommentLikeStatus/", async (req,res)=>{
+    const forumPostCommentID = req.query.commentID
+    const userID = req.query.userID
+    const check = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND UserID = ?"
+    db.query(check, [forumPostCommentID, userID], (err,data)=>{
+        if (err){
+            return res.send("error");
+        }
+        else { 
+            return res.json(data)
+        }
+    })
+})
+
+//Posts a like/dislike with user and comment
+app.post("/forumPostCommentLikeDislike/", async (req,res)=>{
+    const forumPostCommentID = req.query.commentID
+    const userID = req.query.userID
+    const rating = req.query.rating
+    const query = "INSERT INTO ForumPostCommentLikeDislike (forumPostCommentID, UserID, LikeStatus) VALUES (?, ?, ?)"
+    db.query(query, [forumPostCommentID, userID, rating], (err, data) => {
+        if (err) {
+            return res.status(500).send("Internal Server Error")
+        } else {
+            return res.status(201).send("Like/Dislike Successful!")
+        }
+    });
+});
+
+//Changes like to dislike and vice versa with user and comment
+app.put("/forumPostCommentChangeLikeDislike/", async (req,res)=>{
+    const LikeDislikeID = req.query.LikeDislikeID
+    const rating = req.query.rating
+    const query = "UPDATE ForumPostCommentLikeDislike SET LikeStatus = ? WHERE LikeDislikeID = ?"
+    db.query(query, [rating, LikeDislikeID], (err, data) => {
+        if (err) {
+            return res.status(500).send("Internal Server Error")
+        } else {
+            return res.status(201).send("Like/Dislike Update Successful!")
+        }
+    });
+});
+
+//Deletes like/dislike from database
+app.delete("/forumPostCommentDeleteLikeDislike/", async (req,res)=>{
+    const LikeDislikeID = req.query.LikeDislikeID
+    const query = "DELETE FROM ForumPostCommentLikeDislike WHERE LikeDislikeID = ?"
+    db.query(query, [LikeDislikeID], (err, data) => {
+        if (err) {
+            return res.status(500).send("Internal Server Error")
+        } else {
+            return res.status(201).send("Like/Dislike Update Successful!")
+        }
+    });
+});
+
+//gets forum comments liked by a user
+app.get("/forumPostCommentsLikedByUser/", async (req,res)=>{
+    const userID = req.query.userID
+    const forumPostCommentID = req.query.commentID
+    const query = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND userID = ? AND LikeStatus = 1"
+    db.query(query, [forumPostCommentID, userID], (err,data)=>{
+        if (err) return res.send(err)
+        return res.json(data);
+    });
+});
+
+//gets forum comments disliked by a user
+app.get("/forumPostCommentsDislikedByUser/", async (req,res)=>{
+    const userID = req.query.userID
+    const forumPostCommentID = req.query.commentID
+    const query = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND userID = ? AND LikeStatus = 0"
+    db.query(query, [forumPostCommentID, userID], (err,data)=>{
+        if (err) return res.send(err)
+        return res.json(data);
+    });
+});
 
 app.get("/forumPostParentCommentGetByID/:id", (req, res) =>{
     const forumPostID = parseInt(req.params.id, 10)
@@ -793,7 +1025,6 @@ app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
 app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
     const forumPostID = parseInt(req.params.id, 10)
     const parentCommentID = parseInt(req.params.commentID, 10)
-    //debugging 
 
     if(isNaN(parentCommentID)){
         return;
@@ -809,7 +1040,200 @@ app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
     })
 })
 
-  app.get("/videoComments/:VideoPostId", (req,res)=>{
+app.get("/forumPostSearch/:searchTitle", (req, res) => {
+    const searchTitle = req.params.searchTitle
+    db.query("SELECT * FROM forumpost WHERE title LIKE ?",['%' + searchTitle + '%'], function (err, data){
+        if(err){
+            console.log(err)
+        }
+        else{
+            return res.json(data)
+        }
+    })
+})
+
+/*
+to see if a post should be recommended, take the consine similarity of the tfidf_vector
+if it meets the threshold, recommend it
+*/
+
+app.get("/forumPostRecommendedPost/:postID", (req, res) =>{
+    const postID = req.params.postID
+    const recommendedPosts = []
+    db.query("SELECT * from forumpost WHERE ID=?", [postID], function(err, data){
+        if(err){
+            console.log(err)
+        }
+        else{
+            const post = data[0]
+            console.log(post)
+            db.query("SELECT * from forumpost WHERE ID!=?", [postID], function(err, data){
+                if(err){
+                    console.log(err)
+                }
+                else{
+                    const similarityThreshold = 0.10
+                    data.forEach(otherPost =>{
+                        if(cosineSimilarity(post.tfidf_vector, otherPost.tfidf_vector) >= similarityThreshold){
+                            recommendedPosts.push(otherPost)
+                            console.log(recommendedPosts)
+                        }
+                    })
+                    return res.status(201).send({recommendedPosts: recommendedPosts})
+                }
+            })
+            
+        }
+    })
+})
+
+function cosineSimilarity(tfidfVector1, tfidfVector2) {
+    const parsedVector1 = JSON.parse(tfidfVector1)
+    const parsedVector2 = JSON.parse(tfidfVector2)
+
+    let dotProduct = 0
+    for(let term in parsedVector1){
+        if(parsedVector2.hasOwnProperty(term)){
+            dotProduct += (parsedVector1[term] * parsedVector2[term])
+        }
+    }
+
+    const magnitude1 = Math.sqrt(
+        Object.values(parsedVector1).reduce((acc, val) => acc + val ** 2, 0)
+    );
+
+    const magnitude2 = Math.sqrt(
+        Object.values(parsedVector2).reduce((acc, val) => acc + val ** 2, 0)
+    );
+
+    return dotProduct / (magnitude1 * magnitude2).toFixed(2)
+}
+
+
+app.get("/fetchAllPlaylistVideosID", (req, res)=>{
+    const playlistID = req.query.playlistID
+    const query = "SELECT VideoPostID FROM playlistvideoposts WHERE PlaylistID = ?"
+    db.query(query, [playlistID], (err, data)=>{
+        if(err){
+            console.log(err)
+        } else{
+            return res.json(data)
+        }
+    })
+})
+
+app.get("/fetchAllVideos", (req, res)=>{
+    const videoPostID = req.query.videoPostID
+    console.log(videoPostID)
+    const query = "SELECT * FROM VideoPost WHERE VideoPostID = ?"
+    db.query(query, [videoPostID], (err, data)=>{
+        if(err){
+            console.log(err)
+        } else{
+            return res.json(data)
+        }
+    })
+})
+
+app.get("/fetchVideoInPlaylist", (req, res)=>{
+    const playlistID = req.query.playlistID
+    const videoPostID = req.query.videoPostID
+    const query = "SELECT * FROM playlistvideoposts WHERE PlaylistID = ? AND VideoPostID = ?"
+    db.query(query, [playlistID, videoPostID], (err, data)=>{
+        if(err){
+            console.log(err)
+        } else{
+            return res.json(data)
+        }
+    })
+})
+
+app.post("/addVideoToPlaylist", (req, res)=>{
+    const playlistID = req.query.playlistID
+    const videoPostID = req.query.videoPostID
+    console.log("playlistID: ", playlistID)
+    console.log("videoPostID: ", videoPostID)
+    const query = "INSERT INTO playlistvideoposts (DateAdded, PlaylistID, VideoPostID) VALUES (NOW(), ?, ?)"
+    db.query(query, [playlistID, videoPostID], (err, data)=>{
+        if (err) {
+            return res.status(500).send("Internal Server Error")
+        } else {
+            return res.status(201).send("Video Added to Playlist!")
+        }
+    })
+})
+
+app.delete("/deleteVideoFromPlaylist", (req, res)=>{
+    const playlistID = req.query.playlistID
+    const videoPostID = req.query.videoPostID
+    console.log("playlistID: ", playlistID)
+    console.log("videoPostID: ", videoPostID)
+    const query = "DELETE FROM playlistvideoposts WHERE PlaylistID = ? AND VideoPostID = ?"
+    db.query(query, [playlistID, videoPostID], (err)=>{
+        if (err) {
+            return res.status(500).send(err)
+        } else {
+            return res.status(201).send("Video Deleted from Playlist!")
+        }
+    })
+})
+    
+app.get("/fetchAllUserPlaylists", (req, res)=>{
+    const userID = req.query.userID
+    console.log("userID ", userID)
+    const query = "SELECT * FROM Playlist WHERE userID = ?"
+    db.query(query, [userID], (err, data)=>{
+        if(err){
+            console.log(err)
+        } else{
+            return res.json(data)
+        }
+    })
+})
+
+app.post("/createPlaylist", (req, res)=>{
+    const playlistName = req.query.playlistName
+    const userID = req.query.userID
+    console.log(playlistName)
+    const query = "INSERT INTO Playlist (playlistName, dateCreated, userID) VALUES (?, NOW(), ?)"
+    db.query(query, [playlistName, userID], (err, data)=>{
+        if(err){
+            console.log(err)
+        } else{
+            return res.json(data)
+        }
+    })
+})
+
+app.delete("/deletePlaylist", (req, res)=>{
+    const playlistID = req.query.playlistID
+    console.log(playlistID)
+    const query = "DELETE FROM Playlist WHERE PlaylistID = ?"
+    db.query(query, [playlistID], (err)=>{
+        if (err) {
+            return res.status(500).send(err)
+        } else {
+            return res.status(201).send("Playlist Deleted!")
+        }
+    })
+})
+
+app.put("/editPlaylistName", (req, res)=>{
+    const playlistID = req.query.playlistID
+    const newPlaylistName = req.query.newPlaylistName
+    console.log("ID: ", playlistID)
+    console.log("new name: ", newPlaylistName)
+    const query = "UPDATE Playlist SET PlaylistName = ? WHERE PlaylistID = ?"
+    db.query(query, [newPlaylistName, playlistID], (err)=>{
+        if (err) {
+            return res.status(500).send(err)
+        } else {
+            return res.status(201).send("Playlist Name Edited!")
+        }
+    })
+})
+
+app.get("/videoComments/:VideoPostId", (req,res)=>{
     const VideoPostId= req.params.VideoPostId;
     db.query('SELECT * FROM VideoPostComments WHERE VideoPostId = ?',[VideoPostId], (err, results)=>{
         if(err) {

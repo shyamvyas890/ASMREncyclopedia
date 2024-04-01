@@ -55,6 +55,7 @@ title varchar(255) NOT NULL,
 body TEXT NOT NULL, 
 post_timestamp timestamp NOT NULL, 
 forums TEXT,
+tfidf_vector TEXT,
 PRIMARY KEY(id),
 FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );
@@ -82,6 +83,19 @@ CREATE TABLE ForumPostComments(
   FOREIGN KEY (parent_comment_id) REFERENCES ForumPostComments(id) ON DELETE CASCADE,
   FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );
+
+ALTER TABLE forumpostcomments ADD COLUMN deleted boolean;
+
+CREATE TABLE ForumCommentLikeDislike(
+  LikeDislikeID INT AUTO_INCREMENT PRIMARY KEY,
+  ForumPostCommentID INT NOT NULL,
+  UserID INT NOT NULL,
+  LikeStatus BOOLEAN NOT NULL,
+  FOREIGN KEY (ForumPostCommentID) REFERENCES ForumPostComments(id) ON DELETE CASCADE,
+  FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE (ForumPostCommentID, UserId)
+);
+
 
 CREATE TABLE VideoPostComments (
   VideoPostCommentId INT AUTO_INCREMENT PRIMARY KEY,
@@ -155,4 +169,21 @@ CREATE TABLE ChatMessage (
   FOREIGN KEY(SenderUserId) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY(ReceiverUserId) REFERENCES users(id) ON DELETE CASCADE,
   CHECK (SenderUserId != ReceiverUserId)
+);
+
+CREATE TABLE Playlist(
+  PlaylistID INT AUTO_INCREMENT PRIMARY KEY,
+  PlaylistName VARCHAR(255) NOT NULL,
+  DateCreated DATETIME NOT NULL,
+  UserID INT NOT NULL,
+  FOREIGN KEY (UserID) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE PlaylistVideoPosts(
+  PlaylistVideoPostsID INT AUTO_INCREMENT PRIMARY KEY,
+  DateAdded DATETIME NOT NULL,
+  VideoPostID INT NOT NULL,
+  PlaylistID INT NOT NULL,
+  FOREIGN KEY (PlaylistID) REFERENCES Playlist(PlaylistID) ON DELETE CASCADE,
+  FOREIGN KEY (VideoPostID) REFERENCES VideoPost(VideoPostId) ON DELETE CASCADE
 );

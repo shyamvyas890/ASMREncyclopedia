@@ -15,13 +15,13 @@ export const ForumPostFeedComponent = (props) =>{
     const [currentUsername, setCurrentUsername] = useState()
     const [currentUserID, setCurrentUserID] = useState()
     const [sortType, setSortType] = useState()
+    const [searchInput, setSearchInput] = useState()
 
     const [tagOptions, setTagOptions] = useState([])
     const [title, setTitle] = useState()
     const [body, setBody] = useState()
     const [tagInput, setTagInput] = useState()
     const navigate = useNavigate()
-    
 
     //gets the username of the current user
     useEffect( () => {
@@ -48,6 +48,7 @@ export const ForumPostFeedComponent = (props) =>{
             }
           };
         fetchID()
+        
     }, [currentUsername])
 
     //get all forumposts upon page load, initially sort from newest to oldest 
@@ -79,17 +80,17 @@ export const ForumPostFeedComponent = (props) =>{
 //get like/dislike information for posts
 useEffect(() => {
     fetchAllPostsLikesAndDislikes();
-}, [allPosts]);
+}, [currentUserID]);
 
 const fetchAllPostsLikesAndDislikes = async () => {
     await LikeDislikeComponent.fetchAllPostsLikes(allPosts, setAllPostLikes);
     await LikeDislikeComponent.fetchAllPostsDislikes(allPosts, setAllPostDislikes);
-    await LikeDislikeComponent.fetchUserLikedPosts(props.userID, allPosts, setUserLikedPosts);
-    await LikeDislikeComponent.fetchUserDislikedPosts(props.userID, allPosts, setUserDislikedPosts);
+    await LikeDislikeComponent.fetchUserLikedPosts(currentUserID, allPosts, setUserLikedPosts);
+    await LikeDislikeComponent.fetchUserDislikedPosts(currentUserID, allPosts, setUserDislikedPosts);
 };
 
-const handleLikeDislike = async (postID, userID, rating) => {
-    await LikeDislikeComponent.handleLikeDislike(postID, userID, rating);
+const handlePostLikeDislike = async (postID, userID, rating) => {
+    await LikeDislikeComponent.handleForumPostLikeDislike(postID, userID, rating);
     //updates the likes/dislikes
     fetchAllPostsLikesAndDislikes();
 }
@@ -146,7 +147,7 @@ const sortForumPosts = (e) =>{
       })
    }
    //lowest like - dislike count
-   else{
+   else if(sortType === '4'){
     copyOfAllPosts.sort( (a, b) =>{
       if(allPostLikes.get(a.id) - allPostDislikes.get(a.id) > allPostLikes.get(b.id) - allPostDislikes.get(b.id)){
         return 1;
@@ -180,7 +181,8 @@ const onSubmit =  async (e) => {
       body: body,
       forums: tagOptions,
       username: currentUsername,
-      post_timestamp: new Date()
+      post_timestamp: new Date(),
+      allPosts: allPosts
   }
   const isValid = await schema.isValid(data) //valid schema according to yup
   if(isValid){
@@ -218,11 +220,26 @@ const handleTagDelete = (tagToRemove) =>{
 
 //user submits a tag for their post
 const handleInputKeyDown = (e) =>{
-  if(e.key === 'Enter' && tagInput.trim() != ''){
-      e.preventDefault()
-      setTagOptions([...tagOptions, tagInput])
-      setTagInput('')
+  if(e.key === 'Enter' && tagInput.trim() != '' ){
+      //tag not yet included
+      if(!tagOptions.includes(tagInput)){
+        e.preventDefault()
+        setTagOptions([...tagOptions, tagInput])
+        setTagInput('')
+      }
+      //trying to submit a duplicate tag
+      else{
+        e.preventDefault()
+        console.log("TAGS: " + tagOptions)
+        alert(`You already included the tag '${tagInput}'`)
+        setTagInput('')
+        console.log("TAGS: " + tagOptions)
+      }
   }
+}
+
+const searchForumPosts = () =>{
+   navigate(`/forumPost/search_by/${searchInput}`)
 }
 
 return(<div>
@@ -241,7 +258,7 @@ return(<div>
            </br>
            <div>
              {tagOptions.map( (tag) => (
-                <div>
+                <div key={tag}>
                     {tag}
                     <button onClick={() => handleTagDelete(tag)}> x </button>
                 </div>
@@ -255,7 +272,7 @@ return(<div>
 
 <form onSubmit={sortForumPosts}>
  <select onChange={(e) => setSortType(e.target.value)}>
-    <option> Sort posts by... </option>
+    <option value="none"> Sort posts by... </option>
     <option value="1"> Newest to Oldest (default) </option>
     <option value="2"> Oldest To Newest </option>
     <option value="3"> Most Liked to Least Liked </option>
@@ -264,10 +281,23 @@ return(<div>
  <button> Sort </button>
 </form>
 
+<form onSubmit={searchForumPosts}>
+  <input value={searchInput} type="text" placeholder="Search posts by title..." onChange={ (e) => setSearchInput(e.target.value)}/>
+  <button> Search </button>
+</form>
+
 <div className="feed-posts">
     {allPosts.map(post=>(
         <div className="user-posts" key={post.id}>
-            <h2>{post.title} by {post.username} @ {new Date(post.post_timestamp).toLocaleString()}</h2>
+            <h2>{post.title} by <a 
+          style={{textDecoration: 'none'}}
+          onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+          onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+          onClick={() => {navigate(`/userHistory/${post.username}`)}}
+          >
+          {post.username}
+         </a> 
+         @ {new Date(post.post_timestamp).toLocaleString()}</h2>
             <p>{post.body}</p>
             <div>
               Tag(s)
@@ -277,11 +307,11 @@ return(<div>
             <button onClick={ () => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)}> View Post </button>
             <button 
                 className={`like ${userLikedPosts.includes(post.id) ? "liked" : ""}`} 
-                onClick={()=>handleLikeDislike(post.id, currentUserID, 1)}>
+                onClick={()=>handlePostLikeDislike(post.id, currentUserID, 1)}>
                 {allPostLikes.get(post.id)} Likes
             </button>
             <button className={`dislike ${userDislikedPosts.includes(post.id) ? "disliked" : ""}`}
-                onClick={()=>handleLikeDislike(post.id, currentUserID, 0)}>
+                onClick={()=>handlePostLikeDislike(post.id, currentUserID, 0)}>
                 {allPostDislikes.get(post.id)} Dislikes</button>
         </div>
     ))}

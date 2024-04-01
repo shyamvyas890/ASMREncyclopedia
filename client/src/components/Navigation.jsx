@@ -4,6 +4,7 @@ import NotificationsDropdownComponent from './NotificationsDropdown';
 
 const NavigationComponent= () => {
     const location = useLocation().pathname;
+
     return (<nav>
         <ul>
             <li>
@@ -23,6 +24,9 @@ const NavigationComponent= () => {
             </li>
             <li>
                 <Link to="/random">Random</Link>
+            </li>
+            <li>
+                <Link to="/userPlaylists">Playlists</Link>
             </li>
         </ul>
         <NotificationsDropdownComponent />
