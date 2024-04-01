@@ -78,13 +78,12 @@ CREATE TABLE ForumPostComments(
   comment_timestamp timestamp NOT NULL,
   parent_comment_id INT DEFAULT NULL,
   NotificationRead BOOLEAN DEFAULT FALSE, 
+  deleted boolean DEFAULT false NOT NULL,
   PRIMARY KEY (id), 
   FOREIGN KEY (forum_post_id) REFERENCES ForumPost(id) ON DELETE CASCADE,
   FOREIGN KEY (parent_comment_id) REFERENCES ForumPostComments(id) ON DELETE CASCADE,
   FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );
-
-ALTER TABLE forumpostcomments ADD COLUMN deleted boolean;
 
 CREATE TABLE ForumCommentLikeDislike(
   LikeDislikeID INT AUTO_INCREMENT PRIMARY KEY,
