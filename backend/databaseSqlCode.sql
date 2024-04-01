@@ -81,6 +81,8 @@ PRIMARY KEY (id),
 FOREIGN KEY (forum_post_id) REFERENCES ForumPost(id) ON DELETE CASCADE,
 FOREIGN KEY (parent_comment_id) REFERENCES ForumPostComments(id) ON DELETE CASCADE);
 
+ALTER TABLE forumpostcomments ADD COLUMN deleted boolean;
+
 CREATE TABLE ForumCommentLikeDislike(
   LikeDislikeID INT AUTO_INCREMENT PRIMARY KEY,
   ForumPostCommentID INT NOT NULL,
@@ -90,6 +92,7 @@ CREATE TABLE ForumCommentLikeDislike(
   FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE,
   UNIQUE (ForumPostCommentID, UserId)
 );
+
 
 CREATE TABLE VideoPostComments (
   VideoPostCommentId INT AUTO_INCREMENT PRIMARY KEY,

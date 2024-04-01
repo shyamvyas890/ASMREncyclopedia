@@ -16,8 +16,15 @@ export const ForumPostComment = (props) => {
     const [commentDislikes, setCommentDislikes] = useState()
     const [userLikedComments, setUserLikedComments] = useState()
     const [userDislikedComments, setUserDislikedComments] = useState()
+    const [isDeleted, setIsDeleted] = useState()
+    const [isEditing, setIsEditing] = useState()
+    const [commentBody, setCommentBody] = useState(props.body)
+    const [editContent, setEditContent] = useState(props.body)
+    const [showReplies, setShowReplies] = useState(false)
+
     const navigate = useNavigate()
-    
+    const commenterUsername = props.username
+
     //runs everytime a comment is rendered. gets the replies to that comment (parent or reply)
     useEffect( () => {
         const getReplies = async () =>{
@@ -71,7 +78,35 @@ export const ForumPostComment = (props) => {
             setReplies([...replies, replyToAdd])
             setReplyText('')
             setIsReplying(false)
+            setShowReplies(true)
         })    
+    }
+
+    const handleDeleteComment = async () =>{
+        const confirmDelete = window.confirm("Are you sure you want to delete your comment?")
+        if(confirmDelete){
+            await axios.put(`http://localhost:3001/deleteForumPostComment/${props.id}`)
+            setIsDeleted(true)
+        }
+
+    }
+    
+
+    const handleEditCancel = () =>{
+        setIsEditing(false)
+    }
+
+    const handleEditSubmit = async() =>{
+        await axios.put(`http://localhost:3001/editForumPostComment/${props.id}`, {
+        editedBody: editContent
+       })
+       setCommentBody(editContent)
+       setIsEditing(false)
+    }
+
+    const showReplyStatus = () =>{
+        setShowReplies(!showReplies)
+        console.log(showReplies)
     }
 
     const fetchAllPostsLikesAndDislikes = async () => {
@@ -94,15 +129,26 @@ export const ForumPostComment = (props) => {
 
     return(
         <div>
-            <a 
+        {props.deleted || isDeleted ? <div><div> Deleted Comment </div> <div style={replyStyle}>
+             {replies && replies.map && showReplies === true && replies.map( (reply) => (
+               <ForumPostComment id = {reply.id} postID = {reply.forum_post_id} username = {reply.username} timestamp = {reply.comment_timestamp} body = {reply.body} userID = {props.userID} deleted={reply.deleted}/>
+            ))}
+            </div> </div>: 
+            
+        <div>
+          <a 
           style={{textDecoration: 'none'}}
           onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
           onMouseOut={(e) => e.target.style.textDecoration = 'none'}
-          onClick={() => {navigate(`/userHisotry/${props.username}`)}}
+          onClick={() => {navigate(`/userHistory/${props.username}`)}}
           >
           {props.username}
-         </a>  @ {new Date(props.timestamp).toLocaleString()}: {props.body}
+         </a>  @ {new Date(props.timestamp).toLocaleString()}: {commentBody}
+
+         {isEditing ? (<div> <input value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button onClick={handleEditCancel}> Cancel Edit </button> <button onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
+
             <button onClick={() => handleReply(props.id)}> Reply to {props.username} </button>
+            
             <button 
                 className={`like ${userLikedComments ? "liked" : ""}`} 
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 1)}>
@@ -113,14 +159,18 @@ export const ForumPostComment = (props) => {
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 0)}>
                 {commentDislikes} Dislikes
             </button>
+            {currentUsername === commenterUsername ? (<div>
+              <button onClick={setIsEditing}> Edit Comment </button> <button onClick={handleDeleteComment}> Delete Comment </button> </div>
+            ) : <div></div>}
             
-            <div style={replyStyle}>
-            {replies && replies.map( (reply) => (
-                <ForumPostComment id = {reply.id} postID = {reply.forum_post_id} username = {reply.username} timestamp = {reply.comment_timestamp} body = {reply.body} userID = {props.userID}/>
-            ))}
-            </div> 
+            <button onClick={showReplyStatus}> + </button>
 
-            
+            <div style={replyStyle}>
+            {replies && replies.map && showReplies && replies.map( (reply) => (
+                <ForumPostComment id = {reply.id} postID = {reply.forum_post_id} username = {reply.username} timestamp = {reply.comment_timestamp} body = {reply.body} userID = {props.userID} deleted={reply.deleted}/>
+            ))}
+            </div>
+
             {(isReplying && replyCommentID === props.id && (
                 <div>
                    <input type="text" value={replyText} placeholder="Reply here" onChange={ (event) => {setReplyText(event.target.value)}} />
@@ -128,6 +178,9 @@ export const ForumPostComment = (props) => {
                    <button onClick={() => {setIsReplying(false)}}> Cancel Reply </button>
                 </div>)
             )}
+        </div>}
+        
+        
         </div>
     )
 }

@@ -572,6 +572,19 @@ app.delete("/forumPostDelete/:id", (req,res)=>{
     });
 });
 
+app.put("/editForumPost/:id", (req, res) =>{
+    const forumPostID = req.params.id
+    const query = "UPDATE forumpost SET body=? WHERE id=?"
+    db.query(query, [req.body.newBody, forumPostID], (err, data)=>{
+        if(err){
+            return res.send(err)
+        }
+        else{
+            return res.json("Post Edit Successful")
+        }
+    })
+})
+
 //gets forum posts liked by a user
 app.get("/forumPostsLikedByUser/", async (req,res)=>{
     const userID = req.query.userID
@@ -694,6 +707,34 @@ app.post("/forumPostComment/:id", (req, res) => {
         return res.status(201).send("Comment Successful")
     }
    })
+})
+
+app.put("/deleteForumPostComment/:commentID", (req, res) =>{
+    const commentID = parseInt(req.params.commentID, 10)
+    console.log(commentID)
+    db.query("UPDATE FORUMPOSTCOMMENTS SET DELETED=? WHERE id=?", [true, commentID], function(err){
+        if(err){
+            console.log(err)
+        }
+        else{
+            return res.status(201).send("Comment Deleted")
+        }
+    })
+})
+
+app.put("/editForumPostComment/:commentID", (req, res) =>{
+    console.log("HELLO")
+    const commentID = parseInt(req.params.commentID, 10)
+    const editedBody = req.body.editedBody
+    console.log(editedBody)
+    db.query("UPDATE FORUMPOSTCOMMENTS SET body=? WHERE id=?", [editedBody, commentID], function(err){
+        if(err){
+            console.log(err)
+        }
+        else{
+            return res.status(201).send("Comment Edited")
+        }
+    })
 })
 
 app.get("/getForumPostComments", async(req, res) =>{

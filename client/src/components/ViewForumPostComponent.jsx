@@ -21,8 +21,10 @@ export const ViewForumPostComponent = () =>{
    const [userLikedPosts, setUserLikedPosts] = useState([])
    const [userDislikedPosts, setUserDislikedPosts] = useState([])
    const [currentUsername, setCurrentUsername] = useState()
-
+   const [isEditing, setIsEditing] = useState()
    const [recommendedPosts, setRecommendedPosts] = useState([])
+   const [editContent, setEditContent] = useState()
+   const [postBody, setPostBody] = useState()
 
    useEffect( () =>{
       const fetchRecommendedPosts = async() =>{
@@ -54,6 +56,7 @@ export const ViewForumPostComponent = () =>{
         try{
            const response = await axios.get(`http://localhost:3001/forumPostsById/${postID}`)
             setPostObject(response.data)
+            setEditContent(response.data[0].body)
         }
         catch(error){
             console.log(error)
@@ -80,6 +83,27 @@ export const ViewForumPostComponent = () =>{
         fetchAllPostsLikesAndDislikes();
     }
 
+    const handleDeletePost = async () =>{
+      const confirmDelete = window.confirm("Are you sure you want to delete this post?")
+      if(confirmDelete){
+         await axios.delete(`http://localhost:3001/forumPostDelete/${postID}`)
+         navigate("/")
+      }
+    }
+
+    const cancelEdit = () =>{
+      setIsEditing(false)
+      setPostBody(postBody)
+    }
+
+    const submitEdit = async () =>{
+       await axios.put(`http://localhost:3001/editForumPost/${postID}`, {
+        newBody: editContent
+       })
+       setPostBody(editContent)
+       setIsEditing(false)
+    }
+
     console.log(recommendedPosts)
     return (
     (postObject ?
@@ -95,7 +119,7 @@ export const ViewForumPostComponent = () =>{
          </a>
 
         @ {new Date(postObject[0].post_timestamp).toLocaleString()} </h1>
-        <p> {postObject[0].body} </p>
+        {isEditing ? (<div> <input value={editContent} onChange={ (e) => {setEditContent(e.target.value)}}/> <button onClick={cancelEdit}> Cancel Edit </button> <button onClick={submitEdit}> Confirm Edit </button></div>) : (<p> {editContent} </p>)}
         <button 
           className={`like ${userLikedPosts.includes(postObject[0].id) ? "liked" : ""}`}
           onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 1)}>
@@ -104,6 +128,10 @@ export const ViewForumPostComponent = () =>{
           className={`dislike ${userDislikedPosts.includes(postObject[0].id) ? "disliked" : ""}`}
           onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 0)}>
           {postDislikes.get(postObject[0].id)} Dislikes</button>
+          {currentUsername === postObject[0].username ? <div>
+          <button onClick={handleDeletePost}> Delete Post </button> <button onClick = {setIsEditing}> Edit Post </button>
+          </div>
+          : <div> </div>}
         <div>
           Tag(s) 
           <br></br>
@@ -137,7 +165,7 @@ export const ViewForumPostComponent = () =>{
            ))}
          </div> : <h3> No similar posts were found </h3>}
       </div>
-    </div>
+     </div>
       : <p> Loading... </p>)
    )
 }
