@@ -1153,7 +1153,7 @@ app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
     });
   })
   app.get("/notifications", (req,res)=>{
-    const {UserId} = req.query;
+    const {UserId, Dropdown} = req.query;
     db.query("SELECT VideoPost.UserId AS 'VideoPostReceiverUserId', VideoPostComments.UserId AS 'VideoCommentSenderUserId', VideoPost.VideoPostId AS 'VideoPostId', VideoPostComments.VideoPostCommentId as 'SenderVideoPostCommentId', VideoPostComments.Comment AS 'Message', VideoPostComments.CommentedAt AS 'CommentedAt', VideoPostComments.DELETED AS 'DELETED', VideoPostComments.NotificationRead AS 'NotificationRead' FROM VideoPost INNER JOIN VideoPostComments ON VideoPostComments.VideoPostId = VideoPost.VideoPostId WHERE VideoPostComments.ReplyToVideoPostCommentId IS NULL AND VideoPostComments.UserId != VideoPost.UserId AND VideoPost.UserId = ?;", [UserId], (err, results)=>{
         if(err){
             console.log(err);
@@ -1164,24 +1164,37 @@ app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
                 console.log(err1)
                 res.status(500).send("Internal Server Error");
             }
-            db.query("SELECT ForumPost.id AS 'ForumPostReceiverUserId', ForumPostComments.id AS 'ForumCommentSenderUserId', ForumPost.id AS 'ForumPostId', ForumPostComments.id AS 'SenderForumPostCommentId', ForumPostComments.body AS 'Message', ForumPostComments.comment_timestamp AS 'CommentedAt',ForumPostComments.NotificationRead AS 'NotificationRead' FROM ForumPost INNER JOIN ForumPostComments ON ForumPostComments.id = ForumPost.id WHERE ForumPostComments.parent_comment_id IS NULL AND ForumPostComments.id != ForumPost.id AND ForumPost.id = ?;", [UserId], (err2, results2)=>{
+            db.query("SELECT u1.id AS 'ForumPostReceiverUserId', u2.id AS 'ForumCommentSenderUserId', ForumPost.id AS 'ForumPostId', ForumPostComments.id AS 'SenderForumPostCommentId', ForumPostComments.body AS 'Message', ForumPostComments.comment_timestamp AS 'CommentedAt', ForumPostComments.NotificationRead AS 'NotificationRead' FROM ForumPost INNER JOIN ForumPostComments ON ForumPostComments.forum_post_id = ForumPost.id LEFT JOIN users AS u1 ON ForumPost.username = u1.username LEFT JOIN users AS u2 ON ForumPostComments.username = u2.username WHERE ForumPostComments.parent_comment_id IS NULL AND u1.id != u2.id AND u1.id = ?", [UserId], (err2, results2)=>{
                 if(err2){
                     console.log(err2);
                     res.status(500).send("Internal Server Error");
                 }
-                db.query("SELECT v1.id as 'ForumCommentSenderUserId', v2.id as 'ForumCommentReceiverUserId', v1.body as 'Message', v1.comment_timestamp as 'CommentedAt', v1.forum_post_id as 'ForumPostId', v1.NotificationRead as 'NotificationRead', v1.id as 'SenderForumPostCommentId', v2.id as 'ReceiverForumPostCommentId' FROM ForumPostComments v1 JOIN ForumPostComments v2 ON v1.parent_comment_id = v2.id WHERE v1.username != v2.username AND v2.id = ?;", [UserId], (err3,results3)=>{
+                db.query("SELECT u1.id as 'ForumCommentSenderUserId', u2.id as 'ForumCommentReceiverUserId', v1.body as 'Message', v1.comment_timestamp as 'CommentedAt', v1.forum_post_id as 'ForumPostId', v1.NotificationRead as 'NotificationRead', v1.id as 'SenderForumPostCommentId', v2.id as 'ReceiverForumPostCommentId' FROM ForumPostComments AS v1 INNER JOIN ForumPostComments AS v2 ON v1.parent_comment_id = v2.id LEFT JOIN users AS u1 ON v1.username = u1.username LEFT JOIN users as u2 ON v2.username = u2.username WHERE v1.username != v2.username AND u2.id = ?;", [UserId], (err3,results3)=>{
                     if(err3){
                         console.log(err3);
                         res.status(500).send("Internal Server Error");
                     }
-                    res.send([...results, ...results1, ...results2, ...results3]);
+                    if(!Dropdown){
+                        console.log(results2);
+                        console.log(results3);
+                        res.send([...results, ...results1, ...results2, ...results3]);
+                    }
+                    else {
+                        let sendThis = [...results, ...results1, ...results2, ...results3];
+                        sendThis.forEach((comment)=>{
+                            comment.CommentedAtDateObject = new Date(comment.CommentedAt)
+                        })
+                        sendThis.sort((a, b) => b.CommentedAtDateObject - a.CommentedAtDateObject);
+                        sendThis = sendThis.slice(0,10);
+                        res.send(sendThis);
+                    }
                 } )
             })
         })
     } )
         
   });
-  app.put("/notifications", (req,res)=>{
+  app.patch("/notifications", (req,res)=>{
     const {ForumPostCommentId, VideoPostCommentId}= req.body;
     if(VideoPostCommentId){
         queryTheDatabase("UPDATE VideoPostComments SET NotificationRead = ? WHERE VideoPostCommentId = ?", [true, VideoPostCommentId], res);
