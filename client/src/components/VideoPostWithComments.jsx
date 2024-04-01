@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from "react-router-dom";
 import { VideoCommentContainerComponent } from './VideoCommentContainer';
@@ -9,6 +9,10 @@ const VideoPostWithCommentsComponent = ()=>{
     const {VideoPostId}=useParams();
     const [username, setUsername]= React.useState(null);
     const [allTheVideoPostInformation, setAllTheVideoPostInformation]= useState(null);
+    const [modal, setModal] = useState(false)
+    const [userPlaylists, setUserPlaylists] = useState([])
+    //contains [playlistID, bool] video is in playlist -> true
+    const [userPlaylistIncludesVideo, setUserPlaylistIncludesVideo] = useState([])
     function changeTheRating(rating){
         setAllTheVideoPostInformation(prev=>({...prev, rating}))
     }
@@ -123,6 +127,68 @@ const VideoPostWithCommentsComponent = ()=>{
 
         }
     }, [username])
+
+    const toggleModal = () => {
+      setModal(!modal)
+      for(let playlist in userPlaylists)
+        console.log("userID: ", playlist)
+    }
+
+  const fetchAllUserPlaylist = async () => {
+    try{
+      const res = await axios.get("http://localhost:3001/fetchAllUserPlaylists", {
+        params: { userID: username.userIdOfCurrentUser}
+      })
+      setUserPlaylists(res.data)
+      } catch (error) {
+          console.log(error)
+    }
+  }
+
+  //gets all user playlists that has the video
+  const fetchVideoInPlaylist = async ()=>{
+    try{
+      let arr = [];
+      for(const playlist of userPlaylists){
+        const res = await axios.get("http://localhost:3001/fetchVideoInPlaylist", {
+          params: { playlistID: playlist.PlaylistID, videoPostID: allTheVideoPostInformation.VideoPostId }
+        })
+        if(res.data.length !== 0){
+          arr.push(playlist.PlaylistID)
+        } 
+      }
+      setUserPlaylistIncludesVideo(arr)
+    } catch (error) {
+        console.log(error)
+    }
+  }
+  
+  //When clicked, removes/adds from playlist
+  const handleCheckBox = async (PlaylistID)=>{
+    try{
+      if(userPlaylistIncludesVideo.includes(PlaylistID)){
+        await axios.delete("http://localhost:3001/deleteVideoFromPlaylist", {
+          params: { playlistID: PlaylistID, videoPostID: allTheVideoPostInformation.VideoPostId }
+        })
+      } else if(!userPlaylistIncludesVideo.includes(PlaylistID)){
+          await axios.post("http://localhost:3001/addVideoToPlaylist", {},  { 
+            params: { playlistID: PlaylistID, videoPostID: allTheVideoPostInformation.VideoPostId }
+          })
+      }
+    } catch (error) {
+      console.log(error)
+    }
+    fetchVideoInPlaylist()
+  }
+
+  useEffect(()=>{
+    fetchAllUserPlaylist()
+  }, [modal])
+
+  useEffect(()=>{
+    fetchVideoInPlaylist()
+  }, [userPlaylists])
+
     const highlightLikeButtonRating= {
         color: allTheVideoPostInformation!==null && allTheVideoPostInformation.rating===1? "white":"black",
         backgroundColor: allTheVideoPostInformation!==null && allTheVideoPostInformation.rating===1? "black": "white",
@@ -151,6 +217,26 @@ const VideoPostWithCommentsComponent = ()=>{
             <button style={highlightLikeButtonRating} onClick={handleLike}>Like</button>
             <button style={highlightDislikeButtonRating} onClick={handleDislike}>Dislike</button>
             {allTheVideoPostInformation.UserId===username.userIdOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
+            <button onClick={toggleModal} className="btn-Modal"> Add to Playlist</button>
+            {modal && (
+              <div className="modal">
+                <div onClick={toggleModal} className="overlay"></div>
+                <div className="modal-content">
+                  {userPlaylists.map(playlist=>(
+                  <div className="user-playlist" key={playlist.playlistID}>
+                      <h2>{playlist.PlaylistName}</h2>
+                      <label>
+                        <input type="checkbox" 
+                        checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
+                        onClick={()=>handleCheckBox(playlist.PlaylistID)}
+                        />
+                      </label>
+                  </div>
+                  ))}
+                <button className="close-modal"onClick={toggleModal}>Close</button>
+              </div>
+            </div>
+            )}
             <VideoCommentContainerComponent 
                 VideoPostId= {allTheVideoPostInformation.VideoPostId}
                 userIdOfCurrentUser= {username.userIdOfCurrentUser}
