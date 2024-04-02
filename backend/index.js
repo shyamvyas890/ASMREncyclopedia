@@ -506,10 +506,20 @@ app.get("/forums", (req,res)=>{
 
 app.get("/UserPosts", async (req,res)=>{
     const username = req.query.username
-    db.query('SELECT * FROM forumpost WHERE username = ?', [username], (err, data)=>{
+    const query = `
+    SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
+    FROM ForumPost
+    LEFT JOIN ForumPostTag ON ForumPost.id = ForumPostTag.ForumPostID
+    LEFT JOIN ForumTag ON ForumPostTag.ForumTagID = ForumTag.ForumTagID
+    WHERE ForumPost.username=?
+    GROUP BY ForumPost.id
+    ORDER BY ForumPost.post_timestamp DESC;
+`;
+    db.query(query, [username], (err, data)=>{
         if(err){
             res.send(err)
         }
+        console.log(data)
         return res.json(data)
     })
 })
@@ -524,6 +534,7 @@ app.post("/forumPostCreate", async (req, res) => {
     const username = req.body.username
     const title = req.body.title
     const body = req.body.body
+
     const tfidfVector = {}
 
     //add all previous posts to the corpus
@@ -671,6 +682,7 @@ app.get("/forumPostsAll", async (req,res)=>{
         if(err){
             res.send(err)
         }
+        console.log(data)
         return res.json(data)
     })
 })
@@ -679,7 +691,16 @@ app.get("/forumPostsAll", async (req,res)=>{
 app.get("/forumPostsById/:postID", async (req,res)=>{
     const id = parseInt(req.params.postID, 10)
     console.log(id)
-    db.query('SELECT * FROM forumpost WHERE id=?', [id], (err, data)=>{
+    const query = `
+    SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
+    FROM ForumPost
+    LEFT JOIN ForumPostTag ON ForumPost.id = ForumPostTag.ForumPostID
+    LEFT JOIN ForumTag ON ForumPostTag.ForumTagID = ForumTag.ForumTagID
+    WHERE ForumPost.id=?
+    GROUP BY ForumPost.id
+    ORDER BY ForumPost.post_timestamp DESC;
+`;
+    db.query(query, [id], (err, data)=>{
         if(err){
             res.send(err)
         }
