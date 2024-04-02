@@ -553,7 +553,7 @@ app.post("/forumPostCreate", async (req, res) => {
                 res.status(500).send(err)
             }
             else{
-                console.log("COMPLETE")
+
             }
         })
     }
@@ -1180,7 +1180,6 @@ app.delete("/deleteVideoFromPlaylist", (req, res)=>{
     
 app.get("/fetchAllUserPlaylists", (req, res)=>{
     const userID = req.query.userID
-    console.log("userID ", userID)
     const query = "SELECT * FROM Playlist WHERE userID = ?"
     db.query(query, [userID], (err, data)=>{
         if(err){
@@ -1577,7 +1576,7 @@ app.get("/videoComments/:VideoPostId", (req,res)=>{
     });
   })
   app.get("/notifications", (req,res)=>{
-    const {UserId, Dropdown} = req.query;
+    const {UserId, Dropdown, getUnreadCount} = req.query;
     db.query("SELECT VideoPost.UserId AS 'VideoPostReceiverUserId', VideoPostComments.UserId AS 'VideoCommentSenderUserId', VideoPost.VideoPostId AS 'VideoPostId', VideoPostComments.VideoPostCommentId as 'SenderVideoPostCommentId', VideoPostComments.Comment AS 'Message', VideoPostComments.CommentedAt AS 'CommentedAt', VideoPostComments.DELETED AS 'DELETED', VideoPostComments.NotificationRead AS 'NotificationRead' FROM VideoPost INNER JOIN VideoPostComments ON VideoPostComments.VideoPostId = VideoPost.VideoPostId WHERE VideoPostComments.ReplyToVideoPostCommentId IS NULL AND VideoPostComments.UserId != VideoPost.UserId AND VideoPost.UserId = ?;", [UserId], (err, results)=>{
         if(err){
             console.log(err);
@@ -1599,18 +1598,31 @@ app.get("/videoComments/:VideoPostId", (req,res)=>{
                         res.status(500).send("Internal Server Error");
                     }
                     if(!Dropdown){
-                        console.log(results2);
-                        console.log(results3);
                         res.send([...results, ...results1, ...results2, ...results3]);
                     }
                     else {
                         let sendThis = [...results, ...results1, ...results2, ...results3];
+                        let UnreadCount =0;
+                        if(getUnreadCount){
+                            sendThis.forEach((element)=>{
+                                if(element.NotificationRead===0){
+                                    UnreadCount++;
+                                }
+                            })
+                        }
                         sendThis.forEach((comment)=>{
                             comment.CommentedAtDateObject = new Date(comment.CommentedAt)
                         })
                         sendThis.sort((a, b) => b.CommentedAtDateObject - a.CommentedAtDateObject);
                         sendThis = sendThis.slice(0,10);
-                        res.send(sendThis);
+
+                        if(getUnreadCount){
+                            res.send({UnreadNotifications: UnreadCount});
+                        }
+                        else {
+                            res.send(sendThis);
+                        }
+                        
                     }
                 } )
             })

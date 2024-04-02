@@ -1,10 +1,9 @@
 import React from 'react';
 import {Link, useLocation} from "react-router-dom";
-import NotificationsDropdownComponent from './NotificationsDropdown';
-
+import NotificationsComponent from './Notifications';
+import axios from 'axios';
 const NavigationComponent= () => {
-    const location = useLocation().pathname;
-
+    const location = useLocation().pathname;    
     return (<nav>
         <ul>
             <li>
@@ -29,7 +28,7 @@ const NavigationComponent= () => {
                 <Link to="/userPlaylists">Playlists</Link>
             </li>
         </ul>
-        <NotificationsDropdownComponent />
+        {location!== "/notifications"  && <NotificationsComponent />}
     </nav>)
 }
 

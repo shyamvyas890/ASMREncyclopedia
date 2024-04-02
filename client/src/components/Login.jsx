@@ -15,6 +15,7 @@ const LoginComponent = (props) => {
       setFeedback("Login Successful");
       localStorage.setItem("token", response.data.token);
       props.setIsLoggedIn(true);
+      window.location.reload();
     } catch (error) {
       setFeedback(error.response.data);
       e.target.elements.passwordInput.value="";
@@ -55,6 +56,7 @@ const LoginComponent = (props) => {
     props.setIsLoggedIn(false);
     props.setUsername("");
     setFeedback('');
+    window.location.reload();
   }
 
   return (
