@@ -20,7 +20,7 @@ const FriendsComponent = (props)=>{
                 else {
                     // setIsLoggedIn(false);
                     navigate("/");
-                   
+            
                 }
             }
     

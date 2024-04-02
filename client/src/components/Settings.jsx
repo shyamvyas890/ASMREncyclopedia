@@ -148,6 +148,8 @@ const SettingsComponent = ()=>{
                     ))
                     }
                     <button onClick={changeEditSubscriptionPreferences}>Update Video Subscription Preferences</button>
+                    <div>Forum Post Subscription Preferences</div>
+
                     <div>Security</div>
                     <button onClick={changeEditPassword}>Change Password</button>
                 </>

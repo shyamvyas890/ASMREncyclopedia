@@ -524,7 +524,6 @@ app.post("/forumPostCreate", async (req, res) => {
     const username = req.body.username
     const title = req.body.title
     const body = req.body.body
-    const forums = req.body.forums.join(", ")
     const tfidfVector = {}
 
     //add all previous posts to the corpus
@@ -566,7 +565,7 @@ app.post("/forumPostCreate", async (req, res) => {
     //update tfidf vector for previous posts
     //add current post to database
     const tfidfVectorString = JSON.stringify(tfidfVector)
-    db.query('INSERT INTO ForumPost(username, title, body, post_timestamp, forums, tfidf_vector) VALUES (?, ?, ?, NOW(), ?, ?)', [username, title, body, forums, tfidfVectorString], function(err, insertResult) {
+    db.query('INSERT INTO ForumPost(username, title, body, post_timestamp, tfidf_vector) VALUES (?, ?, ?, NOW(), ?)', [username, title, body, tfidfVectorString], function(err, insertResult) {
         if(err){
             console.log(err)
             res.status(500).send(err)
@@ -578,15 +577,97 @@ app.post("/forumPostCreate", async (req, res) => {
                 title: title, 
                 body: body, 
                 id: postID,
-                forums: forums
             })
+        }
+    })
+})
+
+app.post("/forumTagCreate", async (req,res)=>{
+    const forumTagName = req.query.forumTagName;
+    //inserts tag into db, if already exists do nothing
+    const query = "INSERT IGNORE INTO ForumTag (forumTagName) VALUES (?)";
+    console.log("Creating Tag Name: ", forumTagName);
+    try {
+        const data = await new Promise((resolve, reject) => {
+            db.query(query, [forumTagName], (err, data)=>{
+                if(err){
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+        });
+        
+        console.log(data.insertId);
+        res.status(200).json({ data: data });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error);
+    }
+});
+
+app.get("/fetchForumTag", async (req,res)=>{
+    const forumTagName = req.query.forumTagName
+    console.log("Fetching Tag Name: ", forumTagName)
+    const query = "SELECT ForumTagID FROM ForumTag WHERE forumTagName = ?"
+    db.query(query, [forumTagName], (err, data)=>{
+        if(err){
+            res.send(err)
+        } else{
+            console.log(data)
+            return res.json(data)
+        }
+    })
+})
+
+app.post("/forumPostTagCreate", async (req,res)=>{
+    const postID = req.query.postID
+    const forumTagID = req.query.forumTagID
+    console.log("Creating PostID: ", postID)
+    console.log("With TagID: ", forumTagID)
+    const query = "INSERT INTO ForumPostTag (ForumPostID, ForumTagID) VALUES (?, ?)";
+    try {
+        const data = await new Promise((resolve, reject) => {
+            db.query(query, [postID, forumTagID], (err, data) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(data)
+                }
+            })
+        })
+        console.log(data);
+        res.status(200).json({ data: data });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error);
+    }
+})
+
+app.post("/fetchForumPostTagID", async (req, res)=>{
+    const postID = req.query.postID
+    const query = "SELECT ForumTagID FROM ForumPostTag WHERE ForumPostID = ?"
+    db.query(query, [postID], (err, data)=>{
+        if(err){
+            res.send(err)
+        } else{
+            console.log(data)
+            return res.json(data)
         }
     })
 })
 
 //viewing all posts, mainly for testing purposes can change the condition later
 app.get("/forumPostsAll", async (req,res)=>{
-    db.query('SELECT * FROM forumpost', (err, data)=>{
+    const query = `
+    SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
+    FROM ForumPost
+    LEFT JOIN ForumPostTag ON ForumPost.id = ForumPostTag.ForumPostID
+    LEFT JOIN ForumTag ON ForumPostTag.ForumTagID = ForumTag.ForumTagID
+    GROUP BY ForumPost.id
+    ORDER BY ForumPost.post_timestamp DESC;
+`;
+    db.query(query, (err, data)=>{
         if(err){
             res.send(err)
         }
@@ -840,7 +921,7 @@ app.get("/getVideoPostComments", async(req, res) =>{
 app.get("/fetchAllForumPostCommentLikes/", async(req,res)=>{
     //holds number of likes for each post
     const forumPostCommentID = req.query.commentID
-    const queryLikes = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND LikeStatus = 1"
+    const queryLikes = "SELECT * FROM ForumCommentLikeDislike WHERE forumPostCommentID = ? AND LikeStatus = 1"
         db.query(queryLikes, [forumPostCommentID], (err, data)=>{
             if (err){
                 return res.send("error")
@@ -855,7 +936,7 @@ app.get("/fetchAllForumPostCommentLikes/", async(req,res)=>{
 app.get("/fetchAllForumPostCommentDislikes/", async(req,res)=>{
     //holds number of dislikes for each post
     const forumPostCommentID = req.query.commentID
-    const queryDislikes = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND LikeStatus = 0"
+    const queryDislikes = "SELECT * FROM ForumCommentLikeDislike WHERE forumPostCommentID = ? AND LikeStatus = 0"
         db.query(queryDislikes, [forumPostCommentID], (err, data)=>{
             if (err){
                 return res.send("error");
@@ -870,7 +951,7 @@ app.get("/fetchAllForumPostCommentDislikes/", async(req,res)=>{
 app.get("/forumPostCommentLikeStatus/", async (req,res)=>{
     const forumPostCommentID = req.query.commentID
     const userID = req.query.userID
-    const check = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND UserID = ?"
+    const check = "SELECT * FROM ForumCommentLikeDislike WHERE forumPostCommentID = ? AND UserID = ?"
     db.query(check, [forumPostCommentID, userID], (err,data)=>{
         if (err){
             return res.send("error");
@@ -886,7 +967,7 @@ app.post("/forumPostCommentLikeDislike/", async (req,res)=>{
     const forumPostCommentID = req.query.commentID
     const userID = req.query.userID
     const rating = req.query.rating
-    const query = "INSERT INTO ForumPostCommentLikeDislike (forumPostCommentID, UserID, LikeStatus) VALUES (?, ?, ?)"
+    const query = "INSERT INTO ForumCommentLikeDislike (forumPostCommentID, UserID, LikeStatus) VALUES (?, ?, ?)"
     db.query(query, [forumPostCommentID, userID, rating], (err, data) => {
         if (err) {
             return res.status(500).send("Internal Server Error")
@@ -900,7 +981,7 @@ app.post("/forumPostCommentLikeDislike/", async (req,res)=>{
 app.put("/forumPostCommentChangeLikeDislike/", async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
     const rating = req.query.rating
-    const query = "UPDATE ForumPostCommentLikeDislike SET LikeStatus = ? WHERE LikeDislikeID = ?"
+    const query = "UPDATE ForumCommentLikeDislike SET LikeStatus = ? WHERE LikeDislikeID = ?"
     db.query(query, [rating, LikeDislikeID], (err, data) => {
         if (err) {
             return res.status(500).send("Internal Server Error")
@@ -913,7 +994,7 @@ app.put("/forumPostCommentChangeLikeDislike/", async (req,res)=>{
 //Deletes like/dislike from database
 app.delete("/forumPostCommentDeleteLikeDislike/", async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
-    const query = "DELETE FROM ForumPostCommentLikeDislike WHERE LikeDislikeID = ?"
+    const query = "DELETE FROM ForumCommentLikeDislike WHERE LikeDislikeID = ?"
     db.query(query, [LikeDislikeID], (err, data) => {
         if (err) {
             return res.status(500).send("Internal Server Error")
@@ -927,7 +1008,7 @@ app.delete("/forumPostCommentDeleteLikeDislike/", async (req,res)=>{
 app.get("/forumPostCommentsLikedByUser/", async (req,res)=>{
     const userID = req.query.userID
     const forumPostCommentID = req.query.commentID
-    const query = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND userID = ? AND LikeStatus = 1"
+    const query = "SELECT * FROM ForumCommentLikeDislike WHERE forumPostCommentID = ? AND userID = ? AND LikeStatus = 1"
     db.query(query, [forumPostCommentID, userID], (err,data)=>{
         if (err) return res.send(err)
         return res.json(data);
@@ -938,7 +1019,7 @@ app.get("/forumPostCommentsLikedByUser/", async (req,res)=>{
 app.get("/forumPostCommentsDislikedByUser/", async (req,res)=>{
     const userID = req.query.userID
     const forumPostCommentID = req.query.commentID
-    const query = "SELECT * FROM ForumPostCommentLikeDislike WHERE forumPostCommentID = ? AND userID = ? AND LikeStatus = 0"
+    const query = "SELECT * FROM ForumCommentLikeDislike WHERE forumPostCommentID = ? AND userID = ? AND LikeStatus = 0"
     db.query(query, [forumPostCommentID, userID], (err,data)=>{
         if (err) return res.send(err)
         return res.json(data);
