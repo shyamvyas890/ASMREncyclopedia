@@ -49,15 +49,28 @@ CREATE TABLE forums (
 );
 
 CREATE TABLE ForumPost(
-id INT AUTO_INCREMENT UNIQUE,
-username varchar(255) NOT NULL,
-title varchar(255) NOT NULL, 
-body TEXT NOT NULL, 
-post_timestamp timestamp NOT NULL, 
-forums TEXT,
-tfidf_vector TEXT,
-PRIMARY KEY(id),
-FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+  id INT AUTO_INCREMENT UNIQUE,
+  username varchar(255) NOT NULL,
+  title varchar(255) NOT NULL, 
+  body TEXT NOT NULL, 
+  post_timestamp timestamp NOT NULL, 
+  tfidf_vector TEXT,
+  PRIMARY KEY(id),
+  FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+);
+
+CREATE TABLE ForumTag(
+  ForumTagID INT AUTO_INCREMENT PRIMARY KEY,
+  ForumTagName Varchar(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE ForumPostTag(
+  ForumPostTagID INT AUTO_INCREMENT PRIMARY KEY,
+  ForumPostID INT NOT NULL,
+  ForumTagID INT NOT NULL,
+  FOREIGN KEY (ForumPostID) REFERENCES ForumPost(id) ON DELETE CASCADE,
+  FOREIGN KEY (ForumTagID) REFERENCES ForumTag(ForumTagID) ON DELETE CASCADE,
+  UNIQUE (ForumPostID, ForumTagID)
 );
 
 CREATE TABLE ForumPostLikeDislike(
@@ -152,6 +165,10 @@ CREATE TABLE VideoSubscriptions (
   UNIQUE(UserId, GenreId)
 );
 
+CREATE TABLE ForumSubscriptions(
+  ForumSubscriptionsID INT AUTO_INCREMENT PRIMARY KEY,
+  UserID INT NOT NULL
+)
 
 CREATE TABLE ChatMessage (
   ChatMessageId INT AUTO_INCREMENT PRIMARY KEY,

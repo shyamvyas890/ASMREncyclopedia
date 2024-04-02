@@ -49,14 +49,13 @@ export const FourmPostCommentSection = (props) => {
          }).then( (res) => {
              const commentToAdd = {
                  id: res.data.id,
-                 body: commentText, 
+                 body: commentText,
                  username: username, 
                  comment_timestamp: new Date().toLocaleString()
              }
              setParentCommentsObject([...parentCommentsObject, commentToAdd])
              setCommentText('')
          })
- 
      }
 
     //for each parent comment, render a ForumPostComment 
