@@ -668,6 +668,34 @@ app.post("/fetchForumPostTagID", async (req, res)=>{
     })
 })
 
+app.get("/fetchForumSubscriptions", async (req, res)=>{
+    const userID = req.query.userID
+    const query = `SELECT ForumTag.ForumTagName 
+    FROM ForumSubscriptions 
+    LEFT JOIN ForumTag ON ForumSubscriptions.ForumTagID = ForumTag.ForumTagID
+    WHERE UserID = ?`
+    db.query(query, [userID], (err, data)=>{
+        if(err){
+            res.send(err)
+        } else{
+            console.log("data: ", data)
+            return res.json(data)
+        }
+    })
+})
+
+app.get("/fetchForumSubscriptionOnly", async (req, res)=>{
+    const userID = req.query.userID
+    const query = "SELECT * FROM ForumSubscriptionOnly WHERE UserID = ?"
+    db.query(query, [userID], (err, data)=>{
+        if(err){
+            res.send(err)
+        } else{
+            console.log(data)
+            return res.json(data)
+        }
+    })
+})
 //viewing all posts, mainly for testing purposes can change the condition later
 app.get("/forumPostsAll", async (req,res)=>{
     const query = `
