@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from "react-router-dom";
 import { axiosRequest } from "../utils/utils";
 const SettingsComponent = ()=>{
@@ -15,10 +15,8 @@ const SettingsComponent = ()=>{
     const [videoTags, setVideoTags]= useState([]);
     const navigate= useNavigate();
     const tokenVerify= async (e) => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
             try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
+                const response= await axios.get(`http://localhost:3001/verify-token`)
                 if(response.data.username){
                     const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
                     setUsername({userIdOfCurrentUser, username:response.data.username})
@@ -30,11 +28,9 @@ const SettingsComponent = ()=>{
     
             catch(error){
                 console.log(error);
+                navigate("/");
             }
-        }
-        else{
-            navigate("/");
-        }
+        
     }
     React.useEffect(()=>{
         tokenVerify();

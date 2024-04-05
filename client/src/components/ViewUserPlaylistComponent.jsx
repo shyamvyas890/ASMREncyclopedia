@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 
 export const ViewUserPlaylistComponent = ()=>{
     const {playlistID} = useParams()

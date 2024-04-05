@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from "react-router-dom";
 
 const FriendsComponent = (props)=>{
