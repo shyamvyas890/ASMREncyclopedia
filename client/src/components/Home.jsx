@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import LoginComponent from './Login';
 import PostComponent from './Post';
-import axios from 'axios';
+import axios from '../utils/AxiosWithCredentials';
 import AddVideoPostComponent from './AddVideoPost';
 import {axiosRequest} from "../utils/utils.js";
 import { useNavigate } from 'react-router-dom';

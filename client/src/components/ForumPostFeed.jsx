@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useState, useEffect } from "react";
 import { redirectDocument, useNavigate } from "react-router-dom";
 import LikeDislikeComponent from "./LikeDislikeComponent"

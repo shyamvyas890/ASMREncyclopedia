@@ -1,5 +1,5 @@
 import React from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from "react-router-dom";
 import {hostname, axiosRequest } from "../utils/utils";
 import io from 'socket.io-client';
@@ -19,25 +19,17 @@ const NotificationsComponent = (props)=>{
         }
     };
     const tokenVerify= async () => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
-            try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    setUsername({userIdOfCurrentUser, username:response.data.username})
-                    setSocket(io(hostname, { transports : ['websocket'], query:{token:localStorage.getItem("token")}}));
-                    
-                }
-                else {
-                    navigate("/");
-                }
-            }
-            catch(error){
-                console.log(error);
+        try{
+            const response= await axios.get(`http://localhost:3001/verify-token`)
+            if(response.data.username){
+                const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+                setUsername({userIdOfCurrentUser, username:response.data.username})
+                setSocket(io(hostname, { transports : ['websocket'], query:{token:localStorage.getItem("token")}}));
+                
             }
         }
-        else{
+        catch(error){
+            console.log(error);
             navigate("/");
         }
     };

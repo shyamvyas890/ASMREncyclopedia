@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useState } from "react"
-import axios from "axios"
+import axios from '../utils/AxiosWithCredentials';
 import { useParams } from "react-router-dom"
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { useNavigate } from "react-router-dom";

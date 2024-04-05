@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {useNavigate } from "react-router-dom";
 import * as yup from "yup"
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 
 export const UserPlaylistComponent = ()=>{
     const [currentUsername, setCurrentUsername] = useState()

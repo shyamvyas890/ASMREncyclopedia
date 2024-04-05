@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 
 const handleForumPostLikeDislike = async (postID, userID, rating)=>{
     try{

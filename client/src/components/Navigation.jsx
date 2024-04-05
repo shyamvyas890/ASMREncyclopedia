@@ -1,7 +1,6 @@
 import React from 'react';
 import {Link, useLocation} from "react-router-dom";
 import NotificationsComponent from './Notifications';
-import axios from 'axios';
 const NavigationComponent= () => {
     const location = useLocation().pathname;    
     return (<nav>

@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from '../utils/AxiosWithCredentials';
 import { useState } from "react"
 import { useParams } from "react-router-dom"
 import { useEffect } from "react"
