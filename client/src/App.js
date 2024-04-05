@@ -19,6 +19,7 @@ import SingleVideoCommentComponent from './components/SingleVideoComment.tsx';
 import { UserProfileComponent } from './components/UserProfileComponent';
 import { UserPlaylistComponent } from './components/UserPlaylistComponent';
 import { ViewUserPlaylistComponent } from './components/ViewUserPlaylistComponent';
+import { SingleForumCommentComponent } from './components/SingleForumCommentComponent.jsx';
 function App() {
   const [token, setToken]= React.useState("");
   return (
@@ -40,6 +41,7 @@ function App() {
             <Route path="/search/videos/:keyword" element={<SearchVideosComponent />} />
             <Route path="/random" element={<RandomVideoComponent />}/>
             <Route path= "/SingleVideoComment/:VideoPostCommentId" element={<SingleVideoCommentComponent />} />
+            <Route path= "/singleForumComment/:forumPostCommentID" element={<SingleForumCommentComponent />} />
             <Route path="/userHistory/:username" element={<UserProfileComponent />} />
             <Route path="/username/:username" element={<ProfilePageComponent />} />
             <Route path="/userPlaylists/" element={<UserPlaylistComponent />}/>
