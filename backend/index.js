@@ -41,7 +41,7 @@ app.use(cors({
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '#jySJSU2024',
+    password: 'password',
     database: 'ASMR_DB',
   });
 db.connect((err) => {
@@ -94,38 +94,6 @@ app.post("/register", async (req,res)=>{
     );
 
 });
-
-
-  app.put("/changePassword", async (req, res)=>{
-    const {username, password}= req.body;
-    const hashedPassword = await bcrypt.hash(password, 13);
-    queryTheDatabase("UPDATE users SET password = ? WHERE username= ? ", [hashedPassword,username], res);
-
-  })
-  
-  app.post("/login", async (req, res)=>{
-    const { username, password } = req.body;
-    db.query(
-        'SELECT * FROM users WHERE username = ?',
-        [username],
-        async (err, results) => {
-            if(err){
-                console.log(err);
-                res.status(500).send("Error logging in")
-            }
-            else if (results.length>0){
-                const match = await bcrypt.compare(password, results[0].password);
-                if (match) {
-                    const exp = Math.floor(Date.now() / 1000) + 86400;
-                    const token = jwt.sign({ username, exp }, secretKey);
-                    return res.status(200).json({ token });
-                } 
-                else {
-                    res.status(401).send('Incorrect password');
-                }
-            }
-            else {
-                res.status(404).send('User not found');
 
 const authenticateUser = (socket, next)=>{
     const token= socket.handshake.query.token;
@@ -270,40 +238,42 @@ app.put("/changePassword",
     }
 )
 app.post("/login", async (req, res)=>{ // secure
-const { username, password } = req.body;
-db.query(
-    'SELECT * FROM users WHERE username = ?',
-    [username],
-    async (err, results) => {
-        if(err){
-            console.log(err);
-            res.status(500).send("Error logging in.")
-        }
-        else if (results.length>0){
-            const match = await bcrypt.compare(password, results[0].password);
-            if (match) {
-                const exp = Math.floor(Date.now() / 1000) + 86400;
-                const token = jwt.sign({ username, exp, UserId: results[0].id}, secretKey);
+    const { username, password } = req.body;
+    console.log(username);
+    console.log(password);
+    db.query(
+        'SELECT * FROM users WHERE username = ?',
+        [username],
+        async (err, results) => {
+            if(err){
+                console.log(err);
+                res.status(500).send("Error logging in.")
+            }
+            else if (results.length>0){
+                const match = await bcrypt.compare(password, results[0].password);
+                if (match) {
+                    const exp = Math.floor(Date.now() / 1000) + 86400;
+                    const token = jwt.sign({ username, exp, UserId: results[0].id}, secretKey);
 
-                res.cookie('theJWTToken', token, {
-                    expires: new Date(Date.now() + 86400000),
-                    httpOnly: true,
-                    creationDate: Date.now()
-                    //secure: true,                  Will change on deployment
-                    //Some same site attribute
-                });
-                return res.status(200).json({ token }); // Will have to change this later
-            } 
+                    res.cookie('theJWTToken', token, {
+                        expires: new Date(Date.now() + 86400000),
+                        httpOnly: true,
+                        creationDate: Date.now()
+                        //secure: true,                  Will change on deployment
+                        //Some same site attribute
+                    });
+                    return res.status(200).json({ token }); // Will have to change this later
+                } 
+                else {
+                    res.status(401).send('Your password is incorrect.');
+
+                }
+            }
             else {
-                res.status(401).send('Your password is incorrect.');
-
+                res.status(404).send('This username does not exist.');
             }
         }
-        else {
-            res.status(404).send('This username does not exist.');
-        }
-    }
-);
+    );
 })
 app.get('/verify-token', (req, res)=>{ //secure
     const submittedToken= req.cookies['theJWTToken'];
@@ -431,43 +401,9 @@ app.get('/users/id', verifyJWTMiddleware, (req, res)=> {
             }
         })
 
-  })
-
-  app.get('/users/id', (req, res)=> {
-        const {username, UserId}= req.query
-        console.log("USERNAME: " + username)
-        if(username){
-            db.query('SELECT * FROM users WHERE username = ?', [username], (err, results)=>{
-                if(err){
-                    console.log(err)
-                    res.status(500).send("Something went wrong")
-                }
-                else if(results.length===0){
-                    res.status(404).send("This username doesn't exist")
-                }
-                else {
-                    res.status(200).send({id:results[0].id})
-                }
-            })
-        }
-        else {
-            db.query('SELECT * FROM users WHERE id = ?', [UserId], (err, results)=>{
-                if(err){
-                    console.log(err)
-                    res.status(500).send("Something went wrong")
-                }
-                else if(results.length===0){
-                    res.status(404).send("This username doesn't exist")
-                }
-                else {
-                    res.status(200).send({username:results[0].username})
-                }
-            })
-        }
-  })
-
-    }
-})
+  }
+}
+)
 
 
 app.get('/genre/id', verifyJWTMiddleware, (req, res)=> {
@@ -690,21 +626,21 @@ app.get("/UserPosts", async (req,res)=>{
     const username = req.query.username
     console.log("USER POSTS USERNAME: " + username)
     db.query('SELECT * FROM forumpost WHERE username = ?', [username], (err, data)=>{
-    const query = `
-    SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
-    FROM ForumPost
-    LEFT JOIN ForumPostTag ON ForumPost.id = ForumPostTag.ForumPostID
-    LEFT JOIN ForumTag ON ForumPostTag.ForumTagID = ForumTag.ForumTagID
-    WHERE ForumPost.username=?
-    GROUP BY ForumPost.id
-    ORDER BY ForumPost.post_timestamp DESC;
-`;
-    db.query(query, [username], (err, data)=>{
-        if(err){
-            res.send(err)
-        }
-        console.log(data)
-        return res.json(data)
+        const query = `
+        SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
+        FROM ForumPost
+        LEFT JOIN ForumPostTag ON ForumPost.id = ForumPostTag.ForumPostID
+        LEFT JOIN ForumTag ON ForumPostTag.ForumTagID = ForumTag.ForumTagID
+        WHERE ForumPost.username=?
+        GROUP BY ForumPost.id
+        ORDER BY ForumPost.post_timestamp DESC;`;
+        db.query(query, [username], (err, data)=>{
+            if(err){
+                res.send(err)
+            }
+            console.log(data)
+            return res.json(data)
+        })
     })
 })
 
@@ -1251,7 +1187,7 @@ app.get("/forumPostParentCommentGetByID/:id", (req, res) =>{
     })
 })
 
-app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
+app.post("/forumPostCommentReply/:id/:commentID", (req, res) => {
     const forumPostID = parseInt(req.params.id, 10)
     const commentID = parseInt(req.params.commentID, 10)
     const username = req.body.username
@@ -1269,65 +1205,66 @@ app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
     }
     const insertQuery = "INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp, parent_comment_id) VALUES (?, ?, ?, NOW(),?)"
 
-    db.query(insertQuery, [forumPostID, username, body, commentID], (err, insertResult) =>{
-    if(err){
-        console.log(err)
-    }
-    else{
-        const replyID = insertResult.insertId
-        const selectQuery = "SELECT * from forumpostcomments where id=?"
-        db.query(selectQuery, [replyID], (err1, selectResult) => {
-            if(err1){
-                console.log(err1)
-            }
-            else{
-                const replyID = insertResult.insertId
-                const selectQuery = "SELECT username from forumpostcomments where id=?"
-                db.query(selectQuery, [replyID], (err, selectResult) => {
-                    if(err){
-                        console.log(err)
-                    }
+    db.query(insertQuery, [forumPostID, username, body, commentID], (err, insertResult) => {
+        if (err) {
+            console.log(err)
+        } else {
+            const replyID = insertResult.insertId
+            const selectQuery = "SELECT * from forumpostcomments where id=?"
+            db.query(selectQuery, [replyID], (err1, selectResult) => {
+                if (err1) {
+                    console.log(err1)
+                } else {
+                    const replyID = insertResult.insertId
+                    const selectQuery = "SELECT username from forumpostcomments where id=?"
+                    db.query(selectQuery, [replyID], (err, selectResult) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            const replyUsername = selectResult[0].username;
+                            db.query("SELECT * FROM ForumPostComments WHERE id = ?", [commentID], (err2, results2) => {
+                                if (err2) {
+                                    console.log(err2);
+                                }
+                                db.query("SELECT * FROM users WHERE username = ?", [results2[0].username], (err3, results3) => {
+                                    if (err3) {
+                                        console.log(err3);
+                                        res.status(500).send("internal server error");
+                                    }
+                                    db.query("SELECT * FROM users WHERE username = ?", [username], (err4, results4) => {
+                                        if (err4) {
+                                            console.log(err4);
+                                            res.status(500).send("internal server error");
+                                        }
+                                        if (results4[0].id !== results3[0].id) {
+                                            io.to(`UserId_${results3[0].id}`).emit("newNotification", {
+                                                ForumCommentSenderUserId: results4[0].id,
+                                                ForumCommentReceiverUserId: results3[0].id,
+                                                Message: body,
+                                                CommentedAt: new Date().toISOString(),
+                                                ForumPostId: forumPostID,
+                                                NotificationRead: 0,
+                                                SenderForumPostCommentId: insertResult.insertId,
+                                                ReceiverForumPostCommentId: commentID
+                                            })
+                                        }
+                                        res.status(201).send({
+                                            id: replyID,
+                                            username: replyUsername,
+                                            message: "Reply Successful"
+                                        })
+                                    })
 
-            else
-            {
-                const replyUsername = selectResult[0].username;
-                db.query("SELECT * FROM ForumPostComments WHERE id = ?", [commentID], (err2, results2)=>{
-                    if(err2){
-                        console.log(err2);
-                    }
-                    db.query("SELECT * FROM users WHERE username = ?", [results2[0].username], (err3,results3)=>{
-                        if(err3){
-                            console.log(err3);
-                            res.status(500).send("internal server error");
-                        }
-                        db.query("SELECT * FROM users WHERE username = ?", [username], (err4, results4)=>{
-                            if(err4){
-                                console.log(err4);
-                                res.status(500).send("internal server error");
-                            }
-                            if(results4[0].id!==results3[0].id){
-                                io.to(`UserId_${results3[0].id}`).emit("newNotification",{
-                                    ForumCommentSenderUserId: results4[0].id,
-                                    ForumCommentReceiverUserId: results3[0].id,
-                                    Message: body,
-                                    CommentedAt: new Date().toISOString(),
-                                    ForumPostId: forumPostID,
-                                    NotificationRead:0,
-                                    SenderForumPostCommentId: insertResult.insertId,
-                                    ReceiverForumPostCommentId: commentID
                                 })
-                            }
-                            res.status(201).send({id: replyID, username: replyUsername, message:"Reply Successful"})
-                        })
 
+
+                            })
+
+                        }
                     })
-
-
-                })
-
-            }
-        })
-    }
+                }
+            })
+        }
     })
 })
 
@@ -1361,11 +1298,33 @@ app.get("/forumPostSearch/:searchTitle", (req, res) => {
     })
 })
 
+function cosineSimilarity(tfidfVector1, tfidfVector2) {
+    const parsedVector1 = JSON.parse(tfidfVector1)
+    const parsedVector2 = JSON.parse(tfidfVector2)
+
+    let dotProduct = 0
+    for(let term in parsedVector1){
+        if(parsedVector2.hasOwnProperty(term)){
+            dotProduct += (parsedVector1[term] * parsedVector2[term])
+        }
+    }
+
+    const magnitude1 = Math.sqrt(
+        Object.values(parsedVector1).reduce((acc, val) => acc + val ** 2, 0)
+    );
+
+    const magnitude2 = Math.sqrt(
+        Object.values(parsedVector2).reduce((acc, val) => acc + val ** 2, 0)
+    );
+
+    return dotProduct / (magnitude1 * magnitude2).toFixed(2)
+}
+
+
 /*
 to see if a post should be recommended, take the consine similarity of the tfidf_vector
 if it meets the threshold, recommend it
 */
-
 app.get("/forumPostRecommendedPost/:postID", (req, res) =>{
     const postID = req.params.postID
     const recommendedPosts = []
@@ -1396,27 +1355,7 @@ app.get("/forumPostRecommendedPost/:postID", (req, res) =>{
 })
 })
 
-function cosineSimilarity(tfidfVector1, tfidfVector2) {
-    const parsedVector1 = JSON.parse(tfidfVector1)
-    const parsedVector2 = JSON.parse(tfidfVector2)
 
-    let dotProduct = 0
-    for(let term in parsedVector1){
-        if(parsedVector2.hasOwnProperty(term)){
-            dotProduct += (parsedVector1[term] * parsedVector2[term])
-        }
-    }
-
-    const magnitude1 = Math.sqrt(
-        Object.values(parsedVector1).reduce((acc, val) => acc + val ** 2, 0)
-    );
-
-    const magnitude2 = Math.sqrt(
-        Object.values(parsedVector2).reduce((acc, val) => acc + val ** 2, 0)
-    );
-
-    return dotProduct / (magnitude1 * magnitude2).toFixed(2)
-}
 
 
 app.get("/fetchAllPlaylistVideosID", (req, res)=>{
@@ -1631,7 +1570,7 @@ app.post("/videoComments", verifyJWTMiddleware, async (req,res)=>{
                 return res.status(500).send("Internal Server Error");
             }
             //return res.json(results1);
-            }
+            // }
             db.query("SELECT * FROM VideoPostComments WHERE VideoPostCommentId = ?", [results1.insertId], (err2,results2)=>{
                 if(err2){
                     console.log(err2)
@@ -1855,88 +1794,35 @@ const {UserId} = req.query;
 queryTheDatabase("SELECT * FROM VideoSubscriptions WHERE UserId = ?", [UserId], res);
 })
 
-app.delete("/videoSubscriptions", (req,res)=>{
-const {UserId} = req.query;
-queryTheDatabase("DELETE FROM VideoSubscriptions WHERE UserId = ?", [UserId], res);
-})
-app.post("/videoSubscriptions", (req,res)=>{
-const {UserId, Genre}=req.body;
-db.query('SELECT * FROM Genre Where Genre = ?', [Genre.toLowerCase()], (err, results)=>{
-    if(err){
-        console.log(err)
-        res.status(500).send("Something went wrong in selecting from genres")
-    }
-    else {
-        if(results.length===1){
-            queryTheDatabase("INSERT INTO VideoSubscriptions (UserId, GenreId) VALUES (?, ?)", [UserId, results[0].GenreId], res)
+  app.delete("/videoSubscriptions", (req,res)=>{
+    const {UserId} = req.query;
+    queryTheDatabase("DELETE FROM VideoSubscriptions WHERE UserId = ?", [UserId], res);
+  })
+  app.post("/videoSubscriptions", (req,res)=>{
+    const {UserId, Genre}=req.body;
+    db.query('SELECT * FROM Genre Where Genre = ?', [Genre.toLowerCase()], (err, results)=>{
+        if(err){
+            console.log(err)
+            res.status(500).send("Something went wrong in selecting from genres")
         }
-        else if(results.length===0){
-            db.query(`INSERT INTO Genre (Genre) VALUES (?)`, [Genre.toLowerCase()], (err1, results1)=>{
-                if(err1){
-                    console.log(err1)
-                    res.status(500).send("Something went wrong in creating new genre");
-                }
-                else {
-                    queryTheDatabase("INSERT INTO VideoSubscriptions (UserId, GenreId) VALUES (?, ?)", [UserId, results1.insertId], res)
-                }
-            } )
+        else {
+            if(results.length===1){
+                queryTheDatabase("INSERT INTO VideoSubscriptions (UserId, GenreId) VALUES (?, ?)", [UserId, results[0].GenreId], res)
+            }
+            else if(results.length===0){
+                db.query(`INSERT INTO Genre (Genre) VALUES (?)`, [Genre.toLowerCase()], (err1, results1)=>{
+                    if(err1){
+                        console.log(err1)
+                        res.status(500).send("Something went wrong in creating new genre");
+                    }
+                    else {
+                        queryTheDatabase("INSERT INTO VideoSubscriptions (UserId, GenreId) VALUES (?, ?)", [UserId, results1.insertId], res)
+                    }
+                } )
+            }
         }
-
     })
   })
-  const authenticateUserForChat = (socket, next)=>{
-    const token= socket.handshake.query.token;
-    if (!token) {
-        return next(new Error('Authentication error: Token missing'));
-    }
-    jwt.verify(token, secretKey, (err, value)=>{
-        if(err){
-            return next(new Error('Authentication error: Invalid token'));
-        }
-        else{
-            socket.request.user= {username:value.username};
-            db.query("SELECT * FROM users WHERE username = ?", [value.username], (error1, results1)=>{
-                if(error1){
-                    console.log(error1)
-                }
-                else{
-                    socket.request.user.UserId = results1[0].id;
-                    next();
-                }
-            })    
-        }
-    })
-  }
-  io.use(authenticateUserForChat);
-
-
-  const queryTheDatabaseWithCallback= (theQuery, theArray, res, callback)=>{
-    db.query(theQuery, theArray, (error, results)=>{
-        if(error){
-            console.log(error)
-            res.status(500).send("Internal Server Error");
-        }
-        callback(results)
-    })
-  }
-  
-  io.on('connection', (socket) => {
-    console.log(`A user connected ${socket.id}`);
-    const {UserId}= socket.request.user;
-
-    socket.join(`UserId_${UserId}`);
-
-    socket.on('disconnect', () => {
-
-        console.log(`User disconnected ${socket.id}`);
-
-        socket.leave(`UserId_${UserId}`);
-    });
-  });
-
-    }
-})
-})
 
 
 
@@ -2021,5 +1907,5 @@ else if(ForumPostCommentId){
 })
 
 server.listen(port, () => {
-console.log(`Server is running on port ${port}`);
+    console.log(`Server is running on port ${port}`);
 });
