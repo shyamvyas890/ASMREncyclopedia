@@ -1569,8 +1569,6 @@ app.post("/videoComments", verifyJWTMiddleware, async (req,res)=>{
                 console.log(err1)
                 return res.status(500).send("Internal Server Error");
             }
-            //return res.json(results1);
-            // }
             db.query("SELECT * FROM VideoPostComments WHERE VideoPostCommentId = ?", [results1.insertId], (err2,results2)=>{
                 if(err2){
                     console.log(err2)
