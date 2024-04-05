@@ -41,7 +41,7 @@ app.use(cors({
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'password',
+    password: '#jySJSU2024',
     database: 'ASMR_DB',
   });
 db.connect((err) => {
@@ -94,6 +94,38 @@ app.post("/register", async (req,res)=>{
     );
 
 });
+
+
+  app.put("/changePassword", async (req, res)=>{
+    const {username, password}= req.body;
+    const hashedPassword = await bcrypt.hash(password, 13);
+    queryTheDatabase("UPDATE users SET password = ? WHERE username= ? ", [hashedPassword,username], res);
+
+  })
+  
+  app.post("/login", async (req, res)=>{
+    const { username, password } = req.body;
+    db.query(
+        'SELECT * FROM users WHERE username = ?',
+        [username],
+        async (err, results) => {
+            if(err){
+                console.log(err);
+                res.status(500).send("Error logging in")
+            }
+            else if (results.length>0){
+                const match = await bcrypt.compare(password, results[0].password);
+                if (match) {
+                    const exp = Math.floor(Date.now() / 1000) + 86400;
+                    const token = jwt.sign({ username, exp }, secretKey);
+                    return res.status(200).json({ token });
+                } 
+                else {
+                    res.status(401).send('Incorrect password');
+                }
+            }
+            else {
+                res.status(404).send('User not found');
 
 const authenticateUser = (socket, next)=>{
     const token= socket.handshake.query.token;
@@ -264,6 +296,7 @@ db.query(
             } 
             else {
                 res.status(401).send('Your password is incorrect.');
+
             }
         }
         else {
@@ -397,8 +430,45 @@ app.get('/users/id', verifyJWTMiddleware, (req, res)=> {
                 res.status(200).send({username:results[0].username})
             }
         })
+
+  })
+
+  app.get('/users/id', (req, res)=> {
+        const {username, UserId}= req.query
+        console.log("USERNAME: " + username)
+        if(username){
+            db.query('SELECT * FROM users WHERE username = ?', [username], (err, results)=>{
+                if(err){
+                    console.log(err)
+                    res.status(500).send("Something went wrong")
+                }
+                else if(results.length===0){
+                    res.status(404).send("This username doesn't exist")
+                }
+                else {
+                    res.status(200).send({id:results[0].id})
+                }
+            })
+        }
+        else {
+            db.query('SELECT * FROM users WHERE id = ?', [UserId], (err, results)=>{
+                if(err){
+                    console.log(err)
+                    res.status(500).send("Something went wrong")
+                }
+                else if(results.length===0){
+                    res.status(404).send("This username doesn't exist")
+                }
+                else {
+                    res.status(200).send({username:results[0].username})
+                }
+            })
+        }
+  })
+
     }
 })
+
 
 app.get('/genre/id', verifyJWTMiddleware, (req, res)=> {
     const {genre}= req.query
@@ -618,6 +688,8 @@ app.get("/forums", (req,res)=>{
 
 app.get("/UserPosts", async (req,res)=>{
     const username = req.query.username
+    console.log("USER POSTS USERNAME: " + username)
+    db.query('SELECT * FROM forumpost WHERE username = ?', [username], (err, data)=>{
     const query = `
     SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
     FROM ForumPost
@@ -830,6 +902,7 @@ app.get("/forumPostsAll", async (req,res)=>{
 //viewing a post by its id
 app.get("/forumPostsById/:postID", async (req,res)=>{
     const id = parseInt(req.params.postID, 10)
+    console.log(typeof(id))
     console.log(id)
     const query = `
     SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
@@ -844,6 +917,8 @@ app.get("/forumPostsById/:postID", async (req,res)=>{
         if(err){
             res.send(err)
         }
+        console.log(data)
+        console.log("hi")
         return res.json(data)
     })
 })
@@ -985,46 +1060,25 @@ app.post("/forumPostComment/:id", (req, res) => {
     const username = req.body.username
     const body = req.body.body
 
-    db.query("INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp) VALUES (?, ?, ?, NOW())", [forumPostID, username, body], function (err, results){
+
+   db.query("INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp) VALUES (?, ?, ?, NOW())", [forumPostID, username, body], function (err){
     if(err){
-        console.log(err);
-        return res.status(500).send("Internal Server Error");
+        console.log(err)
     }else{
-        db.query("SELECT * FROM ForumPost WHERE id = ?", [forumPostID], (err1,results1)=>{
-            if(err1){
-                console.log(err1);
-                return res.status(500).send("Internal Server Error");
-            }
-            db.query("SELECT * FROM users WHERE username = ?", [results1[0].username], (err2, results2)=>{
-                if(err2){
-                    console.log(err2);
-                    return res.status(500).send("Internal Server Error");
-                }
-                db.query("SELECT * FROM users WHERE username = ?", [username], (err3, results3)=>{
-                    if(err3){
-                        console.log(err3);
-                        return res.status(500).send("Internal Server Error");
-                    }
-                    if(results2[0].id !== results3[0].id) {
-                        io.to(`UserId_${results2[0].id}`).emit("newNotification", {
-                            ForumPostReceiverUserId: results2[0].id,
-                            ForumCommentSenderUserId: results3[0].id, 
-                            ForumPostId: forumPostID,
-                            SenderForumPostCommentId : results.insertId,
-                            Message: body,
-                            CommentedAt: new Date().toISOString(),
-                            NotificationRead:0
-                        })
-                    }
-                    res.status(201).send("Comment Successful");
-                })
-            })
-
-
-            
-        } );
-        
+        return res.status(201).send("Comment Successful")
     }
+    })
+})
+
+app.get("/getForumPostCommentByID/:id", (req, res) =>{
+    const forumPostCommentID = parseInt(req.params.id, 10)
+    db.query("SELECT * FROM FORUMPOSTCOMMENTS WHERE id=?", [forumPostCommentID], function(err, data){
+        if(err){
+            console.log(err)
+        }
+        else{
+            return res.json(data)
+        }
     })
 })
 
@@ -1203,6 +1257,11 @@ app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
     const username = req.body.username
     const body = req.body.body
     const timestamp = new Date().toISOString()
+
+    console.log("FORUM POST COMMENT REPLY FOR POST " + forumPostID)
+    console.log("TYPE OF FORUM POST ID " + typeof(forumPostID))
+    console.log("PARENT COMMENT " + commentID)
+    console.log()
     const reply = {
         username,
         body,
@@ -1221,6 +1280,14 @@ app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
             if(err1){
                 console.log(err1)
             }
+            else{
+                const replyID = insertResult.insertId
+                const selectQuery = "SELECT username from forumpostcomments where id=?"
+                db.query(selectQuery, [replyID], (err, selectResult) => {
+                    if(err){
+                        console.log(err)
+                    }
+
             else
             {
                 const replyUsername = selectResult[0].username;
@@ -1528,16 +1595,17 @@ app.post("/videoComments", verifyJWTMiddleware, async (req,res)=>{
         db.query('SELECT * FROM VideoPostComments WHERE VideoPostCommentId = ?', [ReplyToVideoPostCommentId], (err, results)=>{
             if(err){
                 console.log(err)
-                res.status(500).send("Internal Server Error")
+                return res.status(500).send("Internal Server Error")
             }
             if(results[0].DELETED){
-                    res.status(400).send("You cannot reply to a deleted comment");
+               return res.status(400).send("You cannot reply to a deleted comment");
             }
             db.query('INSERT INTO VideoPostComments (UserId, Comment, VideoPostId, ReplyToVideoPostCommentId, DELETED) VALUES (?, ?, ?, ?, ?)', [UserId, Comment, VideoPostId, ReplyToVideoPostCommentId, false], (err1, results1)=>{
                 if(err1){
                     console.log(err1)
-                        res.status(500).send("Internal Server Error");
+                    return res.status(500).send("Internal Server Error");
                 }
+            
                 if(UserId!==results[0].UserId){
                     io.to(`UserId_${results[0].UserId}`).emit("newNotification", {
                         VideoCommentSenderUserId: UserId, 
@@ -1560,7 +1628,9 @@ app.post("/videoComments", verifyJWTMiddleware, async (req,res)=>{
         db.query('INSERT INTO VideoPostComments (UserId, Comment, VideoPostId, ReplyToVideoPostCommentId, DELETED) VALUES (?, ?, ?, ?, ?)', [UserId, Comment, VideoPostId, ReplyToVideoPostCommentId, false], (err1, results1)=>{
             if(err1){
                 console.log(err1)
-                    res.status(500).send("Internal Server Error");
+                return res.status(500).send("Internal Server Error");
+            }
+            //return res.json(results1);
             }
             db.query("SELECT * FROM VideoPostComments WHERE VideoPostCommentId = ?", [results1.insertId], (err2,results2)=>{
                 if(err2){
@@ -1811,9 +1881,63 @@ db.query('SELECT * FROM Genre Where Genre = ?', [Genre.toLowerCase()], (err, res
                 }
             } )
         }
+
+    })
+  })
+  const authenticateUserForChat = (socket, next)=>{
+    const token= socket.handshake.query.token;
+    if (!token) {
+        return next(new Error('Authentication error: Token missing'));
+    }
+    jwt.verify(token, secretKey, (err, value)=>{
+        if(err){
+            return next(new Error('Authentication error: Invalid token'));
+        }
+        else{
+            socket.request.user= {username:value.username};
+            db.query("SELECT * FROM users WHERE username = ?", [value.username], (error1, results1)=>{
+                if(error1){
+                    console.log(error1)
+                }
+                else{
+                    socket.request.user.UserId = results1[0].id;
+                    next();
+                }
+            })    
+        }
+    })
+  }
+  io.use(authenticateUserForChat);
+
+
+  const queryTheDatabaseWithCallback= (theQuery, theArray, res, callback)=>{
+    db.query(theQuery, theArray, (error, results)=>{
+        if(error){
+            console.log(error)
+            res.status(500).send("Internal Server Error");
+        }
+        callback(results)
+    })
+  }
+  
+  io.on('connection', (socket) => {
+    console.log(`A user connected ${socket.id}`);
+    const {UserId}= socket.request.user;
+
+    socket.join(`UserId_${UserId}`);
+
+    socket.on('disconnect', () => {
+
+        console.log(`User disconnected ${socket.id}`);
+
+        socket.leave(`UserId_${UserId}`);
+    });
+  });
+
     }
 })
 })
+
 
 
 app.post("/chatMessage", (req, res)=>{
@@ -1823,6 +1947,7 @@ queryTheDatabaseWithCallback("INSERT INTO ChatMessage (SenderUserId, ReceiverUse
     res.send(results);
 }); 
 })
+
 
 app.get("/chatMessages", (req, res)=>{
 const {UserId1, UserId2} = req.query;
