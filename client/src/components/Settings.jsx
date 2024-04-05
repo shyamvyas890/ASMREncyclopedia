@@ -9,10 +9,13 @@ const SettingsComponent = ()=>{
     const [edit, setEdit] = useState({
         email: false,
         subscriptionPreferences:false,
+        subscriptionForumPreferences: false,
         password: false
     })
     const [subscriptionRadio, setSubscriptionRadio]= useState(null);
     const [videoTags, setVideoTags]= useState([]);
+    const [forumTags, setForumTags]= useState([]);
+
     const navigate= useNavigate();
     const tokenVerify= async (e) => {
             try{
@@ -39,14 +42,23 @@ const SettingsComponent = ()=>{
         const email = (await axiosRequest(3, 2, "email", {UserId: username.userIdOfCurrentUser})).data[0].email;
         const videoSubscriptionOnly = (await axiosRequest(3,2,"videoSubscriptionOnly", {UserId: username.userIdOfCurrentUser})).data;
         const videoSubscriptions = (await axiosRequest(3,2,"videoSubscriptions", {UserId: username.userIdOfCurrentUser})).data;
+        const forumSubscriptions = (await axios.get('http://localhost:3001/fetchForumSubscriptions', {
+            params: {userID: username.userIdOfCurrentUser}
+        })).data
+        const forumSubscriptionOnly = (await axios.get('http://localhost:3001/fetchForumSubscriptionOnly', {
+            params: {userID: username.userIdOfCurrentUser}
+        })).data
+
         const newTags=[]
         for(const sub of videoSubscriptions){
             sub.GenreName = (await axiosRequest(3,2,"genreName", {GenreId: sub.GenreId})).data[0].Genre;
             newTags.push(sub.GenreName);
         }
         setVideoTags(newTags);
-        
-        setEmailAndSubscriptionPreferences({email,videoSubscriptionOnly, videoSubscriptions});
+        setForumTags(forumSubscriptions)
+        setEmailAndSubscriptionPreferences({email,videoSubscriptionOnly, videoSubscriptions, forumSubscriptionOnly, forumSubscriptions});
+        console.log("tags: ", forumSubscriptionOnly)
+        console.log("tags: ", forumSubscriptions)
     }
     React.useEffect(()=>{
         if(username){
@@ -58,6 +70,9 @@ const SettingsComponent = ()=>{
     }
     const changeEditSubscriptionPreferences = ()=>{
         setEdit(prev=>({...prev, subscriptionPreferences:!prev.subscriptionPreferences}));
+    }
+    const changeEditForumSubscriptionPreferences = ()=>{
+        setEdit(prev=>({...prev, subscriptionForumPreferences:!prev.subscriptionForumPreferences}));
     }
     const changeEditPassword = ()=>{
         setEdit(prev=>({...prev, password:!prev.password}));
@@ -141,9 +156,17 @@ const SettingsComponent = ()=>{
                     {emailAndSubscriptionPreferences.videoSubscriptionOnly.length!==0 && (emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only===1 || emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only===0) &&
                     emailAndSubscriptionPreferences.videoSubscriptions.map((genre, index)=>(
                         <div key={index}>{genre.GenreName}</div>
-                    ))
-                    }
+                    ))}
                     <button onClick={changeEditSubscriptionPreferences}>Update Video Subscription Preferences</button>
+                    
+                    <div>Forum Subscription Preferences</div>
+                    <div>{emailAndSubscriptionPreferences.forumSubscriptionOnly.length===0? "All Genres": emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===1?"Only These Genres": "All Genres Except These:"}</div>
+                    {emailAndSubscriptionPreferences.forumSubscriptionOnly.length!==0 && (emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===1 || emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===0) &&
+                    emailAndSubscriptionPreferences.forumSubscriptions.map((tag, index)=>(
+                        <div key={index}>{tag.ForumTagName}</div>
+                    ))}
+                    <button onClick={changeEditForumSubscriptionPreferences}>Update Forum Post Subscription Preferences</button>
+                    <div>a{}</div>
                     <div>Security</div>
                     <button onClick={changeEditPassword}>Change Password</button>
                 </>
@@ -207,6 +230,10 @@ const SettingsComponent = ()=>{
                         }
                         <button type="submit">Update Subscription Preferences</button>
                     </form>
+                ):
+                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && edit.password)?
+                (
+                    <div></div>
                 ):
                 (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && edit.password)?
                 (
