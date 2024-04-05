@@ -8,6 +8,7 @@ const socketIo = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
+const cookieParser = require('cookie-parser');
 const port = 3001;
 const secretKey= "secret_key" //Will change this later
 
@@ -28,28 +29,29 @@ const enStopwords = [
     "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not",
     "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"
   ];
-  
+app.use(cookieParser());
 app.use(express.json())
 app.use(express.urlencoded({ extended: true })); // Might not need this
 app.use(cors({
     origin: 'http://localhost:3000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
-  }));
+    secure:false
+}));
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'password',
     database: 'ASMR_DB',
   });
-  db.connect((err) => {
+db.connect((err) => {
     if (err) {
-      console.error('Error connecting to MySQL:', err);
+        console.error('Error connecting to MySQL:', err);
     } else {
-      console.log('Connected to MySQL');
+        console.log('Connected to MySQL');
     }
-  });
-  const queryTheDatabase= (theQuery, theArray, res)=>{
+});
+const queryTheDatabase= (theQuery, theArray, res)=>{
     db.query(theQuery, theArray, (error, results)=>{
         if(error){
             console.log(error)
@@ -57,8 +59,20 @@ const db = mysql.createConnection({
         }
         res.send(results);
     })
-  } 
-  app.post("/register", async (req,res)=>{
+}
+const queryTheDatabaseGiveResults = (theQuery, theArray)=>{
+    return new Promise ((resolve, reject)=>{
+        db.query(theQuery, theArray, (error, results)=>{
+            if(error){
+                reject(error)
+            }
+            else {
+                resolve(results);
+            }
+        })
+    })
+}
+app.post("/register", async (req,res)=>{
     const { username, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 13);
     db.query(
@@ -79,9 +93,9 @@ const db = mysql.createConnection({
     }
     );
 
-  });
+});
 
-  const authenticateUser = (socket, next)=>{
+const authenticateUser = (socket, next)=>{
     const token= socket.handshake.query.token;
     if (!token) {
         return next(new Error('Authentication error: Token missing'));
@@ -103,11 +117,90 @@ const db = mysql.createConnection({
             })    
         }
     })
-  }
-  io.use(authenticateUser);
+}
+io.use(authenticateUser);
+
+const verifyJWTMiddleware = (req,res,next)=>{
+    const submittedToken = req.cookies['theJWTToken'];
+    if(!submittedToken){
+        return res.status(401).send("No token provided");
+    }
+    db.query('SELECT * FROM blacklisted_tokens WHERE token = ?', [submittedToken], (error, results)=>{
+        if(error){
+            console.log(error);
+        }
+        else if(results.length>0){
+            return res.status(401).send("Token is blacklisted");  
+        }
+        try {
+            const decodedToken = jwt.verify(submittedToken, secretKey);
+            req.decodedToken = decodedToken;
+            next();
+        }
+        catch(error) {
+
+            return res.status(401).send("Token is invalid");
+        }
+
+    })
+}
+
+async function whoOwnsThis(item, itemValue){
+    if(item === "VideoPostId"){
+        return await queryTheDatabaseGiveResults("SELECT UserId FROM VideoPost WHERE VideoPostId = ?", [itemValue]);
+    }
+    else if (item === "LikeDislikeId"){
+        return await queryTheDatabaseGiveResults("SELECT UserId FROM LikeDislike WHERE LikeDislikeId = ?", [itemValue]);
+    }
+    else if (item === "ForumPostId"){
+        return await queryTheDatabaseGiveResults("SELECT username FROM ForumPost WHERE id = ?", [itemValue]);
+
+    }
+    else if (item === "ForumPostLikeDislikeId"){
+        
+    }
+    else if (item === "ForumPostCommentId"){
+        
+
+    }
+    else if (item === "ForumPostCommentLikeDislikeId"){
+        
+
+    }
+    else if (item === "VideoPostCommentId"){
+        return await queryTheDatabaseGiveResults("SELECT UserId FROM VideoPostComments WHERE VideoPostCommentId = ?", [itemValue]);
+
+    }
+    else if (item === "VideoPostCommentLikeDislikeId"){
+        return await queryTheDatabaseGiveResults("SELECT UserId FROM VideoPostCommentLikeDislikeId WHERE VideoPostCommentLikeDislikeId = ?", [itemValue]);
+
+    }
+    else if (item === "FriendRequestId"){
+        // return await queryTheDatabaseGiveResults("SELECT UserId FROM VideoPost WHERE VideoPostId = ?", [itemValue]);
+
+    }
+    else if (item === "VideoSubscriptionOnlyId"){
+        // return await queryTheDatabaseGiveResults("SELECT UserId FROM VideoPost WHERE VideoPostId = ?", [itemValue]);
+
+    }
+    else if (item === "ChatMessageId"){
+        // return await queryTheDatabaseGiveResults("SELECT UserId FROM VideoPost WHERE VideoPostId = ?", [itemValue]);
+
+    }
+    else if (item === "PlaylistID"){
+        // return await queryTheDatabaseGiveResults("SELECT UserId FROM VideoPost WHERE VideoPostId = ?", [itemValue]);
+
+    }
+    else if (item === "PlaylistVideoPostsID"){
+        // return await queryTheDatabaseGiveResults("SELECT UserId FROM VideoPost WHERE VideoPostId = ?", [itemValue]);
+
+    }
+}
 
 
-  const queryTheDatabaseWithCallback= (theQuery, theArray, res, callback)=>{
+
+
+const queryTheDatabaseWithCallback= (theQuery, theArray, res, callback)=>{
     db.query(theQuery, theArray, (error, results)=>{
         if(error){
             console.log(error)
@@ -115,9 +208,9 @@ const db = mysql.createConnection({
         }
         callback(results)
     })
-  }
-  
-  io.on('connection', (socket) => {
+}
+
+io.on('connection', (socket) => {
     console.log(`A user connected ${socket.id}`);
     const {UserId}= socket.request.user;
     socket.join(`UserId_${UserId}`);
@@ -128,77 +221,95 @@ const db = mysql.createConnection({
 
         socket.leave(`UserId_${UserId}`);
     });
-  });
-  app.put("/changePassword", async (req, res)=>{
-    const {username, password}= req.body;
-    const hashedPassword = await bcrypt.hash(password, 13);
-    queryTheDatabase("UPDATE users SET password = ? WHERE username= ? ", [hashedPassword,username], res);
+});
+app.put("/changePassword",
+     verifyJWTMiddleware, 
+    (req,res,next)=>{ //secure
+        const username = req.body.username;
+        if(username !== req.decodedToken.username){
+            return res.status(403).send("You do not have permission to do that");
+        }
+        next();
+    },
+    async (req, res)=>{
+        const {username, password}= req.body;
+        const hashedPassword = await bcrypt.hash(password, 13);
+        queryTheDatabase("UPDATE users SET password = ? WHERE username= ? ", [hashedPassword,username], res);
+    }
+)
+app.post("/login", async (req, res)=>{ // secure
+const { username, password } = req.body;
+db.query(
+    'SELECT * FROM users WHERE username = ?',
+    [username],
+    async (err, results) => {
+        if(err){
+            console.log(err);
+            res.status(500).send("Error logging in.")
+        }
+        else if (results.length>0){
+            const match = await bcrypt.compare(password, results[0].password);
+            if (match) {
+                const exp = Math.floor(Date.now() / 1000) + 86400;
+                const token = jwt.sign({ username, exp, UserId: results[0].id}, secretKey);
 
-  })
-  app.post("/login", async (req, res)=>{
-    const { username, password } = req.body;
-    db.query(
-        'SELECT * FROM users WHERE username = ?',
-        [username],
-        async (err, results) => {
-            if(err){
-                console.log(err);
-                res.status(500).send("Error logging in.")
-            }
-            else if (results.length>0){
-                const match = await bcrypt.compare(password, results[0].password);
-                if (match) {
-                    const exp = Math.floor(Date.now() / 1000) + 86400;
-                    const token = jwt.sign({ username, exp }, secretKey);
-                    return res.status(200).json({ token });
-                } 
-                else {
-                    res.status(401).send('Your password is incorrect.');
-                }
-            }
+                res.cookie('theJWTToken', token, {
+                    expires: new Date(Date.now() + 86400000),
+                    httpOnly: true,
+                    creationDate: Date.now()
+                    //secure: true,                  Will change on deployment
+                    //Some same site attribute
+                });
+                return res.status(200).json({ token }); // Will have to change this later
+            } 
             else {
-                res.status(404).send('This username does not exist.');
+                res.status(401).send('Your password is incorrect.');
             }
         }
-    );
-  })
-  app.get('/verify-token/:token', (req, res)=>{
-    const submittedToken= req.params.token;
+        else {
+            res.status(404).send('This username does not exist.');
+        }
+    }
+);
+})
+app.get('/verify-token', (req, res)=>{ //secure
+    const submittedToken= req.cookies['theJWTToken'];
 
     const verificationFunction = function(err, results){
         if(err){
             console.log(err);
         }
         else if(results.length>0){
-            return res.status(401).send("Token is invalid and blacklisted");  
+            return res.status(401).send("Token is blacklisted");  
         }
         try {
             const decodedToken = jwt.verify(submittedToken, secretKey);
             return res.json(decodedToken);
         }
         catch(error) {
-            return res.json(error);
+            return res.status(401).send("Token is invalid or expired");
         }
     }
 
-    db.query('SELECT * FROM blacklisted_tokens WHERE token = ?', [submittedToken], verificationFunction )
-  })
+    db.query('SELECT * FROM blacklisted_tokens WHERE token = ?', [submittedToken], verificationFunction)
+})
 
-  app.post('/logout/:token', (req,res)=>{
-    const token=req.params.token;
+app.post('/logout', (req,res)=>{
+    const token=req.cookies.theJWTToken;
     db.query('INSERT INTO blacklisted_tokens (token) VALUES (?)', [token], function(err){
         if(err){
             console.log(err);
             res.status(500).send('Error blacklisting token');
         }
         else {
+            res.clearCookie('theJWTToken');
             res.status(201).send("Successfully blacklisted token")
         }
     })
-  })
+})
 
-  app.get('/users',(req,res)=>{
-    db.query('SELECT * FROM users', (err, results)=>{
+app.get('/users',(req,res)=>{
+    db.query('SELECT * FROM users', verifyJWTMiddleware, (err, results)=>{
         if(err){
             console.log(err);
             return res.json("Error retrieving all users")
@@ -208,11 +319,14 @@ const db = mysql.createConnection({
                     username:result.username}
         }));
     })
-  })
+})
 
-  app.post('/video/:VideoId', (req,res)=>{
+app.post('/video/:VideoId', verifyJWTMiddleware, (req,res)=>{ //secure 
     const VideoLinkId= req.params.VideoId;
     const {UserId, Title} = req.body
+    if(req.decodedToken.UserId !== UserId){
+        return res.status(403).send("You do not have permission to do that");
+    }
     db.query('INSERT INTO VideoPost (UserId, Title, VideoLinkId) VALUES (?, ?, ?)', [UserId, Title, VideoLinkId], (err, results)=>{
         if(err){
             console.log(err);
@@ -222,68 +336,71 @@ const db = mysql.createConnection({
             res.status(201).send(results);
         }
     } )
-  })
+})
 
-  app.post('/video-rating/:VideoPostId', (req,res)=>{
-        const VideoPostId= req.params.VideoPostId;
-        const {UserId, LikeStatus}= req.body;
-        db.query('INSERT INTO LikeDislike (VideoPostId, UserId, LikeStatus) VALUES (?, ?, ?)', [VideoPostId, UserId, LikeStatus], (err)=>{
-            if(err){
-                console.log(err)
-                res.status(500).send("Error adding rating")
-            }
-            else {
-                res.status(201).send("Successfully added rating")
-            }
-        })
-  })
-
-  app.post('/genre', (req,res)=>{
-        const genre= req.body.genre;
-        db.query('INSERT INTO Genre (Genre) VALUES (?)', [genre], (err, results)=>{
-            if(err){
-                console.log(err)
-                res.status(500).send("Error adding genre")
-            }
-            else {
-                res.status(201).send(results);
-            }
-        })
-  })
-
-  app.get('/users/id', (req, res)=> {
-        const {username, UserId}= req.query
-        if(username){
-            db.query('SELECT * FROM users WHERE username = ?', [username], (err, results)=>{
-                if(err){
-                    console.log(err)
-                    res.status(500).send("Something went wrong")
-                }
-                else if(results.length===0){
-                    res.status(404).send("This username doesn't exist")
-                }
-                else {
-                    res.status(200).send({id:results[0].id})
-                }
-            })
+app.post('/video-rating/:VideoPostId', verifyJWTMiddleware, (req,res)=>{ //secure
+    const VideoPostId= req.params.VideoPostId;
+    const {UserId, LikeStatus}= req.body;
+    if(req.decodedToken.UserId !== UserId){
+        return res.status(403).send("You do not have permission to do that");
+    }
+    db.query('INSERT INTO LikeDislike (VideoPostId, UserId, LikeStatus) VALUES (?, ?, ?)', [VideoPostId, UserId, LikeStatus], (err)=>{
+        if(err){
+            console.log(err)
+            res.status(500).send("Error adding rating")
         }
         else {
-            db.query('SELECT * FROM users WHERE id = ?', [UserId], (err, results)=>{
-                if(err){
-                    console.log(err)
-                    res.status(500).send("Something went wrong")
-                }
-                else if(results.length===0){
-                    res.status(404).send("This username doesn't exist")
-                }
-                else {
-                    res.status(200).send({username:results[0].username})
-                }
-            })
+            res.status(201).send("Successfully added rating")
         }
-  })
+    })
+})
 
-  app.get('/genre/id', (req, res)=> {
+app.post('/genre', verifyJWTMiddleware, (req,res)=>{
+    const genre= req.body.genre;
+    db.query('INSERT INTO Genre (Genre) VALUES (?)', [genre], (err, results)=>{
+        if(err){
+            console.log(err)
+            res.status(500).send("Error adding genre")
+        }
+        else {
+            res.status(201).send(results);
+        }
+    })
+})
+
+app.get('/users/id', verifyJWTMiddleware, (req, res)=> {
+    const {username, UserId}= req.query
+    if(username){
+        db.query('SELECT * FROM users WHERE username = ?', [username], (err, results)=>{
+            if(err){
+                console.log(err)
+                res.status(500).send("Something went wrong")
+            }
+            else if(results.length===0){
+                res.status(404).send("This username doesn't exist")
+            }
+            else {
+                res.status(200).send({id:results[0].id})
+            }
+        })
+    }
+    else {
+        db.query('SELECT * FROM users WHERE id = ?', [UserId], (err, results)=>{
+            if(err){
+                console.log(err)
+                res.status(500).send("Something went wrong")
+            }
+            else if(results.length===0){
+                res.status(404).send("This username doesn't exist")
+            }
+            else {
+                res.status(200).send({username:results[0].username})
+            }
+        })
+    }
+})
+
+app.get('/genre/id', verifyJWTMiddleware, (req, res)=> {
     const {genre}= req.query
     db.query('SELECT * FROM Genre WHERE Genre = ?', [genre], (err, results)=>{
         if(err){
@@ -299,7 +416,7 @@ const db = mysql.createConnection({
     })
 })
 
-app.get('/video/id', (req, res)=>{
+app.get('/video/id', verifyJWTMiddleware, (req, res)=>{
     const {VideoLinkId, VideoPostId} = req.query
     if(VideoLinkId){
         db.query('SELECT * FROM VideoPost WHERE VideoLinkId = ?', [VideoLinkId], (err, results)=>{
@@ -330,9 +447,12 @@ app.get('/video/id', (req, res)=>{
         })
     }   
 })
-app.delete('/video', (req, res)=>{
+app.delete('/video', verifyJWTMiddleware, async (req, res)=>{
     const {id, VideoPostId, LikeDislikeId, GenreId, VideoPostGenreId, UserId, VideoPostCommentId}= req.query
     if(id){
+        if(req.decodedToken.UserId !== id){
+            return res.status(403).send("You do not have permission to do that");
+        }
         db.query('DELETE FROM users WHERE id = ?', [id], (err)=>{
             if(err){
                 console.log(err);
@@ -344,6 +464,10 @@ app.delete('/video', (req, res)=>{
         });
     }
     else if(VideoPostId){
+        const authorizedUserId = (await whoOwnsThis("VideoPostId", VideoPostId))[0].UserId;
+        if(req.decodedToken.UserId !== authorizedUserId){
+            return res.status(403).send("You do not have permission to do that");
+        }
         db.query('DELETE FROM VideoPost WHERE VideoPostId = ?', [VideoPostId], (err)=>{
             if(err){
                 console.log(err);
@@ -356,6 +480,10 @@ app.delete('/video', (req, res)=>{
 
     }
     else if(LikeDislikeId){
+        const authorizedUserId = (await whoOwnsThis("LikeDislikeId", LikeDislikeId))[0].UserId;
+        if(req.decodedToken.UserId !== authorizedUserId){
+            return res.status(403).send("You do not have permission to do that");
+        }
         db.query('DELETE FROM LikeDislike WHERE LikeDislikeId = ?', [LikeDislikeId], (err)=>{
             if(err){
                 console.log(err);
@@ -367,18 +495,10 @@ app.delete('/video', (req, res)=>{
         });
 
     }
-    else if(GenreId){
-        db.query('DELETE FROM Genre WHERE GenreId = ?', [GenreId], (err)=>{
-            if(err){
-                console.log(err);
-                res.status(500).send("Error in deleting Genre");
-            }
-            else {
-                res.status(200).send("Successfully deleted Genre")
-            }
-        });
-    }
     else if(VideoPostCommentId && UserId){
+        if(req.decodedToken.UserId !== UserId){
+            return res.status(403).send("You do not have permission to do that");
+        }
         db.query('DELETE FROM VideoPostCommentLikeDislike WHERE VideoPostCommentId = ? AND UserId = ?', [VideoPostCommentId, UserId], (err)=>{
             if(err){
                 console.log(err);
@@ -390,7 +510,11 @@ app.delete('/video', (req, res)=>{
         });
 
     }
-    else if(VideoPostCommentId){ 
+    else if(VideoPostCommentId){
+        const authorizedUserId = (await whoOwnsThis("VideoPostCommentId", VideoPostCommentId))[0].UserId;
+        if(req.decodedToken.UserId !== authorizedUserId){
+            return res.status(403).send("You do not have permission to do that");
+        }
         db.query('UPDATE VideoPostComments SET Comment = ?, DELETED = ? WHERE VideoPostCommentId = ?', ["deleted",true,VideoPostCommentId], (err)=>{
             if(err){
                 console.log(err);
@@ -401,19 +525,8 @@ app.delete('/video', (req, res)=>{
             }
         });
     }
-    else if(VideoPostGenreId) {
-        db.query('DELETE FROM VideoPostGenre WHERE VideoPostGenreId = ?', [VideoPostGenreId], (err)=>{
-            if(err){
-                console.log(err);
-                res.status(500).send("Error in deleting Video Genre");
-            }
-            else {
-                res.status(200).send("Successfully deleted Video Genre")
-            }
-        });
-    }
 })
-app.get('/video',(req,res)=>{
+app.get('/video', verifyJWTMiddleware,(req,res)=>{
     db.query('SELECT * FROM VideoPost', (err, results)=>{
         if(err) {
             console.log(err)
@@ -423,7 +536,7 @@ app.get('/video',(req,res)=>{
     });
 })
 
-app.get('/video-by-genre-or-user',(req,res)=>{
+app.get('/video-by-genre-or-user', verifyJWTMiddleware, (req,res)=>{
     const {GenreId, UserId, VideoPostId}= req.query;
     if(GenreId){
         db.query('SELECT * FROM VideoPostGenre WHERE GenreId = ?',[GenreId], (err, results)=>{
@@ -454,9 +567,8 @@ app.get('/video-by-genre-or-user',(req,res)=>{
     }
 })
 
-app.get('/video-rating', (req,res)=>{   
+app.get('/video-rating', verifyJWTMiddleware, (req,res)=>{   
     const {VideoPostId, UserId}= req.query
-    
     if(VideoPostId && UserId){
         db.query('SELECT * FROM LikeDislike WHERE VideoPostId = ? AND UserId= ?', [VideoPostId, UserId], (err, results)=>{
             if(err) {
@@ -557,7 +669,7 @@ app.post("/forumPostCreate", async (req, res) => {
             }
         })
     }
-    
+
     //calculate currnent post tfidf vector
     tfidf.listTerms(tfidf.documents.length - 1).forEach(function(item) {
         tfidfVector[item.term] = item.tfidf
@@ -655,14 +767,14 @@ app.get("/fetchAllForumPostLikes/", async(req,res)=>{
     //holds number of likes for each post
     const forumPostID = req.query.postID
     const queryLikes = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND LikeStatus = 1"
-        db.query(queryLikes, [forumPostID], (err, data)=>{
-            if (err){
-                return res.send("error")
-            }
-            else { 
-                return res.json(data)
-            }
-        });
+    db.query(queryLikes, [forumPostID], (err, data)=>{
+        if (err){
+            return res.send("error")
+        }
+        else { 
+            return res.json(data)
+        }
+    });
 });
 
 //gets dislikes from post
@@ -670,14 +782,14 @@ app.get("/fetchAllForumPostDislikes/", async(req,res)=>{
     //holds number of dislikes for each post
     const forumPostID = req.query.postID
     const queryLikes = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND LikeStatus = 0"
-        db.query(queryLikes, [forumPostID], (err, data)=>{
-            if (err){
-                return res.send("error");
-            }
-            else { 
-                return res.json(data)
-            }
-        })
+    db.query(queryLikes, [forumPostID], (err, data)=>{
+        if (err){
+            return res.send("error");
+        }
+        else { 
+            return res.json(data)
+        }
+    })
 })
 
 //Gets posts that has a dislike/like in db by user
@@ -738,12 +850,12 @@ app.delete("/forumPostDeleteLikeDislike/", async (req,res)=>{
 });
 
 app.post("/forumPostComment/:id", (req, res) => {
-   const forumPostID = parseInt(req.params.id, 10)
-   //debugging purposes
-   const username = req.body.username
-   const body = req.body.body
+    const forumPostID = parseInt(req.params.id, 10)
+    //debugging purposes
+    const username = req.body.username
+    const body = req.body.body
 
-   db.query("INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp) VALUES (?, ?, ?, NOW())", [forumPostID, username, body], function (err, results){
+    db.query("INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp) VALUES (?, ?, ?, NOW())", [forumPostID, username, body], function (err, results){
     if(err){
         console.log(err);
         return res.status(500).send("Internal Server Error");
@@ -783,7 +895,7 @@ app.post("/forumPostComment/:id", (req, res) => {
         } );
         
     }
-   })
+    })
 })
 
 app.put("/deleteForumPostComment/:commentID", (req, res) =>{
@@ -968,58 +1080,58 @@ app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
     }
     const insertQuery = "INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp, parent_comment_id) VALUES (?, ?, ?, NOW(),?)"
 
-           db.query(insertQuery, [forumPostID, username, body, commentID], (err, insertResult) =>{
-            if(err){
-                console.log(err)
+    db.query(insertQuery, [forumPostID, username, body, commentID], (err, insertResult) =>{
+    if(err){
+        console.log(err)
+    }
+    else{
+        const replyID = insertResult.insertId
+        const selectQuery = "SELECT * from forumpostcomments where id=?"
+        db.query(selectQuery, [replyID], (err1, selectResult) => {
+            if(err1){
+                console.log(err1)
             }
-            else{
-                const replyID = insertResult.insertId
-                const selectQuery = "SELECT * from forumpostcomments where id=?"
-                db.query(selectQuery, [replyID], (err1, selectResult) => {
-                    if(err1){
-                        console.log(err1)
+            else
+            {
+                const replyUsername = selectResult[0].username;
+                db.query("SELECT * FROM ForumPostComments WHERE id = ?", [commentID], (err2, results2)=>{
+                    if(err2){
+                        console.log(err2);
                     }
-                    else
-                    {
-                        const replyUsername = selectResult[0].username;
-                        db.query("SELECT * FROM ForumPostComments WHERE id = ?", [commentID], (err2, results2)=>{
-                            if(err2){
-                                console.log(err2);
+                    db.query("SELECT * FROM users WHERE username = ?", [results2[0].username], (err3,results3)=>{
+                        if(err3){
+                            console.log(err3);
+                            res.status(500).send("internal server error");
+                        }
+                        db.query("SELECT * FROM users WHERE username = ?", [username], (err4, results4)=>{
+                            if(err4){
+                                console.log(err4);
+                                res.status(500).send("internal server error");
                             }
-                            db.query("SELECT * FROM users WHERE username = ?", [results2[0].username], (err3,results3)=>{
-                                if(err3){
-                                    console.log(err3);
-                                    res.status(500).send("internal server error");
-                                }
-                                db.query("SELECT * FROM users WHERE username = ?", [username], (err4, results4)=>{
-                                    if(err4){
-                                        console.log(err4);
-                                        res.status(500).send("internal server error");
-                                    }
-                                    if(results4[0].id!==results3[0].id){
-                                        io.to(`UserId_${results3[0].id}`).emit("newNotification",{
-                                            ForumCommentSenderUserId: results4[0].id,
-                                            ForumCommentReceiverUserId: results3[0].id,
-                                            Message: body,
-                                            CommentedAt: new Date().toISOString(),
-                                            ForumPostId: forumPostID,
-                                            NotificationRead:0,
-                                            SenderForumPostCommentId: insertResult.insertId,
-                                            ReceiverForumPostCommentId: commentID
-                                        })
-                                    }
-                                    res.status(201).send({id: replyID, username: replyUsername, message:"Reply Successful"})
+                            if(results4[0].id!==results3[0].id){
+                                io.to(`UserId_${results3[0].id}`).emit("newNotification",{
+                                    ForumCommentSenderUserId: results4[0].id,
+                                    ForumCommentReceiverUserId: results3[0].id,
+                                    Message: body,
+                                    CommentedAt: new Date().toISOString(),
+                                    ForumPostId: forumPostID,
+                                    NotificationRead:0,
+                                    SenderForumPostCommentId: insertResult.insertId,
+                                    ReceiverForumPostCommentId: commentID
                                 })
-
-                            })
-    
-
+                            }
+                            res.status(201).send({id: replyID, username: replyUsername, message:"Reply Successful"})
                         })
 
-                    }
+                    })
+
+
                 })
+
             }
-           })
+        })
+    }
+    })
 })
 
 app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
@@ -1031,12 +1143,12 @@ app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
     }
 
     db.query("SELECT * FROM forumpostcomments WHERE parent_comment_id=?", [parentCommentID], function (err, data){
-    if(err){
-        console.log(err)
-    }
-    else{
-        return res.json(data)
-    }
+        if(err){
+            console.log(err)
+        }
+        else{
+            return res.json(data)
+        }
     })
 })
 
@@ -1084,7 +1196,7 @@ app.get("/forumPostRecommendedPost/:postID", (req, res) =>{
             })
             
         }
-    })
+})
 })
 
 function cosineSimilarity(tfidfVector1, tfidfVector2) {
@@ -1177,7 +1289,7 @@ app.delete("/deleteVideoFromPlaylist", (req, res)=>{
         }
     })
 })
-    
+
 app.get("/fetchAllUserPlaylists", (req, res)=>{
     const userID = req.query.userID
     const query = "SELECT * FROM Playlist WHERE userID = ?"
@@ -1232,7 +1344,7 @@ app.put("/editPlaylistName", (req, res)=>{
     })
 })
 
-app.get("/videoComments/:VideoPostId", (req,res)=>{
+app.get("/videoComments/:VideoPostId", verifyJWTMiddleware, (req,res)=>{
     const VideoPostId= req.params.VideoPostId;
     db.query('SELECT * FROM VideoPostComments WHERE VideoPostId = ?',[VideoPostId], (err, results)=>{
         if(err) {
@@ -1241,11 +1353,15 @@ app.get("/videoComments/:VideoPostId", (req,res)=>{
         }
         return res.json(results);
     });
-  })
+})
 
-  app.put("/videoComments/:VideoPostCommentId", (req,res)=>{
+app.put("/videoComments/:VideoPostCommentId", verifyJWTMiddleware, async (req,res)=>{
     const VideoPostCommentId = req.params.VideoPostCommentId;
     const {updatedComment}= req.body;
+    const authorizedUserId = (await whoOwnsThis("VideoPostCommentId", VideoPostCommentId))[0].UserId;
+    if(req.decodedToken.UserId !== authorizedUserId){
+        return res.status(403).send("You do not have permission to do that");
+    }
     db.query('UPDATE VideoPostComments SET Comment= ? WHERE VideoPostCommentId =?', [updatedComment, VideoPostCommentId], (err, results)=>{
         if(err) {
             console.log(err)
@@ -1253,28 +1369,31 @@ app.get("/videoComments/:VideoPostId", (req,res)=>{
         }
         return res.json(results);
     })
-  })
+})
 
-  app.get("/video-comment-parent/:VideoPostCommentId", (req,res)=>{
+app.get("/video-comment-parent/:VideoPostCommentId", verifyJWTMiddleware, (req,res)=>{
     const VideoPostCommentId = req.params.VideoPostCommentId;
     queryTheDatabase("SELECT ReplyToVideoPostCommentId FROM VideoPostComments WHERE VideoPostCommentId = ?",[VideoPostCommentId], res );
-  })
+})
 
-  app.get("/video-comment", (req,res)=>{
+app.get("/video-comment", verifyJWTMiddleware, (req,res)=>{
     const VideoPostCommentId = req.query.VideoPostCommentId;
     queryTheDatabase("SELECT * FROM VideoPostComments WHERE VideoPostCommentId = ?", [VideoPostCommentId], res)
-  })
+})
 
-  app.get("/video-comment-descendants/:VideoPostCommentId", (req,res)=>{
+app.get("/video-comment-descendants/:VideoPostCommentId", verifyJWTMiddleware, (req,res)=>{
     queryTheDatabase(`WITH RECURSIVE VideoCommentDescendants AS (
         SELECT * FROM VideoPostComments WHERE VideoPostCommentId = ?
         UNION
         SELECT VPC.* FROM VideoPostComments VPC INNER JOIN VideoCommentDescendants VCD ON VPC.ReplyToVideoPostCommentId = VCD.VideoPostCommentId
     ) SELECT * FROM VideoCommentDescendants`,[req.params.VideoPostCommentId],res);
-  })
+})
 
-  app.post("/videoComments", (req,res)=>{
+app.post("/videoComments", verifyJWTMiddleware, async (req,res)=>{
     const {UserId, Comment, VideoPostId, ReplyToVideoPostCommentId}= req.body;
+    if(req.decodedToken.UserId !== UserId){
+        return res.status(403).send("You do not have permission to do that");
+    }
     if(ReplyToVideoPostCommentId!==null){
         db.query('SELECT * FROM VideoPostComments WHERE VideoPostCommentId = ?', [ReplyToVideoPostCommentId], (err, results)=>{
             if(err){
@@ -1282,12 +1401,12 @@ app.get("/videoComments/:VideoPostId", (req,res)=>{
                 res.status(500).send("Internal Server Error")
             }
             if(results[0].DELETED){
-                 res.status(400).send("You cannot reply to a deleted comment");
+                    res.status(400).send("You cannot reply to a deleted comment");
             }
             db.query('INSERT INTO VideoPostComments (UserId, Comment, VideoPostId, ReplyToVideoPostCommentId, DELETED) VALUES (?, ?, ?, ?, ?)', [UserId, Comment, VideoPostId, ReplyToVideoPostCommentId, false], (err1, results1)=>{
                 if(err1){
                     console.log(err1)
-                     res.status(500).send("Internal Server Error");
+                        res.status(500).send("Internal Server Error");
                 }
                 if(UserId!==results[0].UserId){
                     io.to(`UserId_${results[0].UserId}`).emit("newNotification", {
@@ -1303,7 +1422,7 @@ app.get("/videoComments/:VideoPostId", (req,res)=>{
                     });
                 }
                 
-                 res.json(results1);
+                    res.json(results1);
             })
         })
     }
@@ -1311,17 +1430,17 @@ app.get("/videoComments/:VideoPostId", (req,res)=>{
         db.query('INSERT INTO VideoPostComments (UserId, Comment, VideoPostId, ReplyToVideoPostCommentId, DELETED) VALUES (?, ?, ?, ?, ?)', [UserId, Comment, VideoPostId, ReplyToVideoPostCommentId, false], (err1, results1)=>{
             if(err1){
                 console.log(err1)
-                 res.status(500).send("Internal Server Error");
+                    res.status(500).send("Internal Server Error");
             }
             db.query("SELECT * FROM VideoPostComments WHERE VideoPostCommentId = ?", [results1.insertId], (err2,results2)=>{
                 if(err2){
                     console.log(err2)
-                     res.status(500).send("Internal Server Error");
+                        res.status(500).send("Internal Server Error");
                 }
                 db.query("SELECT * FROM VideoPost WHERE VideoPostId = ?", [results2[0].VideoPostId], (err3,results3)=>{
                     if(err3){
                         console.log(err3);
-                         res.status(500).send("Internal Server Error");
+                            res.status(500).send("Internal Server Error");
                     }
                     if(results3[0].UserId!==results2[0].UserId){
                         io.to(`UserId_${results3[0].UserId}`).emit("newNotification", {
@@ -1340,12 +1459,13 @@ app.get("/videoComments/:VideoPostId", (req,res)=>{
             })
         })
     }
-    
+})
 
-  })
-
-  app.post("/videoCommentRating", (req, res)=>{
+app.post("/videoCommentRating", verifyJWTMiddleware, (req, res)=>{
     const {VideoPostCommentId, UserId, LikeStatus}= req.body;
+    if(req.decodedToken.UserId !== UserId){
+        return res.status(403).send("You do not have permission to do that");
+    }
     db.query('INSERT INTO VideoPostCommentLikeDislike (VideoPostCommentId, UserId, LikeStatus) VALUES (?, ?, ?)', [VideoPostCommentId, UserId, LikeStatus], (err, results)=>{
         if(err){
             console.log(err);
@@ -1353,22 +1473,24 @@ app.get("/videoComments/:VideoPostId", (req,res)=>{
         }
         return res.status(201).send("Successfully added Video Comment Rating")
     })
-  })
+})
 
-  app.get("/videoCommentRating", (req, res)=>{
-        const {VideoPostCommentId, UserId} = req.query;
-        db.query("SELECT * FROM VideoPostCommentLikeDislike WHERE UserId= ? AND VideoPostCommentId = ?", [UserId, VideoPostCommentId], (error, results)=>{
-            if (error){
-                console.log(error);
-                return res.status(500).send("Internal Server Error");
-            }
-            return res.json(results);
-        })
-  })
+app.get("/videoCommentRating", verifyJWTMiddleware, (req, res)=>{
+    const {VideoPostCommentId, UserId} = req.query;
+    db.query("SELECT * FROM VideoPostCommentLikeDislike WHERE UserId= ? AND VideoPostCommentId = ?", [UserId, VideoPostCommentId], (error, results)=>{
+        if (error){
+            console.log(error);
+            return res.status(500).send("Internal Server Error");
+        }
+        return res.json(results);
+    })
+})
 
-  app.post("/friendRequests", (req, res)=>{
+app.post("/friendRequests", verifyJWTMiddleware, (req, res)=>{
     const {SenderUserId, ReceiverUserId}= req.body;
-    
+    if(req.decodedToken.UserId !== SenderUserId){
+        return res.status(403).send("You do not have permission to do that");
+    }
     let theQuery= "SELECT * FROM FriendRequests WHERE SenderUserId = ? AND ReceiverUserId = ?"
     let theArray= [ReceiverUserId, SenderUserId];
     db.query(theQuery, theArray, (error, results)=>{
@@ -1386,260 +1508,263 @@ app.get("/videoComments/:VideoPostId", (req,res)=>{
             queryTheDatabase(theQuery, theArray, res);
         }
     })
-  })
+})
 
-  app.delete("/friendRequests", (req,res)=>{
+app.delete("/friendRequests", verifyJWTMiddleware, (req,res)=>{
     const {SenderUserId, ReceiverUserId}= req.query;
+    if(req.decodedToken.UserId !== authorizedUserId){
+        return res.status(403).send("You do not have permission to do that");
+    }
     queryTheDatabase("DELETE FROM FriendRequests WHERE SenderUserId = ? AND ReceiverUserId = ?",[SenderUserId, ReceiverUserId], res)
-  })
+})
 
-  app.post("/Friendships", (req, res)=>{
-    const {UserId1, UserId2}= req.body
-    let val1, val2;
-    if(UserId1>UserId2){
-        val1= UserId2
-        val2= UserId1
-    }
-    else{
-        val1=UserId1
-        val2=UserId2
-    }
-    queryTheDatabase("INSERT INTO Friendships (UserId1, UserId2) VALUES (?, ?)", [val1, val2], res)
-  })
-  app.delete("/Friendships", (req, res)=>{
-    const {UserId1, UserId2}= req.query
-    let val1, val2;
-    if(UserId1>UserId2){
-        val1= UserId2
-        val2= UserId1
-    }
-    else{
-        val1=UserId1
-        val2=UserId2
-    }
-    queryTheDatabase("DELETE FROM Friendships WHERE UserId1= ? AND UserId2 = ?", [val1, val2], res)
-  })
+app.post("/Friendships", (req, res)=>{
+const {UserId1, UserId2}= req.body
+let val1, val2;
+if(UserId1>UserId2){
+    val1= UserId2
+    val2= UserId1
+}
+else{
+    val1=UserId1
+    val2=UserId2
+}
+queryTheDatabase("INSERT INTO Friendships (UserId1, UserId2) VALUES (?, ?)", [val1, val2], res)
+})
+app.delete("/Friendships", (req, res)=>{
+const {UserId1, UserId2}= req.query
+let val1, val2;
+if(UserId1>UserId2){
+    val1= UserId2
+    val2= UserId1
+}
+else{
+    val1=UserId1
+    val2=UserId2
+}
+queryTheDatabase("DELETE FROM Friendships WHERE UserId1= ? AND UserId2 = ?", [val1, val2], res)
+})
 
-  app.get("/OutgoingFriendRequests/:UserId", (req,res)=>{
-    const UserId = req.params.UserId
-    queryTheDatabase("SELECT * FROM FriendRequests WHERE SenderUserId = ?", [UserId], res);
-  })
-  app.get("/IncomingFriendRequests/:UserId", (req,res)=>{
-    const UserId = req.params.UserId
-    queryTheDatabase("SELECT * FROM FriendRequests WHERE ReceiverUserId = ?", [UserId], res);
-  })
-  app.get("/ListOfFriends/:UserId", (req, res)=>{
-    const UserId = req.params.UserId
-    queryTheDatabase("SELECT * FROM Friendships WHERE UserId1 = ? OR UserId2 = ?", [UserId,UserId], res)
-  })
+app.get("/OutgoingFriendRequests/:UserId", (req,res)=>{
+const UserId = req.params.UserId
+queryTheDatabase("SELECT * FROM FriendRequests WHERE SenderUserId = ?", [UserId], res);
+})
+app.get("/IncomingFriendRequests/:UserId", (req,res)=>{
+const UserId = req.params.UserId
+queryTheDatabase("SELECT * FROM FriendRequests WHERE ReceiverUserId = ?", [UserId], res);
+})
+app.get("/ListOfFriends/:UserId", (req, res)=>{
+const UserId = req.params.UserId
+queryTheDatabase("SELECT * FROM Friendships WHERE UserId1 = ? OR UserId2 = ?", [UserId,UserId], res)
+})
 
-  app.get("/FriendRelationship", (req,res)=>{
-    const {LoggedInUserId, VisitorUserId}= req.query;
-    let val1, val2;
-    if(LoggedInUserId>VisitorUserId){
-        val1=VisitorUserId;
-        val2=LoggedInUserId;
+app.get("/FriendRelationship", (req,res)=>{
+const {LoggedInUserId, VisitorUserId}= req.query;
+let val1, val2;
+if(LoggedInUserId>VisitorUserId){
+    val1=VisitorUserId;
+    val2=LoggedInUserId;
+}
+else{
+    val1=LoggedInUserId;
+    val2=VisitorUserId;
+}
+db.query("SELECT * FROM Friendships WHERE UserId1 = ? && UserId2 = ?", [val1, val2], (err, results)=>{
+    if (err){
+        console.log(err);
+        return res.status(500).send("Internal Server Error");
     }
-    else{
-        val1=LoggedInUserId;
-        val2=VisitorUserId;
+    else if(results.length>0){
+        return res.send(results);
     }
-    db.query("SELECT * FROM Friendships WHERE UserId1 = ? && UserId2 = ?", [val1, val2], (err, results)=>{
-        if (err){
-            console.log(err);
+    db.query("SELECT * FROM FriendRequests WHERE SenderUserId = ? && ReceiverUserId = ?", [val1,val2], (err1,results1)=>{
+        if(err1){
+            console.log(err1);
             return res.status(500).send("Internal Server Error");
         }
-        else if(results.length>0){
-            return res.send(results);
+        else if(results1.length>0){
+            return res.send(results1);
         }
-        db.query("SELECT * FROM FriendRequests WHERE SenderUserId = ? && ReceiverUserId = ?", [val1,val2], (err1,results1)=>{
-            if(err1){
-                console.log(err1);
+        db.query("SELECT * FROM FriendRequests WHERE SenderUserId = ? && ReceiverUserId = ?", [val2,val1], (err2,results2)=>{
+            if(err2){
+                console.log(err2);
                 return res.status(500).send("Internal Server Error");
             }
-            else if(results1.length>0){
-                return res.send(results1);
-            }
-            db.query("SELECT * FROM FriendRequests WHERE SenderUserId = ? && ReceiverUserId = ?", [val2,val1], (err2,results2)=>{
-                if(err2){
-                    console.log(err2);
-                    return res.status(500).send("Internal Server Error");
-                }
-                return res.send(results2);
-            })
+            return res.send(results2);
         })
     })
-    
-  })
+})
 
-  app.post('/video-genre', (req,res)=>{
-    const {VideoPostId, Genre}= req.body
-    db.query('SELECT * FROM Genre Where Genre = ?', [Genre.toLowerCase()], (err, results)=>{
-        if(err){
-            console.log(err)
-            res.status(500).send("Something went wrong in selecting from genres")
+})
+
+app.post('/video-genre', (req,res)=>{
+const {VideoPostId, Genre}= req.body
+db.query('SELECT * FROM Genre Where Genre = ?', [Genre.toLowerCase()], (err, results)=>{
+    if(err){
+        console.log(err)
+        res.status(500).send("Something went wrong in selecting from genres")
+    }
+    else {
+        if(results.length===1){
+            queryTheDatabase("INSERT INTO VideoPostGenre (VideoPostId, GenreId) VALUES (?, ?)", [VideoPostId, results[0].GenreId], res)
         }
-        else {
-            if(results.length===1){
-                queryTheDatabase("INSERT INTO VideoPostGenre (VideoPostId, GenreId) VALUES (?, ?)", [VideoPostId, results[0].GenreId], res)
-            }
-            else if(results.length===0){
-                db.query(`INSERT INTO Genre (Genre) VALUES (?)`, [Genre.toLowerCase()], (err1, results1)=>{
-                    if(err1){
-                        console.log(err1)
-                        res.status(500).send("Something went wrong in creating new genre");
-                    }
-                    else {
-                        queryTheDatabase("INSERT INTO VideoPostGenre (VideoPostId, GenreId) VALUES (?, ?)", [VideoPostId, results1.insertId], res)
-                    }
-                } )
-            }
+        else if(results.length===0){
+            db.query(`INSERT INTO Genre (Genre) VALUES (?)`, [Genre.toLowerCase()], (err1, results1)=>{
+                if(err1){
+                    console.log(err1)
+                    res.status(500).send("Something went wrong in creating new genre");
+                }
+                else {
+                    queryTheDatabase("INSERT INTO VideoPostGenre (VideoPostId, GenreId) VALUES (?, ?)", [VideoPostId, results1.insertId], res)
+                }
+            } )
         }
-    })
-  })
+    }
+})
+})
 
-  app.get("/genreName", (req, res)=>{ //fix this and add video later
-    const {GenreId} = req.query;
-    queryTheDatabase("SELECT * FROM Genre WHERE GenreId = ?", [GenreId], res);
-  })
+app.get("/genreName", (req, res)=>{ //fix this and add video later
+const {GenreId} = req.query;
+queryTheDatabase("SELECT * FROM Genre WHERE GenreId = ?", [GenreId], res);
+})
 
-  app.get("/email", (req, res)=>{
-    const {UserId} = req.query;
-    queryTheDatabase("SELECT email FROM users WHERE id = ?", [UserId], res)
-  })
-  app.put("/email", (req, res)=>{
-    const {UserId, email} = req.body;
-    queryTheDatabase("UPDATE users SET email = ? WHERE id = ?", [email, UserId], res)
-  })
+app.get("/email", (req, res)=>{
+const {UserId} = req.query;
+queryTheDatabase("SELECT email FROM users WHERE id = ?", [UserId], res)
+})
+app.put("/email", (req, res)=>{
+const {UserId, email} = req.body;
+queryTheDatabase("UPDATE users SET email = ? WHERE id = ?", [email, UserId], res)
+})
 
-  app.get("/videoSubscriptionOnly", (req, res)=>{
-    const {UserId} = req.query;
-    queryTheDatabase("SELECT * FROM VideoSubscriptionOnly WHERE UserId = ?", [UserId], res)
-  })
-  app.delete("/videoSubscriptionOnly", (req,res)=>{
-    const {UserId}= req.query;
-    queryTheDatabase("DELETE FROM VideoSubscriptionOnly WHERE UserId = ?", [UserId], res);
-  })
-  app.post("/videoSubscriptionOnly", (req, res)=>{
-    const {UserId, Only}=req.body;
-    queryTheDatabase("INSERT INTO VideoSubscriptionOnly (UserId, Only) VALUES (?,?)", [UserId, Only], res);
-  })
+app.get("/videoSubscriptionOnly", (req, res)=>{
+const {UserId} = req.query;
+queryTheDatabase("SELECT * FROM VideoSubscriptionOnly WHERE UserId = ?", [UserId], res)
+})
+app.delete("/videoSubscriptionOnly", (req,res)=>{
+const {UserId}= req.query;
+queryTheDatabase("DELETE FROM VideoSubscriptionOnly WHERE UserId = ?", [UserId], res);
+})
+app.post("/videoSubscriptionOnly", (req, res)=>{
+const {UserId, Only}=req.body;
+queryTheDatabase("INSERT INTO VideoSubscriptionOnly (UserId, Only) VALUES (?,?)", [UserId, Only], res);
+})
 
-  app.get("/videoSubscriptions", (req, res)=>{
-    const {UserId} = req.query;
-    queryTheDatabase("SELECT * FROM VideoSubscriptions WHERE UserId = ?", [UserId], res);
-  })
+app.get("/videoSubscriptions", (req, res)=>{
+const {UserId} = req.query;
+queryTheDatabase("SELECT * FROM VideoSubscriptions WHERE UserId = ?", [UserId], res);
+})
 
-  app.delete("/videoSubscriptions", (req,res)=>{
-    const {UserId} = req.query;
-    queryTheDatabase("DELETE FROM VideoSubscriptions WHERE UserId = ?", [UserId], res);
-  })
-  app.post("/videoSubscriptions", (req,res)=>{
-    const {UserId, Genre}=req.body;
-    db.query('SELECT * FROM Genre Where Genre = ?', [Genre.toLowerCase()], (err, results)=>{
-        if(err){
-            console.log(err)
-            res.status(500).send("Something went wrong in selecting from genres")
+app.delete("/videoSubscriptions", (req,res)=>{
+const {UserId} = req.query;
+queryTheDatabase("DELETE FROM VideoSubscriptions WHERE UserId = ?", [UserId], res);
+})
+app.post("/videoSubscriptions", (req,res)=>{
+const {UserId, Genre}=req.body;
+db.query('SELECT * FROM Genre Where Genre = ?', [Genre.toLowerCase()], (err, results)=>{
+    if(err){
+        console.log(err)
+        res.status(500).send("Something went wrong in selecting from genres")
+    }
+    else {
+        if(results.length===1){
+            queryTheDatabase("INSERT INTO VideoSubscriptions (UserId, GenreId) VALUES (?, ?)", [UserId, results[0].GenreId], res)
         }
-        else {
-            if(results.length===1){
-                queryTheDatabase("INSERT INTO VideoSubscriptions (UserId, GenreId) VALUES (?, ?)", [UserId, results[0].GenreId], res)
-            }
-            else if(results.length===0){
-                db.query(`INSERT INTO Genre (Genre) VALUES (?)`, [Genre.toLowerCase()], (err1, results1)=>{
-                    if(err1){
-                        console.log(err1)
-                        res.status(500).send("Something went wrong in creating new genre");
-                    }
-                    else {
-                        queryTheDatabase("INSERT INTO VideoSubscriptions (UserId, GenreId) VALUES (?, ?)", [UserId, results1.insertId], res)
-                    }
-                } )
-            }
+        else if(results.length===0){
+            db.query(`INSERT INTO Genre (Genre) VALUES (?)`, [Genre.toLowerCase()], (err1, results1)=>{
+                if(err1){
+                    console.log(err1)
+                    res.status(500).send("Something went wrong in creating new genre");
+                }
+                else {
+                    queryTheDatabase("INSERT INTO VideoSubscriptions (UserId, GenreId) VALUES (?, ?)", [UserId, results1.insertId], res)
+                }
+            } )
         }
-    })
-  })
+    }
+})
+})
 
 
-  app.post("/chatMessage", (req, res)=>{
-    const {SenderUserId, ReceiverUserId, Message} = req.body;
-    queryTheDatabaseWithCallback("INSERT INTO ChatMessage (SenderUserId, ReceiverUserId, Message) VALUES (?,?,?)", [SenderUserId, ReceiverUserId, Message], res, (results)=>{
-        io.to(`UserId_${ReceiverUserId}`).emit("newMessage", { SenderUserId, ReceiverUserId, Message, ChatMessageId:results.insertId, SentAt:new Date().toISOString()});
-        res.send(results);
-    }); 
-  })
+app.post("/chatMessage", (req, res)=>{
+const {SenderUserId, ReceiverUserId, Message} = req.body;
+queryTheDatabaseWithCallback("INSERT INTO ChatMessage (SenderUserId, ReceiverUserId, Message) VALUES (?,?,?)", [SenderUserId, ReceiverUserId, Message], res, (results)=>{
+    io.to(`UserId_${ReceiverUserId}`).emit("newMessage", { SenderUserId, ReceiverUserId, Message, ChatMessageId:results.insertId, SentAt:new Date().toISOString()});
+    res.send(results);
+}); 
+})
 
-  app.get("/chatMessages", (req, res)=>{
-    const {UserId1, UserId2} = req.query;
-    queryTheDatabaseWithCallback("SELECT * FROM ChatMessage WHERE (SenderUserId = ? AND ReceiverUserId = ?) OR (SenderUserId = ? AND ReceiverUserId = ?) ORDER BY SentAt", [UserId1, UserId2, UserId2, UserId1], res, (results)=>{
-        res.send(results)
-    });
-  })
-  app.get("/notifications", (req,res)=>{
-    const {UserId, Dropdown, getUnreadCount} = req.query;
-    db.query("SELECT VideoPost.UserId AS 'VideoPostReceiverUserId', VideoPostComments.UserId AS 'VideoCommentSenderUserId', VideoPost.VideoPostId AS 'VideoPostId', VideoPostComments.VideoPostCommentId as 'SenderVideoPostCommentId', VideoPostComments.Comment AS 'Message', VideoPostComments.CommentedAt AS 'CommentedAt', VideoPostComments.DELETED AS 'DELETED', VideoPostComments.NotificationRead AS 'NotificationRead' FROM VideoPost INNER JOIN VideoPostComments ON VideoPostComments.VideoPostId = VideoPost.VideoPostId WHERE VideoPostComments.ReplyToVideoPostCommentId IS NULL AND VideoPostComments.UserId != VideoPost.UserId AND VideoPost.UserId = ?;", [UserId], (err, results)=>{
-        if(err){
-            console.log(err);
-            res.status(500).send("Internal Server Server");
+app.get("/chatMessages", (req, res)=>{
+const {UserId1, UserId2} = req.query;
+queryTheDatabaseWithCallback("SELECT * FROM ChatMessage WHERE (SenderUserId = ? AND ReceiverUserId = ?) OR (SenderUserId = ? AND ReceiverUserId = ?) ORDER BY SentAt", [UserId1, UserId2, UserId2, UserId1], res, (results)=>{
+    res.send(results)
+});
+})
+app.get("/notifications", (req,res)=>{
+const {UserId, Dropdown, getUnreadCount} = req.query;
+db.query("SELECT VideoPost.UserId AS 'VideoPostReceiverUserId', VideoPostComments.UserId AS 'VideoCommentSenderUserId', VideoPost.VideoPostId AS 'VideoPostId', VideoPostComments.VideoPostCommentId as 'SenderVideoPostCommentId', VideoPostComments.Comment AS 'Message', VideoPostComments.CommentedAt AS 'CommentedAt', VideoPostComments.DELETED AS 'DELETED', VideoPostComments.NotificationRead AS 'NotificationRead' FROM VideoPost INNER JOIN VideoPostComments ON VideoPostComments.VideoPostId = VideoPost.VideoPostId WHERE VideoPostComments.ReplyToVideoPostCommentId IS NULL AND VideoPostComments.UserId != VideoPost.UserId AND VideoPost.UserId = ?;", [UserId], (err, results)=>{
+    if(err){
+        console.log(err);
+        res.status(500).send("Internal Server Server");
+    }
+    db.query("SELECT v1.UserId as 'VideoCommentSenderUserId', v2.UserId as 'VideoCommentReceiverUserId', v1.Comment as 'Message', v1.CommentedAt as 'CommentedAt', v1.VideoPostId as 'VideoPostId', v1.DELETED as 'DELETED', v1.NotificationRead as 'NotificationRead', v1.VideoPostCommentId as 'SenderVideoPostCommentId', v2.VideoPostCommentId as 'ReceiverVideoPostCommentId' FROM VideoPostComments v1 JOIN VideoPostComments v2 ON v1.ReplyToVideoPostCommentId = v2.VideoPostCommentId WHERE v1.UserId!=v2.UserId AND v2.UserId = ?;", [UserId], (err1, results1)=>{
+        if(err1){
+            console.log(err1)
+            res.status(500).send("Internal Server Error");
         }
-        db.query("SELECT v1.UserId as 'VideoCommentSenderUserId', v2.UserId as 'VideoCommentReceiverUserId', v1.Comment as 'Message', v1.CommentedAt as 'CommentedAt', v1.VideoPostId as 'VideoPostId', v1.DELETED as 'DELETED', v1.NotificationRead as 'NotificationRead', v1.VideoPostCommentId as 'SenderVideoPostCommentId', v2.VideoPostCommentId as 'ReceiverVideoPostCommentId' FROM VideoPostComments v1 JOIN VideoPostComments v2 ON v1.ReplyToVideoPostCommentId = v2.VideoPostCommentId WHERE v1.UserId!=v2.UserId AND v2.UserId = ?;", [UserId], (err1, results1)=>{
-            if(err1){
-                console.log(err1)
+        db.query("SELECT u1.id AS 'ForumPostReceiverUserId', u2.id AS 'ForumCommentSenderUserId', ForumPost.id AS 'ForumPostId', ForumPostComments.id AS 'SenderForumPostCommentId', ForumPostComments.body AS 'Message', ForumPostComments.comment_timestamp AS 'CommentedAt', ForumPostComments.NotificationRead AS 'NotificationRead' FROM ForumPost INNER JOIN ForumPostComments ON ForumPostComments.forum_post_id = ForumPost.id LEFT JOIN users AS u1 ON ForumPost.username = u1.username LEFT JOIN users AS u2 ON ForumPostComments.username = u2.username WHERE ForumPostComments.parent_comment_id IS NULL AND u1.id != u2.id AND u1.id = ?", [UserId], (err2, results2)=>{
+            if(err2){
+                console.log(err2);
                 res.status(500).send("Internal Server Error");
             }
-            db.query("SELECT u1.id AS 'ForumPostReceiverUserId', u2.id AS 'ForumCommentSenderUserId', ForumPost.id AS 'ForumPostId', ForumPostComments.id AS 'SenderForumPostCommentId', ForumPostComments.body AS 'Message', ForumPostComments.comment_timestamp AS 'CommentedAt', ForumPostComments.NotificationRead AS 'NotificationRead' FROM ForumPost INNER JOIN ForumPostComments ON ForumPostComments.forum_post_id = ForumPost.id LEFT JOIN users AS u1 ON ForumPost.username = u1.username LEFT JOIN users AS u2 ON ForumPostComments.username = u2.username WHERE ForumPostComments.parent_comment_id IS NULL AND u1.id != u2.id AND u1.id = ?", [UserId], (err2, results2)=>{
-                if(err2){
-                    console.log(err2);
+            db.query("SELECT u1.id as 'ForumCommentSenderUserId', u2.id as 'ForumCommentReceiverUserId', v1.body as 'Message', v1.comment_timestamp as 'CommentedAt', v1.forum_post_id as 'ForumPostId', v1.NotificationRead as 'NotificationRead', v1.id as 'SenderForumPostCommentId', v2.id as 'ReceiverForumPostCommentId' FROM ForumPostComments AS v1 INNER JOIN ForumPostComments AS v2 ON v1.parent_comment_id = v2.id LEFT JOIN users AS u1 ON v1.username = u1.username LEFT JOIN users as u2 ON v2.username = u2.username WHERE v1.username != v2.username AND u2.id = ?;", [UserId], (err3,results3)=>{
+                if(err3){
+                    console.log(err3);
                     res.status(500).send("Internal Server Error");
                 }
-                db.query("SELECT u1.id as 'ForumCommentSenderUserId', u2.id as 'ForumCommentReceiverUserId', v1.body as 'Message', v1.comment_timestamp as 'CommentedAt', v1.forum_post_id as 'ForumPostId', v1.NotificationRead as 'NotificationRead', v1.id as 'SenderForumPostCommentId', v2.id as 'ReceiverForumPostCommentId' FROM ForumPostComments AS v1 INNER JOIN ForumPostComments AS v2 ON v1.parent_comment_id = v2.id LEFT JOIN users AS u1 ON v1.username = u1.username LEFT JOIN users as u2 ON v2.username = u2.username WHERE v1.username != v2.username AND u2.id = ?;", [UserId], (err3,results3)=>{
-                    if(err3){
-                        console.log(err3);
-                        res.status(500).send("Internal Server Error");
+                if(!Dropdown){
+                    res.send([...results, ...results1, ...results2, ...results3]);
+                }
+                else {
+                    let sendThis = [...results, ...results1, ...results2, ...results3];
+                    let UnreadCount =0;
+                    if(getUnreadCount){
+                        sendThis.forEach((element)=>{
+                            if(element.NotificationRead===0){
+                                UnreadCount++;
+                            }
+                        })
                     }
-                    if(!Dropdown){
-                        res.send([...results, ...results1, ...results2, ...results3]);
+                    sendThis.forEach((comment)=>{
+                        comment.CommentedAtDateObject = new Date(comment.CommentedAt)
+                    })
+                    sendThis.sort((a, b) => b.CommentedAtDateObject - a.CommentedAtDateObject);
+                    sendThis = sendThis.slice(0,10);
+
+                    if(getUnreadCount){
+                        res.send({UnreadNotifications: UnreadCount});
                     }
                     else {
-                        let sendThis = [...results, ...results1, ...results2, ...results3];
-                        let UnreadCount =0;
-                        if(getUnreadCount){
-                            sendThis.forEach((element)=>{
-                                if(element.NotificationRead===0){
-                                    UnreadCount++;
-                                }
-                            })
-                        }
-                        sendThis.forEach((comment)=>{
-                            comment.CommentedAtDateObject = new Date(comment.CommentedAt)
-                        })
-                        sendThis.sort((a, b) => b.CommentedAtDateObject - a.CommentedAtDateObject);
-                        sendThis = sendThis.slice(0,10);
-
-                        if(getUnreadCount){
-                            res.send({UnreadNotifications: UnreadCount});
-                        }
-                        else {
-                            res.send(sendThis);
-                        }
-                        
+                        res.send(sendThis);
                     }
-                } )
-            })
+                    
+                }
+            } )
         })
-    } )
-        
-  });
-  app.patch("/notifications", (req,res)=>{
-    const {ForumPostCommentId, VideoPostCommentId}= req.body;
-    if(VideoPostCommentId){
-        queryTheDatabase("UPDATE VideoPostComments SET NotificationRead = ? WHERE VideoPostCommentId = ?", [true, VideoPostCommentId], res);
-    }
-    else if(ForumPostCommentId){
-        queryTheDatabase("UPDATE ForumPostComments SET NotificationRead = ? WHERE id = ?", [true, ForumPostCommentId], res);
-    }
-  })
+    })
+} )
+    
+});
+app.patch("/notifications", (req,res)=>{
+const {ForumPostCommentId, VideoPostCommentId}= req.body;
+if(VideoPostCommentId){
+    queryTheDatabase("UPDATE VideoPostComments SET NotificationRead = ? WHERE VideoPostCommentId = ?", [true, VideoPostCommentId], res);
+}
+else if(ForumPostCommentId){
+    queryTheDatabase("UPDATE ForumPostComments SET NotificationRead = ? WHERE id = ?", [true, ForumPostCommentId], res);
+}
+})
 
-  server.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-  });
+server.listen(port, () => {
+console.log(`Server is running on port ${port}`);
+});
