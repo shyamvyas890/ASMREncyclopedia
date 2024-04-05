@@ -1,7 +1,6 @@
-// LoginComponent.js
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import axios from '../utils/AxiosWithCredentials';
 const LoginComponent = (props) => {
   const [feedback, setFeedback]= useState("");
   const handleLogin = async (e) => {
@@ -11,10 +10,12 @@ const LoginComponent = (props) => {
         username:props.username,
         password:e.target.elements.passwordInput.value
       });
+      console.log(response)
       e.target.elements.passwordInput.value="";
       setFeedback("Login Successful");
       localStorage.setItem("token", response.data.token);
       props.setIsLoggedIn(true);
+      window.location.reload();
     } catch (error) {
       setFeedback(error.response.data);
       e.target.elements.passwordInput.value="";
@@ -23,26 +24,18 @@ const LoginComponent = (props) => {
     }
   };
   const tokenVerify= async (e) => {
-    const theToken= localStorage.getItem("token");
-    if(theToken){
-        try{
-            const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-            if(response.data.username){
-                props.setUsername(response.data.username)
-                props.setIsLoggedIn(true);
-            }
-            else {
-                props.setIsLoggedIn(false);
-            }
-        }
-
-        catch(error){
-            console.log(error);
-        }
-    }
-    else{
+      try{
+          const response= await axios.get(`http://localhost:3001/verify-token`)
+          if(response.data.username){
+              props.setUsername(response.data.username)
+              props.setIsLoggedIn(true);
+          }
+      }
+      catch(error){
+        console.log(error)
         props.setIsLoggedIn(false);
-    }
+      }
+    
   }
 
   React.useEffect(()=>{
@@ -50,11 +43,12 @@ const LoginComponent = (props) => {
   }, []);
 
   const handleLogout = async (e) => {
-    await axios.post(`http://localhost:3001/logout/${localStorage.getItem("token")}`);
+    await axios.post(`http://localhost:3001/logout/`);
     localStorage.removeItem("token");
     props.setIsLoggedIn(false);
     props.setUsername("");
     setFeedback('');
+    window.location.reload();
   }
 
   return (

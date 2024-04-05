@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useState } from "react"
-import axios from "axios"
+import axios from '../utils/AxiosWithCredentials';
 import { useParams } from "react-router-dom"
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { useNavigate } from "react-router-dom";
@@ -365,10 +365,13 @@ const fetchAllCommentsLikesAndDislikes = async (commentID) => {
             <h2>{obj.title} by {obj.username} @ {new Date(obj.post_timestamp).toLocaleString()}</h2>
             <p>{obj.body}</p>
             <div>
-              Tag(s)
-              <br></br>
-              {obj.forums}
-              <br></br>
+              <div>
+              Tags: {obj.tags && obj.tags.split(',').map(tag => ( //If tags!=null split tags
+                <div>
+                  <span key={tag ? tag.trim() : 'null'}>{tag ? tag.trim() : 'null'}</span>
+                </div>
+              ))}
+              </div>
               
               <button onClick={() => navigate(`/forumPost/${obj.id}/viewing/${userID}/user`)}>
                 View Post
@@ -443,14 +446,16 @@ const fetchAllCommentsLikesAndDislikes = async (commentID) => {
                     <h2>{post.title} by {post.username} @ {new Date(post.post_timestamp).toLocaleString()}</h2>
                     <p>{post.body}</p>
                     <div>
-                        Tag(s)
-                        <br></br>
-                        {post.forums}
-                        <br></br>
-
-                       <button onClick={() => navigate(`/forumPost/${post.id}/viewing/${userID}/user`)}>
-                            View Post
-                        </button>
+                      <div>
+                        Tags: {post.tags && post.tags.split(',').map(tag => ( //If tags!=null split tags
+                          <div>
+                            <span key={tag ? tag.trim() : 'null'}>{tag ? tag.trim() : 'null'}</span>
+                          </div>
+                        ))}
+                      </div>
+                    <button onClick={() => navigate(`/forumPost/${post.id}/viewing/${userID}/user`)}>
+                        View Post
+                    </button>
                     </div>
                 </div>
             ))}

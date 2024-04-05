@@ -1,5 +1,5 @@
 import React from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate, useParams } from "react-router-dom";
 import {hostname, axiosRequest, TreeNode } from "../utils/utils";
 import VideoCommentNodeComponent from "./VideoCommentNode";

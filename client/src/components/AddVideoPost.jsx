@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 const AddVideoPostComponent = (props)=>{
     const hostname= "http://localhost:3001";
     const [videoTags, setVideoTags]= useState([]);

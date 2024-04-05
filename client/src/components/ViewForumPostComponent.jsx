@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from '../utils/AxiosWithCredentials';
 import { useState } from "react"
 import { useParams } from "react-router-dom"
 import { useEffect } from "react"
@@ -133,9 +133,13 @@ export const ViewForumPostComponent = () =>{
           </div>
           : <div> </div>}
         <div>
-          Tag(s) 
-          <br></br>
-          {postObject[0].forums}
+        <div>
+            Tags: {postObject[0].tags && postObject[0].tags.split(',').map(tag => ( //If tags!=null split tags
+              <div>
+              <span key={tag ? tag.trim() : 'null'}>{tag ? tag.trim() : 'null'}</span>
+              </div>
+            ))}
+            </div>
         </div> 
       <div>
             <FourmPostCommentSection currentUser = {currentUsername} userID = {userID}/>

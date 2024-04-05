@@ -20,15 +20,15 @@ import { UserProfileComponent } from './components/UserProfileComponent';
 import { UserPlaylistComponent } from './components/UserPlaylistComponent';
 import { ViewUserPlaylistComponent } from './components/ViewUserPlaylistComponent';
 import { SingleForumCommentComponent } from './components/SingleForumCommentComponent.jsx';
+import NotificationsComponent from './components/Notifications.jsx';
 function App() {
-  const [token, setToken]= React.useState("");
   return (
     <div className="App">
       <BrowserRouter>
-          <NavigationComponent token= {token} setToken= {setToken}/>
+          <NavigationComponent />
           <Routes>
-            <Route path="/" element={<HomeComponent token= {token} setToken= {setToken}/>}/>
-            <Route path="/register" element={<RegistrationComponent token= {token} setToken= {setToken}/>}/>
+            <Route path="/" element={<HomeComponent />}/>
+            <Route path="/register" element={<RegistrationComponent/>}/>
             <Route path="/forums" element={<ForumComponent/>}/>
             <Route path="/forumPosts" element={<AllForumPostComponent />} />
             <Route path="/forumPost/:postID/viewing/:userID/user" element={<ViewForumPostComponent />} />
@@ -46,6 +46,7 @@ function App() {
             <Route path="/username/:username" element={<ProfilePageComponent />} />
             <Route path="/userPlaylists/" element={<UserPlaylistComponent />}/>
             <Route path="/userPlaylists/:playlistID/viewing/:userID/user" element={<ViewUserPlaylistComponent/>}/>
+            <Route path="/notifications" element={<NotificationsComponent AllNotificationsPage = {true}/>} />
           </Routes>
       </BrowserRouter>
     </div>
