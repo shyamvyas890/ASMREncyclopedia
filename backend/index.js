@@ -156,6 +156,9 @@ async function whoOwnsThis(item, itemValue){
         return await queryTheDatabaseGiveResults("SELECT username FROM ForumPost WHERE id = ?", [itemValue]);
 
     }
+    else if(item === "ForumPostCommentId"){
+        return await queryTheDatabaseGiveResults("SELECT username FROM ForumPostComments WHERE id=?", [itemValue])
+    }
     else if (item === "ForumPostLikeDislikeId"){
         
     }
@@ -272,25 +275,7 @@ app.post("/login", async (req, res)=>{ // secure
     );
 })
 app.get('/verify-token', (req, res)=>{ //secure
-    const submittedToken= req.cookies['theJWTToken'];
-
-    const verificationFunction = function(err, results){
-        if(err){
-            console.log(err);
-        }
-        else if(results.length>0){
-            return res.status(401).send("Token is blacklisted");  
-        }
-        try {
-            const decodedToken = jwt.verify(submittedToken, secretKey);
-            return res.json(decodedToken);
-        }
-        catch(error) {
-            return res.status(401).send("Token is invalid or expired");
-        }
-    }
-
-    db.query('SELECT * FROM blacklisted_tokens WHERE token = ?', [submittedToken], verificationFunction)
+    return res.json(req.decodedToken)
 })
 
 app.post('/logout', (req,res)=>{
@@ -653,7 +638,7 @@ app.post("/forumPostCreate", verifyJWTMiddleware, async (req, res) => {
 
     const tfidfVector = {}
 
-    if(req.decodedToken.username != username){
+    if(req.decodedToken.username !== username){
         return res.status(403).send("Incorrect User")
     }
 
@@ -859,11 +844,11 @@ app.get("/forumPostsById/:postID", verifyJWTMiddleware, async (req,res)=>{
     })
 })
 
-app.delete("/forumPostDelete/:id", verifyJWTMiddleware, (req,res)=>{
+app.delete("/forumPostDelete/:id", verifyJWTMiddleware, async (req,res)=>{
     const forumPostID = req.params.id
-    const username = req.body.username
 
-    if(req.decodedToken.username != username){
+    const postUsername = (await whoOwnsThis("ForumPostId", forumPostID))[0].username;
+    if(req.decodedToken.username !== postUsername){
         return res.status(403).send("Incorrect User")
     }
     
@@ -874,9 +859,10 @@ app.delete("/forumPostDelete/:id", verifyJWTMiddleware, (req,res)=>{
     });
 });
 
-app.put("/editForumPost/:id", verifyJWTMiddleware, (req, res) =>{
+app.put("/editForumPost/:id", verifyJWTMiddleware, async (req, res) =>{
     const forumPostID = req.params.id
-    if(req.decodedToken.username != req.body.username){
+    const postUsername = (await whoOwnsThis("ForumPostId", forumPostID))[0].username;
+    if(req.decodedToken.username !== postUsername){
         return res.status(403).send("Incorrect User")
     }
 
@@ -1005,7 +991,8 @@ app.post("/forumPostComment/:id", verifyJWTMiddleware, (req, res) => {
     //debugging purposes
     const username = req.body.username
     const body = req.body.body
-    if(req.decodedToken.username != username){
+
+    if(req.decodedToken.username !== username){
         return res.status(403).send("Incorrect User")
     }
 
@@ -1030,9 +1017,11 @@ app.get("/getForumPostCommentByID/:id", verifyJWTMiddleware, (req, res) =>{
     })
 })
 
-app.put("/deleteForumPostComment/:commentID",verifyJWTMiddleware, (req, res) =>{
+
+app.put("/deleteForumPostComment/:commentID",verifyJWTMiddleware, async (req, res) =>{
     const commentID = parseInt(req.params.commentID, 10)
-    if(req.decodedToken.username != req.body.username){
+    const commentUser = (await whoOwnsThis("ForumPostCommentId", commentID))[0].username;
+    if(req.decodedToken.username !== commentUser){
         return res.status(403).send("Incorrect User")
     }
 
@@ -1047,12 +1036,13 @@ app.put("/deleteForumPostComment/:commentID",verifyJWTMiddleware, (req, res) =>{
     })
 })
 
-app.put("/editForumPostComment/:commentID", verifyJWTMiddleware, (req, res) =>{
+app.put("/editForumPostComment/:commentID", verifyJWTMiddleware, async (req, res) =>{
     console.log("HELLO")
     const commentID = parseInt(req.params.commentID, 10)
     const editedBody = req.body.editedBody
+    const commentUser = (await whoOwnsThis("ForumPostCommentId", commentID))[0].username;
     console.log(editedBody)
-    if(req.decodedToken.username != req.body.username){
+    if(req.decodedToken.username !== commentUser){
         return res.status(403).send("Incorrect User")
     }
 
