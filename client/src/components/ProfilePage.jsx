@@ -11,29 +11,18 @@ const ProfilePageComponent = ()=>{
     const [friendStatus, setFriendStatus]= React.useState(null);
     const theirUsername= useParams().ProfileUsername;
     const navigate= useNavigate();
-    const tokenVerify= async (e) => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
-            try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    const userIdOfProfileUser = (await axios.get(`${hostname}/users/id`, {params:{username:theirUsername}}));
-                    setUsername({userIdOfCurrentUser, username:response.data.username});
-                    setProfileUsername({userIdOfProfileUser:userIdOfProfileUser.data.id, username:theirUsername})               
-                }
-                else {
-                    navigate("/");
-                }
-            }
-    
-            catch(error){
-                console.log(error);
-                navigate("/")
-            }
+    const tokenVerify= async () => {
+        try{
+            const response= await axios.get(`http://localhost:3001/verify-token`)
+                const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+                const userIdOfProfileUser = (await axios.get(`${hostname}/users/id`, {params:{username:theirUsername}}));
+                setUsername({userIdOfCurrentUser, username:response.data.username});
+                setProfileUsername({userIdOfProfileUser:userIdOfProfileUser.data.id, username:theirUsername})               
+
         }
-        else{
-            navigate("/");
+        catch(error){
+            navigate("/")
+            console.log(error);
         }
     }
 
@@ -87,7 +76,6 @@ const ProfilePageComponent = ()=>{
     }
     const handleAcceptFriendRequest = async (e)=>{
         e.preventDefault();
-        await axiosRequest(2,2,"friendRequests", {SenderUserId:profileUsername.userIdOfProfileUser, ReceiverUserId:username.userIdOfCurrentUser});
         await axiosRequest(1,1,"Friendships", {UserId1:username.userIdOfCurrentUser, UserId2: profileUsername.userIdOfProfileUser});
         setFriendStatus(1);
     }

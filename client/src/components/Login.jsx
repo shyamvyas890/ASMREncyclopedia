@@ -13,7 +13,6 @@ const LoginComponent = (props) => {
       console.log(response)
       e.target.elements.passwordInput.value="";
       setFeedback("Login Successful");
-      localStorage.setItem("token", response.data.token);
       props.setIsLoggedIn(true);
       window.location.reload();
     } catch (error) {
@@ -26,10 +25,8 @@ const LoginComponent = (props) => {
   const tokenVerify= async (e) => {
       try{
           const response= await axios.get(`http://localhost:3001/verify-token`)
-          if(response.data.username){
-              props.setUsername(response.data.username)
-              props.setIsLoggedIn(true);
-          }
+          props.setUsername(response.data.username)
+          props.setIsLoggedIn(true);
       }
       catch(error){
         console.log(error)
@@ -44,7 +41,6 @@ const LoginComponent = (props) => {
 
   const handleLogout = async (e) => {
     await axios.post(`http://localhost:3001/logout/`);
-    localStorage.removeItem("token");
     props.setIsLoggedIn(false);
     props.setUsername("");
     setFeedback('');

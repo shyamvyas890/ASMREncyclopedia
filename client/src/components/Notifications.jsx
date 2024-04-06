@@ -21,16 +21,13 @@ const NotificationsComponent = (props)=>{
     const tokenVerify= async () => {
         try{
             const response= await axios.get(`http://localhost:3001/verify-token`)
-            if(response.data.username){
-                const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                setUsername({userIdOfCurrentUser, username:response.data.username})
-                setSocket(io(hostname, { transports : ['websocket'], query:{token:localStorage.getItem("token")}}));
-                
-            }
+            const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+            setUsername({userIdOfCurrentUser, username:response.data.username})
+            setSocket(io(hostname, { transports : ['websocket'] }));
         }
         catch(error){
-            console.log(error);
             navigate("/");
+            console.log(error);
         }
     };
     React.useEffect(()=>{
