@@ -157,15 +157,14 @@ async function whoOwnsThis(item, itemValue){
 
     }
     else if (item === "ForumPostLikeDislikeId"){
-        
+        return await queryTheDatabaseGiveResults("SELECT UserID FROM ForumPostLikeDislike WHERE LikeDislikeID = ?", [itemValue]);
     }
     else if (item === "ForumPostCommentId"){
-        
+
 
     }
     else if (item === "ForumPostCommentLikeDislikeId"){
-        
-
+        return await queryTheDatabaseGiveResults("SELECT UserID FROM ForumPostCommentLikeDislikeId WHERE LikeDislikeID = ?", [itemValue]);
     }
     else if (item === "VideoPostCommentId"){
         return await queryTheDatabaseGiveResults("SELECT UserId FROM VideoPostComments WHERE VideoPostCommentId = ?", [itemValue]);
@@ -188,11 +187,10 @@ async function whoOwnsThis(item, itemValue){
 
     }
     else if (item === "PlaylistID"){
-        // return await queryTheDatabaseGiveResults("SELECT UserId FROM VideoPost WHERE VideoPostId = ?", [itemValue]);
-
+        return await queryTheDatabaseGiveResults("SELECT UserID FROM Playlist WHERE PlaylistID = ?", [itemValue]);
     }
     else if (item === "PlaylistVideoPostsID"){
-        // return await queryTheDatabaseGiveResults("SELECT UserId FROM VideoPost WHERE VideoPostId = ?", [itemValue]);
+        return await queryTheDatabaseGiveResults("SELECT UserID FROM PlaylistVideoPosts WHERE PlaylistVideoPostsID = ?", [itemValue]);
 
     }
 }
@@ -882,7 +880,7 @@ app.put("/editForumPost/:id", (req, res) =>{
 })
 
 //gets forum posts liked by a user
-app.get("/forumPostsLikedByUser/", async (req,res)=>{
+app.get("/forumPostsLikedByUser/", verifyJWTMiddleware, async (req,res)=>{
     const userID = req.query.userID
     const forumPostID = req.query.postID
     const query = "SELECT * FROM ForumPostLikeDislike WHERE forumPostID = ? AND userID = ? AND LikeStatus = 1"
@@ -1355,50 +1353,54 @@ app.get("/forumPostRecommendedPost/:postID", (req, res) =>{
 })
 })
 
-
-
-
-app.get("/fetchAllPlaylistVideosID", (req, res)=>{
+app.get("/fetchAllPlaylistVideosID", verifyJWTMiddleware, (req, res)=>{
     const playlistID = req.query.playlistID
     const query = "SELECT VideoPostID FROM playlistvideoposts WHERE PlaylistID = ?"
     db.query(query, [playlistID], (err, data)=>{
         if(err){
             console.log(err)
+            res.status(500).send("Error fetching videoIDs")
         } else{
             return res.json(data)
         }
     })
 })
 
-app.get("/fetchAllVideos", (req, res)=>{
+app.get("/fetchAllVideos", verifyJWTMiddleware, (req, res)=>{
     const videoPostID = req.query.videoPostID
     console.log(videoPostID)
     const query = "SELECT * FROM VideoPost WHERE VideoPostID = ?"
     db.query(query, [videoPostID], (err, data)=>{
         if(err){
             console.log(err)
+            res.status(500).send("Error fetching videos")
         } else{
             return res.json(data)
         }
     })
 })
 
-app.get("/fetchVideoInPlaylist", (req, res)=>{
+app.get("/fetchVideoInPlaylist", verifyJWTMiddleware, (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
     const query = "SELECT * FROM playlistvideoposts WHERE PlaylistID = ? AND VideoPostID = ?"
     db.query(query, [playlistID, videoPostID], (err, data)=>{
         if(err){
             console.log(err)
+            res.status(500).send("Error fetching videos")
         } else{
             return res.json(data)
         }
     })
 })
 
-app.post("/addVideoToPlaylist", (req, res)=>{
+app.post("/addVideoToPlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
+    const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
+    if(req.decodedToken.userId !== authorizedUserID){
+        return res.status(403).send("You do not have permission to do that");
+    }
     console.log("playlistID: ", playlistID)
     console.log("videoPostID: ", videoPostID)
     const query = "INSERT INTO playlistvideoposts (DateAdded, PlaylistID, VideoPostID) VALUES (NOW(), ?, ?)"
@@ -1411,9 +1413,13 @@ app.post("/addVideoToPlaylist", (req, res)=>{
     })
 })
 
-app.delete("/deleteVideoFromPlaylist", (req, res)=>{
+app.delete("/deleteVideoFromPlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
+    const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
+    if(req.decodedToken.userId !== authorizedUserID){
+        return res.status(403).send("You do not have permission to do that");
+    }
     console.log("playlistID: ", playlistID)
     console.log("videoPostID: ", videoPostID)
     const query = "DELETE FROM playlistvideoposts WHERE PlaylistID = ? AND VideoPostID = ?"
@@ -1426,21 +1432,28 @@ app.delete("/deleteVideoFromPlaylist", (req, res)=>{
     })
 })
 
-app.get("/fetchAllUserPlaylists", (req, res)=>{
-    const userID = req.query.userID
+app.get("/fetchAllUserPlaylists", verifyJWTMiddleware, (req, res)=>{
+    const userID = req.query.userID //Change? -> authorized
+    if(req.decodedToken.userId !== userID){
+        return res.status(403).send("You do not have permission to do that");
+    }
     const query = "SELECT * FROM Playlist WHERE userID = ?"
     db.query(query, [userID], (err, data)=>{
         if(err){
             console.log(err)
+            res.status(500).send("Error fetching playlists")
         } else{
             return res.json(data)
         }
     })
 })
 
-app.post("/createPlaylist", (req, res)=>{
+app.post("/createPlaylist", verifyJWTMiddleware, (req, res)=>{
     const playlistName = req.query.playlistName
     const userID = req.query.userID
+    if(req.decodedToken.userId !== userID){
+        return res.status(403).send("You do not have permission to do that");
+    }
     console.log(playlistName)
     const query = "INSERT INTO Playlist (playlistName, dateCreated, userID) VALUES (?, NOW(), ?)"
     db.query(query, [playlistName, userID], (err, data)=>{
@@ -1452,8 +1465,12 @@ app.post("/createPlaylist", (req, res)=>{
     })
 })
 
-app.delete("/deletePlaylist", (req, res)=>{
+app.delete("/deletePlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
+    const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
+    if(req.decodedToken.userId !== authorizedUserID){
+        return res.status(403).send("You do not have permission to do that");
+    }
     console.log(playlistID)
     const query = "DELETE FROM Playlist WHERE PlaylistID = ?"
     db.query(query, [playlistID], (err)=>{
@@ -1465,9 +1482,13 @@ app.delete("/deletePlaylist", (req, res)=>{
     })
 })
 
-app.put("/editPlaylistName", (req, res)=>{
+app.put("/editPlaylistName", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const newPlaylistName = req.query.newPlaylistName
+    const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
+    if(req.decodedToken.userId !== authorizedUserID){
+        return res.status(403).send("You do not have permission to do that");
+    }
     console.log("ID: ", playlistID)
     console.log("new name: ", newPlaylistName)
     const query = "UPDATE Playlist SET PlaylistName = ? WHERE PlaylistID = ?"
