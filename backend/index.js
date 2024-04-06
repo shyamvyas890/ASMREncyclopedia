@@ -159,10 +159,6 @@ async function whoOwnsThis(item, itemValue){
     else if (item === "ForumPostLikeDislikeId"){
         
     }
-    else if (item === "ForumPostCommentId"){
-        
-
-    }
     else if (item === "ForumPostCommentLikeDislikeId"){
         
 
@@ -649,13 +645,17 @@ app.get("/UserPosts", async (req,res)=>{
 - recalculate tfidf vector for previous posts
 - 
 */
-app.post("/forumPostCreate", async (req, res) => {
+app.post("/forumPostCreate", verifyJWTMiddleware, async (req, res) => {
     const allPosts = req.body.allPosts
     const username = req.body.username
     const title = req.body.title
     const body = req.body.body
 
     const tfidfVector = {}
+
+    if(req.decodedToken.username != username){
+        return res.status(403).send("Incorrect User")
+    }
 
     //add all previous posts to the corpus
     allPosts.forEach(post => {
@@ -836,7 +836,7 @@ app.get("/forumPostsAll", async (req,res)=>{
 })
 
 //viewing a post by its id
-app.get("/forumPostsById/:postID", async (req,res)=>{
+app.get("/forumPostsById/:postID", verifyJWTMiddleware, async (req,res)=>{
     const id = parseInt(req.params.postID, 10)
     console.log(typeof(id))
     console.log(id)
@@ -859,8 +859,14 @@ app.get("/forumPostsById/:postID", async (req,res)=>{
     })
 })
 
-app.delete("/forumPostDelete/:id", (req,res)=>{
+app.delete("/forumPostDelete/:id", verifyJWTMiddleware, (req,res)=>{
     const forumPostID = req.params.id
+    const username = req.body.username
+
+    if(req.decodedToken.username != username){
+        return res.status(403).send("Incorrect User")
+    }
+    
     const query = "DELETE FROM forumpost WHERE id = ?"
     db.query(query, [forumPostID], (err,data)=>{
         if (err) return res.send(err)
@@ -868,8 +874,12 @@ app.delete("/forumPostDelete/:id", (req,res)=>{
     });
 });
 
-app.put("/editForumPost/:id", (req, res) =>{
+app.put("/editForumPost/:id", verifyJWTMiddleware, (req, res) =>{
     const forumPostID = req.params.id
+    if(req.decodedToken.username != req.body.username){
+        return res.status(403).send("Incorrect User")
+    }
+
     const query = "UPDATE forumpost SET body=? WHERE id=?"
     db.query(query, [req.body.newBody, forumPostID], (err, data)=>{
         if(err){
@@ -990,12 +1000,14 @@ app.delete("/forumPostDeleteLikeDislike/", async (req,res)=>{
     });
 });
 
-app.post("/forumPostComment/:id", (req, res) => {
+app.post("/forumPostComment/:id", verifyJWTMiddleware, (req, res) => {
     const forumPostID = parseInt(req.params.id, 10)
     //debugging purposes
     const username = req.body.username
     const body = req.body.body
-
+    if(req.decodedToken.username != username){
+        return res.status(403).send("Incorrect User")
+    }
 
    db.query("INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp) VALUES (?, ?, ?, NOW())", [forumPostID, username, body], function (err){
     if(err){
@@ -1006,7 +1018,7 @@ app.post("/forumPostComment/:id", (req, res) => {
     })
 })
 
-app.get("/getForumPostCommentByID/:id", (req, res) =>{
+app.get("/getForumPostCommentByID/:id", verifyJWTMiddleware, (req, res) =>{
     const forumPostCommentID = parseInt(req.params.id, 10)
     db.query("SELECT * FROM FORUMPOSTCOMMENTS WHERE id=?", [forumPostCommentID], function(err, data){
         if(err){
@@ -1018,8 +1030,12 @@ app.get("/getForumPostCommentByID/:id", (req, res) =>{
     })
 })
 
-app.put("/deleteForumPostComment/:commentID", (req, res) =>{
+app.put("/deleteForumPostComment/:commentID",verifyJWTMiddleware, (req, res) =>{
     const commentID = parseInt(req.params.commentID, 10)
+    if(req.decodedToken.username != req.body.username){
+        return res.status(403).send("Incorrect User")
+    }
+
     console.log(commentID)
     db.query("UPDATE FORUMPOSTCOMMENTS SET DELETED=? WHERE id=?", [true, commentID], function(err){
         if(err){
@@ -1031,11 +1047,15 @@ app.put("/deleteForumPostComment/:commentID", (req, res) =>{
     })
 })
 
-app.put("/editForumPostComment/:commentID", (req, res) =>{
+app.put("/editForumPostComment/:commentID", verifyJWTMiddleware, (req, res) =>{
     console.log("HELLO")
     const commentID = parseInt(req.params.commentID, 10)
     const editedBody = req.body.editedBody
     console.log(editedBody)
+    if(req.decodedToken.username != req.body.username){
+        return res.status(403).send("Incorrect User")
+    }
+
     db.query("UPDATE FORUMPOSTCOMMENTS SET body=? WHERE id=?", [editedBody, commentID], function(err){
         if(err){
             console.log(err)
@@ -1046,7 +1066,7 @@ app.put("/editForumPostComment/:commentID", (req, res) =>{
     })
 })
 
-app.get("/getForumPostComments", async(req, res) =>{
+app.get("/getForumPostComments", verifyJWTMiddleware, async(req, res) =>{
     const username = req.query.username
     db.query("SELECT * FROM ForumPostComments WHERE username=?", [username], function(err, data){
         if(err){
@@ -1187,12 +1207,16 @@ app.get("/forumPostParentCommentGetByID/:id", (req, res) =>{
     })
 })
 
-app.post("/forumPostCommentReply/:id/:commentID", (req, res) => {
+app.post("/forumPostCommentReply/:id/:commentID", verifyJWTMiddleware, (req, res) => {
     const forumPostID = parseInt(req.params.id, 10)
     const commentID = parseInt(req.params.commentID, 10)
     const username = req.body.username
     const body = req.body.body
     const timestamp = new Date().toISOString()
+
+    if(req.decodedToken.username != username){
+        return res.status(403).send("Incorrect User")
+    }
 
     console.log("FORUM POST COMMENT REPLY FOR POST " + forumPostID)
     console.log("TYPE OF FORUM POST ID " + typeof(forumPostID))
@@ -1286,7 +1310,7 @@ app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
     })
 })
 
-app.get("/forumPostSearch/:searchTitle", (req, res) => {
+app.get("/forumPostSearch/:searchTitle", verifyJWTMiddleware, (req, res) => {
     const searchTitle = req.params.searchTitle
     db.query("SELECT * FROM forumpost WHERE title LIKE ?",['%' + searchTitle + '%'], function (err, data){
         if(err){
@@ -1325,7 +1349,7 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
 to see if a post should be recommended, take the consine similarity of the tfidf_vector
 if it meets the threshold, recommend it
 */
-app.get("/forumPostRecommendedPost/:postID", (req, res) =>{
+app.get("/forumPostRecommendedPost/:postID", verifyJWTMiddleware, (req, res) =>{
     const postID = req.params.postID
     const recommendedPosts = []
     db.query("SELECT * from forumpost WHERE ID=?", [postID], function(err, data){

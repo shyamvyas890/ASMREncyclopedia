@@ -29,7 +29,7 @@ export const ForumPostFeedComponent = (props) =>{
         const token = localStorage.getItem("token")
         const fetchUsername = async () => {
             try {
-              const response = await axios.get(`http://localhost:3001/verify-token/${token}`);
+              const response = await axios.get(`http://localhost:3001/verify-token`);
               setCurrentUsername(response.data.username);
             } catch (error) {
               console.log(error);
