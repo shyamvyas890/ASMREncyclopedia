@@ -778,12 +778,8 @@ app.post("/forumPostTagCreate", verifyJWTMiddleware, async (req,res)=>{
     }
 })
 
-app.post("/fetchForumPostTagID", verifyJWTMiddleware, async (req, res)=>{
+app.post("/fetchForumPostTagID", verifyJWTMiddleware, async (req, res)=>{   //change to get later
     const postID = req.query.postID
-    const authorizedUserId = (await whoOwnsThis("ForumPostId", postID))[0].UserId;
-    if(req.decodedToken.UserId !== authorizedUserId){
-        return res.status(403).send("You do not have permission to do that");
-    }
     const query = "SELECT ForumTagID FROM ForumPostTag WHERE ForumPostID = ?"
     db.query(query, [postID], (err, data)=>{
         if(err){
@@ -1149,7 +1145,7 @@ app.put("/forumPostCommentChangeLikeDislike/", verifyJWTMiddleware, async (req,r
     const LikeDislikeID = req.query.LikeDislikeID
     const rating = req.query.rating
     const authorizedUserID = (await whoOwnsThis("ForumPostCommentLikeDislikeId", LikeDislikeID))[0].UserID
-    if(req.decodedToken.userId !== authorizedUserID){
+    if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
     const query = "UPDATE ForumCommentLikeDislike SET LikeStatus = ? WHERE LikeDislikeID = ?"
@@ -1166,7 +1162,7 @@ app.put("/forumPostCommentChangeLikeDislike/", verifyJWTMiddleware, async (req,r
 app.delete("/forumPostCommentDeleteLikeDislike/", verifyJWTMiddleware, async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
     const authorizedUserID = (await whoOwnsThis("ForumPostCommentLikeDislikeId", LikeDislikeID))[0].UserID
-    if(req.decodedToken.userId !== authorizedUserID){
+    if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
     const query = "DELETE FROM ForumCommentLikeDislike WHERE LikeDislikeID = ?"
@@ -1382,7 +1378,7 @@ app.get("/forumPostRecommendedPost/:postID", (req, res) =>{
 app.get("/fetchAllPlaylistVideosID", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
-    if(req.decodedToken.userId !== authorizedUserID){
+    if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
     const query = "SELECT VideoPostID FROM playlistvideoposts WHERE PlaylistID = ?"
@@ -1410,9 +1406,13 @@ app.get("/fetchAllVideos", verifyJWTMiddleware, (req, res)=>{
     })
 })
 
-app.get("/fetchVideoInPlaylist", verifyJWTMiddleware, (req, res)=>{
+app.get("/fetchVideoInPlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
+    const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
+    if(req.decodedToken.UserId !== authorizedUserID){
+        return res.status(403).send("You do not have permission to do that");
+    }
     const query = "SELECT * FROM playlistvideoposts WHERE PlaylistID = ? AND VideoPostID = ?"
     db.query(query, [playlistID, videoPostID], (err, data)=>{
         if(err){
@@ -1428,7 +1428,7 @@ app.post("/addVideoToPlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
-    if(req.decodedToken.userId !== authorizedUserID){
+    if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
     console.log("playlistID: ", playlistID)
@@ -1447,7 +1447,7 @@ app.delete("/deleteVideoFromPlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
-    if(req.decodedToken.userId !== authorizedUserID){
+    if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
     console.log("playlistID: ", playlistID)
@@ -1463,7 +1463,7 @@ app.delete("/deleteVideoFromPlaylist", verifyJWTMiddleware, async (req, res)=>{
 })
 
 app.get("/fetchAllUserPlaylists", verifyJWTMiddleware, (req, res)=>{
-    const userID = req.decodedToken.userId //Change? -> authorized
+    const userID = req.decodedToken.UserId
     const query = "SELECT * FROM Playlist WHERE userID = ?"
     db.query(query, [userID], (err, data)=>{
         if(err){
@@ -1477,7 +1477,7 @@ app.get("/fetchAllUserPlaylists", verifyJWTMiddleware, (req, res)=>{
 
 app.post("/createPlaylist", verifyJWTMiddleware, (req, res)=>{
     const playlistName = req.query.playlistName
-    const userID = req.decodedToken.userId
+    const userID = req.decodedToken.UserId
     console.log(playlistName)
     const query = "INSERT INTO Playlist (playlistName, dateCreated, userID) VALUES (?, NOW(), ?)"
     db.query(query, [playlistName, userID], (err, data)=>{
@@ -1492,7 +1492,7 @@ app.post("/createPlaylist", verifyJWTMiddleware, (req, res)=>{
 app.delete("/deletePlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
-    if(req.decodedToken.userId !== authorizedUserID){
+    if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
     console.log(playlistID)
@@ -1510,7 +1510,7 @@ app.put("/editPlaylistName", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const newPlaylistName = req.query.newPlaylistName
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
-    if(req.decodedToken.userId !== authorizedUserID){
+    if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
     console.log("ID: ", playlistID)
