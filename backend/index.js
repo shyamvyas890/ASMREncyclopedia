@@ -18,6 +18,7 @@ var tfidf = new TfIdf();
 var tokenizer = new natural.WordTokenizer()
 var stopwords = require('stopword');
 const { constrainedMemory } = require('process');
+const { verify } = require('crypto');
 const enStopwords = [
     "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves",
     "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their",
@@ -1187,7 +1188,7 @@ app.get("/forumPostCommentsDislikedByUser/", async (req,res)=>{
     });
 });
 
-app.get("/forumPostParentCommentGetByID/:id", (req, res) =>{
+app.get("/forumPostParentCommentGetByID/:id", verifyJWTMiddleware, (req, res) =>{
     const forumPostID = parseInt(req.params.id, 10)
     db.query("SELECT * FROM forumpostcomments WHERE forum_post_id=? AND parent_comment_id IS NULL", [forumPostID], function (err, data){
     if(err){
@@ -1282,7 +1283,7 @@ app.post("/forumPostCommentReply/:id/:commentID", verifyJWTMiddleware, (req, res
     })
 })
 
-app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
+app.get("/forumPostParentGetReplies/:id/:commentID", verifyJWTMiddleware, (req, res) =>{
     const forumPostID = parseInt(req.params.id, 10)
     const parentCommentID = parseInt(req.params.commentID, 10)
 
