@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { axiosRequest } from "../utils/utils";
 
+
 const SettingsComponent = ()=>{
     const hostname= "http://localhost:3001";
     const [username, setUsername]= React.useState(null);
@@ -28,7 +29,7 @@ const SettingsComponent = ()=>{
                     navigate("/");
                 }
             }
-    
+   
             catch(error){
                 console.log(error);
             }
@@ -50,7 +51,7 @@ const SettingsComponent = ()=>{
             newTags.push(sub.GenreName);
         }
         setVideoTags(newTags);
-        
+       
         setEmailAndSubscriptionPreferences({email,videoSubscriptionOnly, videoSubscriptions});
     }
     React.useEffect(()=>{
@@ -106,6 +107,7 @@ const SettingsComponent = ()=>{
             console.log("New passwords dont match")
             return;
         }
+  
         const tryLoggingIn= await axiosRequest(1,1,"login", {username:username.username, password:e.target.elements.currentPassword.value});
         if(tryLoggingIn.status===200){
             const blacklistToken= await axios.post(`${hostname}/logout/${tryLoggingIn.data.token}`);
@@ -134,34 +136,23 @@ const SettingsComponent = ()=>{
         }
     }
 
-    const handleAccountDeletion = async () => {
-        const confirmDeletion = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
-        if (confirmDeletion) {
-            const enteredPassword = prompt("Please enter your password to confirm account deletion:");
-            if (enteredPassword !== null) {
-                try {
-                    const response = await axios.post("http://localhost:3001/delete-account", {
-                        username: username,
-                        password: enteredPassword
-                    });
-                    if (response.status === 200) {
-                        alert("Your account has been successfully deleted.");
-                        localStorage.removeItem("token");
-                        navigate("/register");
-                    }
-                } catch (error) {
-                    console.error("Error deleting account:", error);
-                    alert("An error occurred while deleting your account. Please try again later.");
-                }
-            }
-        }
-    };
 
-
-  
+const handleAccountDeletion = async (e) => {
+    const confirmDeletion = window.confirm("DISCLAIMER! Are you sure you want to delete your account? Please Note, This action cannot be undone once completed.");
+    
+    if (confirmDeletion) {
+        const tokenLogout= await axios.post(`http://localhost:3001/logout/${localStorage.getItem("token")}`);
+        console.log(tokenLogout);
+        localStorage.removeItem("token");
+        const response = await axiosRequest(2,2,"deleteAccount", {UserId:username.userIdOfCurrentUser});
+        alert("Your account has been successfully deleted.");  
+        navigate("/register");
+    }
+}
+ 
     return (
         <React.Fragment>
-            {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password)? 
+            {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password)?
                 (<>
                     <div>Your Current Settings</div>
                     <div>Email</div>
@@ -198,12 +189,12 @@ const SettingsComponent = ()=>{
                             .tag {
                                 display: inline-block;
                                 background-color: yellow;
-                                color: black; 
+                                color: black;
                                 padding: 5px;
                                 margin: 5px;
                                 border-radius: 5px;
                             }
-                            
+                           
                             .tag-container {
                                 display: inline-block;
                                 padding: 5px;
@@ -263,4 +254,7 @@ const SettingsComponent = ()=>{
     )
 }
 
+
 export default SettingsComponent;
+
+
