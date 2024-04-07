@@ -11,6 +11,7 @@ const io = socketIo(server);
 const port = 3001;
 const secretKey= "secret_key" //Will change this later
 
+
 var natural = require('natural');
 var TfIdf = natural.TfIdf;
 var tfidf = new TfIdf();
@@ -28,7 +29,7 @@ const enStopwords = [
     "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not",
     "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"
   ];
-  
+ 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true })); // Might not need this
 app.use(cors({
@@ -57,7 +58,7 @@ const db = mysql.createConnection({
         }
         res.send(results);
     })
-  } 
+  }
   app.post("/register", async (req,res)=>{
     const { username, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 13);
@@ -71,6 +72,7 @@ const db = mysql.createConnection({
                 return res.status(500).send("This username is already taken. Please choose a different username.")
             }
 
+
             return res.status(500).send(err);
         }
         else{
@@ -79,12 +81,15 @@ const db = mysql.createConnection({
     }
     );
 
+
   });
+
 
   app.put("/changePassword", async (req, res)=>{
     const {username, password}= req.body;
     const hashedPassword = await bcrypt.hash(password, 13);
     queryTheDatabase("UPDATE users SET password = ? WHERE username= ? ", [hashedPassword,username], res);
+
 
   })
   app.post("/login", async (req, res)=>{
@@ -103,7 +108,7 @@ const db = mysql.createConnection({
                     const exp = Math.floor(Date.now() / 1000) + 86400;
                     const token = jwt.sign({ username, exp }, secretKey);
                     return res.status(200).json({ token });
-                } 
+                }
                 else {
                     res.status(401).send('Incorrect password');
                 }
@@ -116,6 +121,7 @@ const db = mysql.createConnection({
   })
   app.get('/verify-token/:token', (req, res)=>{
     const submittedToken= req.params.token;
+
 
     const verificationFunction = function(err, results){
         if(err){
@@ -133,8 +139,10 @@ const db = mysql.createConnection({
         }
     }
 
+
     db.query('SELECT * FROM blacklisted_tokens WHERE token = ?', [submittedToken], verificationFunction )
   })
+
 
   app.post('/logout/:token', (req,res)=>{
     const token=req.params.token;
@@ -149,6 +157,7 @@ const db = mysql.createConnection({
     })
   })
 
+
   app.get('/users',(req,res)=>{
     db.query('SELECT * FROM users', (err, results)=>{
         if(err){
@@ -161,6 +170,7 @@ const db = mysql.createConnection({
         }));
     })
   })
+
 
   app.post('/video/:VideoId', (req,res)=>{
     const VideoLinkId= req.params.VideoId;
@@ -176,6 +186,7 @@ const db = mysql.createConnection({
     } )
   })
 
+
   app.post('/video-rating/:VideoPostId', (req,res)=>{
         const VideoPostId= req.params.VideoPostId;
         const {UserId, LikeStatus}= req.body;
@@ -190,6 +201,7 @@ const db = mysql.createConnection({
         })
   })
 
+
   app.post('/genre', (req,res)=>{
         const genre= req.body.genre;
         db.query('INSERT INTO Genre (Genre) VALUES (?)', [genre], (err, results)=>{
@@ -202,6 +214,7 @@ const db = mysql.createConnection({
             }
         })
   })
+
 
   app.get('/users/id', (req, res)=> {
         const {username, UserId}= req.query
@@ -236,6 +249,7 @@ const db = mysql.createConnection({
         }
   })
 
+
   app.get('/genre/id', (req, res)=> {
     const {genre}= req.query
     db.query('SELECT * FROM Genre WHERE Genre = ?', [genre], (err, results)=>{
@@ -251,6 +265,7 @@ const db = mysql.createConnection({
         }
     })
 })
+
 
 app.get('/video/id', (req, res)=>{
     const {VideoLinkId, VideoPostId} = req.query
@@ -281,7 +296,7 @@ app.get('/video/id', (req, res)=>{
                 res.status(200).json(results)
             }
         })
-    }   
+    }  
 })
 app.delete('/video', (req, res)=>{
     const {id, VideoPostId, LikeDislikeId, GenreId, VideoPostGenreId, UserId, VideoPostCommentId}= req.query
@@ -307,6 +322,7 @@ app.delete('/video', (req, res)=>{
             }
         });
 
+
     }
     else if(LikeDislikeId){
         db.query('DELETE FROM LikeDislike WHERE LikeDislikeId = ?', [LikeDislikeId], (err)=>{
@@ -318,6 +334,7 @@ app.delete('/video', (req, res)=>{
                 res.status(200).send("Successfully deleted Like or Dislike")
             }
         });
+
 
     }
     else if(GenreId){
@@ -342,8 +359,9 @@ app.delete('/video', (req, res)=>{
             }
         });
 
+
     }
-    else if(VideoPostCommentId){ 
+    else if(VideoPostCommentId){
         db.query('UPDATE VideoPostComments SET Comment = ?, DELETED = ? WHERE VideoPostCommentId = ?', ["deleted",true,VideoPostCommentId], (err)=>{
             if(err){
                 console.log(err);
@@ -376,6 +394,7 @@ app.get('/video',(req,res)=>{
     });
 })
 
+
 app.get('/video-by-genre-or-user',(req,res)=>{
     const {GenreId, UserId, VideoPostId}= req.query;
     if(GenreId){
@@ -407,9 +426,10 @@ app.get('/video-by-genre-or-user',(req,res)=>{
     }
 })
 
-app.get('/video-rating', (req,res)=>{   
+
+app.get('/video-rating', (req,res)=>{  
     const {VideoPostId, UserId}= req.query
-    
+   
     if(VideoPostId && UserId){
         db.query('SELECT * FROM LikeDislike WHERE VideoPostId = ? AND UserId= ?', [VideoPostId, UserId], (err, results)=>{
             if(err) {
@@ -431,9 +451,11 @@ app.get('/video-rating', (req,res)=>{
 })
 
 
+
+
 app.post("/forumCreate", async (req,res)=>{
     const title = req.body.title
-    const description = req.body.description 
+    const description = req.body.description
     db.query("INSERT INTO forums(title, description) VALUES(?, ?)", [title, description],(err)=>{
         if(err){
             if(err.errno === 1062){
@@ -442,10 +464,11 @@ app.post("/forumCreate", async (req,res)=>{
             else{
                 res.send(err)
             }
-        } 
+        }
         return res.status(201).send("Forum created successfully")
     })
 })
+
 
 app.get("/forums", (req,res)=>{
     const query = "SELECT * FROM forums"
@@ -456,6 +479,7 @@ app.get("/forums", (req,res)=>{
         return res.json(data)
     })
 })
+
 
 app.get("/UserPosts", async (req,res)=>{
     const username = req.query.username
@@ -468,10 +492,11 @@ app.get("/UserPosts", async (req,res)=>{
     })
 })
 
+
 /*
 - add new post
 - recalculate tfidf vector for previous posts
-- 
+-
 */
 app.post("/forumPostCreate", async (req, res) => {
     const allPosts = req.body.allPosts
@@ -481,6 +506,7 @@ app.post("/forumPostCreate", async (req, res) => {
     const forums = req.body.forums.join(", ")
     const tfidfVector = {}
 
+
     //add all previous posts to the corpus
     allPosts.forEach(post => {
         var tokenedPreviousPost = tokenizer.tokenize(post.body)
@@ -489,10 +515,12 @@ app.post("/forumPostCreate", async (req, res) => {
         tfidf.documents[tfidf.documents.length - 1].__key = post.id //key for idenfying which post is from
     });
 
+
     //add current post to the corpus
     var tokenedCurrentPost = tokenizer.tokenize(body)
     tokenedCurrentPost = stopwords.removeStopwords(tokenedCurrentPost, enStopwords)
     tfidf.addDocument(tokenedCurrentPost)
+
 
     //recalculate previous post tfidf vector
     for(i = 0; i < tfidf.documents.length; i++){
@@ -511,11 +539,12 @@ app.post("/forumPostCreate", async (req, res) => {
             }
         })
     }
-    
+   
     //calculate currnent post tfidf vector
     tfidf.listTerms(tfidf.documents.length - 1).forEach(function(item) {
         tfidfVector[item.term] = item.tfidf
     });
+
 
     //update tfidf vector for previous posts
     //add current post to database
@@ -528,9 +557,9 @@ app.post("/forumPostCreate", async (req, res) => {
         else{
             const postID = insertResult.insertId
             return res.status(201).send({
-                username: username, 
-                title: title, 
-                body: body, 
+                username: username,
+                title: title,
+                body: body,
                 id: postID,
                 forums: forums
             })
@@ -538,7 +567,9 @@ app.post("/forumPostCreate", async (req, res) => {
     })
 })
 
+
 function updateTFI_DFVector(allPosts){
+
 
 }
 //viewing all posts, mainly for testing purposes can change the condition later
@@ -551,11 +582,13 @@ app.get("/forumPostsAll", async (req,res)=>{
     })
 })
 
+
 //EDITING POSTS
 //Edit Route
 app.put("/forumPostEdit/:postID", (req, res) => {
     const postID = req.params.postID;
     const { editedContent } = req.body;
+
 
     db.query("UPDATE forumpost SET body = ? WHERE id = ?", [editedContent, postID], function(err, result) {
         if (err) {
@@ -565,6 +598,7 @@ app.put("/forumPostEdit/:postID", (req, res) => {
         return res.status(200).send("Post edited successfully");
     });
 });
+
 
 //Get Single Route
 app.get("/forumPost/:id", (req, res) => {
@@ -577,6 +611,7 @@ app.get("/forumPost/:id", (req, res) => {
         return res.json(data);
     });
 });
+
 
 //DELETING POSTS
 //Delete Route
@@ -591,27 +626,27 @@ app.delete("/forumPost/:postId", (req, res) => {
     });
 });
 
-//DELETE ACCOUNT
-//Account Deletion Request Endpoint
-app.post("/delete-account", async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        const user = await queryTheDatabaseWithCallback("SELECT * FROM users WHERE username = ?", [username]);
-        if (user.length === 0) {
-            return res.status(404).json({ error: "User not found" });
-        }
-        const passwordMatch = await bcrypt.compare(password, user[0].password);
-        if (!passwordMatch) {
-            return res.status(401).json({ error: "Incorrect password" });
-        }
 
-        await queryTheDatabaseWithCallback("DELETE FROM users WHERE username = ?", [username]);
-        res.sendStatus(200);
-    } catch (error) {
-        console.error("Error deleting account:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
+//DELETE ACCOUNT
+// This is the route for handling deletion requests for user accounts
+app.post("/delete-account", async (req, res) => {
+        console.log("Hello");
+        const { username } = req.body;
+            db.query(
+                'DELETE FROM users WHERE username = ?',
+                [username],
+                async (err, results) => {
+                    if(err){
+                        console.log(err);
+                        res.status(500).send("Error deleting user");
+                    }
+                    else {
+                        return res.status(200).send("User deleted successfully");
+                    }
+                }
+            );
+        }
+);
 
 //viewing a post by its id
 app.get("/forumPostsById/:postID", async (req,res)=>{
@@ -628,6 +663,7 @@ app.get("/forumPostsById/:postID", async (req,res)=>{
     })
 })
 
+
 app.delete("/forumPostDelete/:id", (req,res)=>{
     const forumPostID = req.params.id
     const query = "DELETE FROM forumpost WHERE id = ?"
@@ -636,6 +672,7 @@ app.delete("/forumPostDelete/:id", (req,res)=>{
         return res.json("Post has been deleted successfully");
     });
 });
+
 
 //gets forum posts liked by a user
 app.get("/forumPostsLikedByUser/", async (req,res)=>{
@@ -648,6 +685,7 @@ app.get("/forumPostsLikedByUser/", async (req,res)=>{
     });
 });
 
+
 //gets forum posts disliked by a user
 app.get("/forumPostsDislikedByUser/", async (req,res)=>{
     const userID = req.query.userID
@@ -659,6 +697,7 @@ app.get("/forumPostsDislikedByUser/", async (req,res)=>{
     });
 });
 
+
 //gets likes from post
 app.get("/fetchAllForumPostLikes/", async(req,res)=>{
     //holds number of likes for each post
@@ -668,11 +707,12 @@ app.get("/fetchAllForumPostLikes/", async(req,res)=>{
             if (err){
                 return res.send("error")
             }
-            else { 
+            else {
                 return res.json(data)
             }
         });
 });
+
 
 //gets dislikes from post
 app.get("/fetchAllForumPostDislikes/", async(req,res)=>{
@@ -683,11 +723,12 @@ app.get("/fetchAllForumPostDislikes/", async(req,res)=>{
             if (err){
                 return res.send("error");
             }
-            else { 
+            else {
                 return res.json(data)
             }
         })
 })
+
 
 //Gets posts that has a dislike/like in db by user
 app.get("/forumPostLikeStatus/", async (req,res)=>{
@@ -698,11 +739,12 @@ app.get("/forumPostLikeStatus/", async (req,res)=>{
         if (err){
             return res.send("error");
         }
-        else { 
+        else {
             return res.json(data)
         }
     });
 });
+
 
 //Posts a like/dislike with user and post
 app.post("/forumPostLikeDislike/", async (req,res)=>{
@@ -719,6 +761,7 @@ app.post("/forumPostLikeDislike/", async (req,res)=>{
     });
 });
 
+
 //Changes like to dislike and vice versa with user and post
 app.put("/forumPostChangeLikeDislike/", async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
@@ -733,6 +776,7 @@ app.put("/forumPostChangeLikeDislike/", async (req,res)=>{
     });
 });
 
+
 //Deletes like/dislike from database
 app.delete("/forumPostDeleteLikeDislike/", async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
@@ -746,11 +790,13 @@ app.delete("/forumPostDeleteLikeDislike/", async (req,res)=>{
     });
 });
 
+
 app.post("/forumPostComment/:id", (req, res) => {
    const forumPostID = parseInt(req.params.id, 10)
    //debugging purposes
    const username = req.body.username
    const body = req.body.body
+
 
    db.query("INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp) VALUES (?, ?, ?, NOW())", [forumPostID, username, body], function (err){
     if(err){
@@ -761,6 +807,7 @@ app.post("/forumPostComment/:id", (req, res) => {
    })
 })
 
+
 //gets likes from comment
 app.get("/fetchAllForumPostCommentLikes/", async(req,res)=>{
     //holds number of likes for each post
@@ -770,11 +817,12 @@ app.get("/fetchAllForumPostCommentLikes/", async(req,res)=>{
             if (err){
                 return res.send("error")
             }
-            else { 
+            else {
                 return res.json(data)
             }
         });
 });
+
 
 //gets dislikes from comment
 app.get("/fetchAllForumPostCommentDislikes/", async(req,res)=>{
@@ -785,11 +833,12 @@ app.get("/fetchAllForumPostCommentDislikes/", async(req,res)=>{
             if (err){
                 return res.send("error");
             }
-            else { 
+            else {
                 return res.json(data)
             }
         })
 })
+
 
 //Gets post's comments that has a dislike/like in db by user
 app.get("/forumPostCommentLikeStatus/", async (req,res)=>{
@@ -800,11 +849,12 @@ app.get("/forumPostCommentLikeStatus/", async (req,res)=>{
         if (err){
             return res.send("error");
         }
-        else { 
+        else {
             return res.json(data)
         }
     })
 })
+
 
 //Posts a like/dislike with user and comment
 app.post("/forumPostCommentLikeDislike/", async (req,res)=>{
@@ -821,6 +871,7 @@ app.post("/forumPostCommentLikeDislike/", async (req,res)=>{
     });
 });
 
+
 //Changes like to dislike and vice versa with user and comment
 app.put("/forumPostCommentChangeLikeDislike/", async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
@@ -835,6 +886,7 @@ app.put("/forumPostCommentChangeLikeDislike/", async (req,res)=>{
     });
 });
 
+
 //Deletes like/dislike from database
 app.delete("/forumPostCommentDeleteLikeDislike/", async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
@@ -848,6 +900,7 @@ app.delete("/forumPostCommentDeleteLikeDislike/", async (req,res)=>{
     });
 });
 
+
 //gets forum comments liked by a user
 app.get("/forumPostCommentsLikedByUser/", async (req,res)=>{
     const userID = req.query.userID
@@ -858,6 +911,7 @@ app.get("/forumPostCommentsLikedByUser/", async (req,res)=>{
         return res.json(data);
     });
 });
+
 
 //gets forum comments disliked by a user
 app.get("/forumPostCommentsDislikedByUser/", async (req,res)=>{
@@ -870,6 +924,7 @@ app.get("/forumPostCommentsDislikedByUser/", async (req,res)=>{
     });
 });
 
+
 app.get("/forumPostParentCommentGetByID/:id", (req, res) =>{
     const forumPostID = parseInt(req.params.id, 10)
     db.query("SELECT * FROM forumpostcomments WHERE forum_post_id=? AND parent_comment_id IS NULL", [forumPostID], function (err, data){
@@ -880,12 +935,14 @@ app.get("/forumPostParentCommentGetByID/:id", (req, res) =>{
     })
 })
 
+
 app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
     const forumPostID = parseInt(req.params.id, 10)
     const commentID = parseInt(req.params.commentID, 10)
     const username = req.body.username
     const body = req.body.body
     const timestamp = new Date().toISOString()
+
 
     console.log("FORUM POST COMMENT REPLY FOR POST " + forumPostID)
     console.log("TYPE OF FORUM POST ID " + typeof(forumPostID))
@@ -897,6 +954,7 @@ app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
         timestamp
     }
     const insertQuery = "INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp, parent_comment_id) VALUES (?, ?, ?, NOW(),?)"
+
 
            db.query(insertQuery, [forumPostID, username, body, commentID], (err, insertResult) =>{
             if(err){
@@ -920,13 +978,16 @@ app.post("/forumPostCommentReply/:id/:commentID", (req, res) =>{
            })
 })
 
+
 app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
     const forumPostID = parseInt(req.params.id, 10)
     const parentCommentID = parseInt(req.params.commentID, 10)
 
+
     if(isNaN(parentCommentID)){
         return;
     }
+
 
     db.query("SELECT * FROM forumpostcomments WHERE parent_comment_id=?", [parentCommentID], function (err, data){
     if(err){
@@ -937,6 +998,7 @@ app.get("/forumPostParentGetReplies/:id/:commentID", (req, res) =>{
     }
     })
 })
+
 
 app.get("/forumPostSearch/:searchTitle", (req, res) => {
     const searchTitle = req.params.searchTitle
@@ -950,10 +1012,12 @@ app.get("/forumPostSearch/:searchTitle", (req, res) => {
     })
 })
 
+
 /*
 to see if a post should be recommended, take the consine similarity of the tfidf_vector
 if it meets the threshold, recommend it
 */
+
 
 app.get("/forumPostRecommendedPost/:postID", (req, res) =>{
     const postID = req.params.postID
@@ -980,14 +1044,16 @@ app.get("/forumPostRecommendedPost/:postID", (req, res) =>{
                     return res.status(201).send({recommendedPosts: recommendedPosts})
                 }
             })
-            
+           
         }
     })
 })
 
+
 function cosineSimilarity(tfidfVector1, tfidfVector2) {
     const parsedVector1 = JSON.parse(tfidfVector1)
     const parsedVector2 = JSON.parse(tfidfVector2)
+
 
     let dotProduct = 0
     for(let term in parsedVector1){
@@ -996,16 +1062,21 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
         }
     }
 
+
     const magnitude1 = Math.sqrt(
         Object.values(parsedVector1).reduce((acc, val) => acc + val ** 2, 0)
     );
+
 
     const magnitude2 = Math.sqrt(
         Object.values(parsedVector2).reduce((acc, val) => acc + val ** 2, 0)
     );
 
+
     return dotProduct / (magnitude1 * magnitude2).toFixed(2)
 }
+
+
 
 
   app.get("/videoComments/:VideoPostId", (req,res)=>{
@@ -1019,6 +1090,7 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
     });
   })
 
+
   app.put("/videoComments/:VideoPostCommentId", (req,res)=>{
     const VideoPostCommentId = req.params.VideoPostCommentId;
     const {updatedComment}= req.body;
@@ -1030,6 +1102,7 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
         return res.json(results);
     })
   })
+
 
   app.post("/videoComments", (req,res)=>{
     const {UserId, Comment, VideoPostId, ReplyToVideoPostCommentId}= req.body;
@@ -1060,9 +1133,11 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
             return res.json(results1);
         })
     }
-    
+   
+
 
   })
+
 
   app.post("/videoCommentRating", (req, res)=>{
     const {VideoPostCommentId, UserId, LikeStatus}= req.body;
@@ -1075,6 +1150,7 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
     })
   })
 
+
   app.get("/videoCommentRating", (req, res)=>{
         const {VideoPostCommentId, UserId} = req.query;
         db.query("SELECT * FROM VideoPostCommentLikeDislike WHERE UserId= ? AND VideoPostCommentId = ?", [UserId, VideoPostCommentId], (error, results)=>{
@@ -1086,9 +1162,10 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
         })
   })
 
+
   app.post("/friendRequests", (req, res)=>{
     const {SenderUserId, ReceiverUserId}= req.body;
-    
+   
     let theQuery= "SELECT * FROM FriendRequests WHERE SenderUserId = ? AND ReceiverUserId = ?"
     let theArray= [ReceiverUserId, SenderUserId];
     db.query(theQuery, theArray, (error, results)=>{
@@ -1101,17 +1178,19 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
         }
         else {
             theQuery= "INSERT INTO FriendRequests (SenderUserId, ReceiverUserId) VALUES (?, ?)"
-            
+           
             theArray=[SenderUserId, ReceiverUserId];
             queryTheDatabase(theQuery, theArray, res);
         }
     })
   })
 
+
   app.delete("/friendRequests", (req,res)=>{
     const {SenderUserId, ReceiverUserId}= req.query;
     queryTheDatabase("DELETE FROM FriendRequests WHERE SenderUserId = ? AND ReceiverUserId = ?",[SenderUserId, ReceiverUserId], res)
   })
+
 
   app.post("/Friendships", (req, res)=>{
     const {UserId1, UserId2}= req.body
@@ -1140,6 +1219,7 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
     queryTheDatabase("DELETE FROM Friendships WHERE UserId1= ? AND UserId2 = ?", [val1, val2], res)
   })
 
+
   app.get("/OutgoingFriendRequests/:UserId", (req,res)=>{
     const UserId = req.params.UserId
     queryTheDatabase("SELECT * FROM FriendRequests WHERE SenderUserId = ?", [UserId], res);
@@ -1152,6 +1232,7 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
     const UserId = req.params.UserId
     queryTheDatabase("SELECT * FROM Friendships WHERE UserId1 = ? OR UserId2 = ?", [UserId,UserId], res)
   })
+
 
   app.get("/FriendRelationship", (req,res)=>{
     const {LoggedInUserId, VisitorUserId}= req.query;
@@ -1189,8 +1270,9 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
             })
         })
     })
-    
+   
   })
+
 
   app.post('/video-genre', (req,res)=>{
     const {VideoPostId, Genre}= req.body
@@ -1218,10 +1300,12 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
     })
   })
 
+
   app.get("/genreName", (req, res)=>{ //fix this and add video later
     const {GenreId} = req.query;
     queryTheDatabase("SELECT * FROM Genre WHERE GenreId = ?", [GenreId], res);
   })
+
 
   app.get("/email", (req, res)=>{
     const {UserId} = req.query;
@@ -1230,6 +1314,11 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
   app.put("/email", (req, res)=>{
     const {UserId, email} = req.body;
     queryTheDatabase("UPDATE users SET email = ? WHERE id = ?", [email, UserId], res)
+  })
+
+  app.delete("/deleteAccount", (req,res)=>{
+    const {UserId}= req.query;
+    queryTheDatabase("DELETE FROM users WHERE id = ?", [UserId] , res);
   })
 
   app.get("/videoSubscriptionOnly", (req, res)=>{
@@ -1245,10 +1334,12 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
     queryTheDatabase("INSERT INTO VideoSubscriptionOnly (UserId, Only) VALUES (?,?)", [UserId, Only], res);
   })
 
+
   app.get("/videoSubscriptions", (req, res)=>{
     const {UserId} = req.query;
     queryTheDatabase("SELECT * FROM VideoSubscriptions WHERE UserId = ?", [UserId], res);
   })
+
 
   app.delete("/videoSubscriptions", (req,res)=>{
     const {UserId} = req.query;
@@ -1305,6 +1396,8 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
   io.use(authenticateUserForChat);
 
 
+
+
   const queryTheDatabaseWithCallback= (theQuery, theArray, res, callback)=>{
     db.query(theQuery, theArray, (error, results)=>{
         if(error){
@@ -1314,20 +1407,26 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
         callback(results)
     })
   }
-  
+ 
   io.on('connection', (socket) => {
     console.log(`A user connected ${socket.id}`);
     const {UserId}= socket.request.user;
 
+
     socket.join(`UserId_${UserId}`);
+
 
     socket.on('disconnect', () => {
 
+
         console.log(`User disconnected ${socket.id}`);
+
 
         socket.leave(`UserId_${UserId}`);
     });
   });
+
+
 
 
   app.post("/chatMessage", (req, res)=>{
@@ -1335,8 +1434,9 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
     queryTheDatabaseWithCallback("INSERT INTO ChatMessage (SenderUserId, ReceiverUserId, Message) VALUES (?,?,?)", [SenderUserId, ReceiverUserId, Message], res, (results)=>{
         io.to(`UserId_${ReceiverUserId}`).emit("newMessage", { SenderUserId, ReceiverUserId, Message, ChatMessageId:results.insertId, SentAt:new Date().toISOString()});
         res.send(results);
-    }); 
+    });
   })
+
 
   app.get("/chatMessages", (req, res)=>{
     const {UserId1, UserId2} = req.query;
@@ -1345,6 +1445,9 @@ function cosineSimilarity(tfidfVector1, tfidfVector2) {
     });
   })
 
+
   server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
+
+
