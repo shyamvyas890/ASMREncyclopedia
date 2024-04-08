@@ -109,7 +109,9 @@ export const ForumPostComment = (props) => {
     const handleDeleteComment = async () =>{
         const confirmDelete = window.confirm("Are you sure you want to delete your comment?")
         if(confirmDelete){
-            await axios.put(`http://localhost:3001/deleteForumPostComment/${props.id}`)
+            await axios.put(`http://localhost:3001/deleteForumPostComment/${props.id}`, {
+                username: currentUsername
+            })
             setIsDeleted(true)
         }
 
@@ -122,7 +124,7 @@ export const ForumPostComment = (props) => {
 
     const handleEditSubmit = async() =>{
         await axios.put(`http://localhost:3001/editForumPostComment/${props.id}`, {
-        editedBody: editContent
+        editedBody: editContent, username: currentUsername
        })
        setCommentBody(editContent)
        setIsEditing(false)
