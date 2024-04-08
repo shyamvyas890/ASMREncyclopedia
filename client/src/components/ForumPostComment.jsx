@@ -174,7 +174,7 @@ export const ForumPostComment = (props) => {
 
          {isEditing ? (<div> <input value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button onClick={handleEditCancel}> Cancel Edit </button> <button onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
 
-            {showReplyOption && (<button onClick={() => handleReply(props.id)}> Reply to {props.username} </button>)}
+            {showReplyOption !== false && (<button onClick={() => handleReply(props.id)}> Reply to {props.username} </button>)}
             
             <button 
                 className={`like ${userLikedComments ? "liked" : ""}`} 
