@@ -1,5 +1,5 @@
 import React from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from "react-router-dom";
 import {hostname } from "../utils/utils";
 

@@ -1,5 +1,5 @@
 import react from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useState } from "react";
 import { useEffect } from "react";
 import * as yup from "yup"

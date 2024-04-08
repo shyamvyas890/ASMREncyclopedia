@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useState, useEffect } from "react";
 import { redirectDocument, useNavigate } from "react-router-dom";
 import LikeDislikeComponent from "./LikeDislikeComponent"
@@ -12,6 +12,7 @@ export const ForumPostFeedComponent = (props) =>{
     const [allPostDislikes, setAllPostDislikes] = useState(new Map())
     const [userLikedPosts, setUserLikedPosts] = useState([])
     const [userDislikedPosts, setUserDislikedPosts] = useState([])
+
     const [currentUsername, setCurrentUsername] = useState()
     const [currentUserID, setCurrentUserID] = useState()
     const [sortType, setSortType] = useState()
@@ -58,6 +59,7 @@ export const ForumPostFeedComponent = (props) =>{
             const res = await axios.get("http://localhost:3001/forumPostsAll")
             //initially sort from newest to oldest
             setAllPosts(res.data)
+            console.log(res.data)
             const intialPosts = res.data.sort((a, b) => {
               if(a.post_timestamp > b.post_timestamp){
                 return -1;
@@ -179,15 +181,36 @@ const onSubmit =  async (e) => {
   const data = {
       title: title,
       body: body,
-      forums: tagOptions,
       username: currentUsername,
       post_timestamp: new Date(),
       allPosts: allPosts
   }
   const isValid = await schema.isValid(data) //valid schema according to yup
   if(isValid){
-      
-      await axios.post('http://localhost:3001/forumPostCreate', data) //post to database
+    try{
+      //Create Forum Post
+      const postRes = await axios.post('http://localhost:3001/forumPostCreate', data) //post to database
+      let tagIDs = []
+      for(let i = 0; i < tagOptions.length; i++){
+        let forumTagName = tagOptions[i]
+        //Create Tags submitted with Forum Post
+        await axios.post('http://localhost:3001/forumTagCreate', {}, {
+          params: { forumTagName: forumTagName }
+        })
+        //Gets the TagID of each Tag
+        const tagRes = await axios.get('http://localhost:3001/fetchForumTag', {
+          params: {forumTagName: forumTagName}
+        })
+        tagIDs.push(tagRes.data[0])
+      }
+
+      for(let forumTagID of tagIDs){
+        //Creates a TagPost, linking Tags to Posts
+        await axios.post('http://localhost:3001/forumPostTagCreate', {}, {
+          params: { postID: postRes.data.id, forumTagID: forumTagID.ForumTagID }
+        })
+      }
+
       //get all posts including new post, resort from newest to oldest
       const response2 = await axios.get('http://localhost:3001/forumPostsAll') 
       response2.data.sort((a, b) => {
@@ -201,12 +224,16 @@ const onSubmit =  async (e) => {
           return 0;
         }
       })
+      
       setAllPosts(response2.data)
 
       //resetting useStates and text boxes
       setTitle("")
       setBody("")
       setTagOptions([])
+    } catch (e){
+        console.log(e)
+    }
   }
   else{
       alert("Make sure to give your post a title and body!")
@@ -298,11 +325,13 @@ return(<div>
           {post.username}
          </a> 
          @ {new Date(post.post_timestamp).toLocaleString()}</h2>
-            <p>{post.body}</p>
+            <p>{}</p>
             <div>
-              Tag(s)
-              <br></br>
-              {post.forums}
+            Tags: {post.tags && post.tags.split(',').map(tag => ( //If tags!=null split tags
+              <div>
+              <span key={tag ? tag.trim() : 'null'}>{tag ? tag.trim() : 'null'}</span>
+              </div>
+            ))}
             </div>
             <button onClick={ () => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)}> View Post </button>
             <button 

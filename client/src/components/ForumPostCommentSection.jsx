@@ -1,5 +1,5 @@
 import { useEffect, useState} from "react"
-import axios from "axios"
+import axios from '../utils/AxiosWithCredentials';
 import { ForumPostComment } from "./ForumPostComment"
 import { useParams } from "react-router-dom"
 
@@ -49,14 +49,13 @@ export const FourmPostCommentSection = (props) => {
          }).then( (res) => {
              const commentToAdd = {
                  id: res.data.id,
-                 body: commentText, 
+                 body: commentText,
                  username: username, 
                  comment_timestamp: new Date().toLocaleString()
              }
              setParentCommentsObject([...parentCommentsObject, commentToAdd])
              setCommentText('')
          })
- 
      }
 
     //for each parent comment, render a ForumPostComment 

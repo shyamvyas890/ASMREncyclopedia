@@ -1,6 +1,6 @@
 // RegistrationComponent.js
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../utils/AxiosWithCredentials';
 import { Link } from 'react-router-dom';
 const RegistrationComponent = () => {
   const [feedback, setFeedback] = useState('');

@@ -1,5 +1,5 @@
 import { useEffect, useState} from "react"
-import axios from "axios"
+import axios from '../utils/AxiosWithCredentials';
 import { useParams } from "react-router-dom"
 import LikeDislikeComponent from "./LikeDislikeComponent"
 import { useNavigate } from "react-router-dom"
