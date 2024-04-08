@@ -154,6 +154,7 @@ const SettingsComponent = ()=>{
                     <button onClick={changeEditSubscriptionPreferences}>Update Video Subscription Preferences</button>
                     
                     <div>Forum Subscription Preferences</div>
+                     
                     <div>{emailAndSubscriptionPreferences.forumSubscriptionOnly.length===0? "All Genres": emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===1?"Only These Genres": "All Genres Except These:"}</div>
                     {emailAndSubscriptionPreferences.forumSubscriptionOnly.length!==0 && (emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===1 || emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===0) &&
                     emailAndSubscriptionPreferences.forumSubscriptions.map((tag, index)=>(

@@ -743,7 +743,7 @@ app.get("/fetchForumTag", verifyJWTMiddleware, (req,res)=>{
 app.post("/forumPostTagCreate", verifyJWTMiddleware, async (req,res)=>{
     const postID = req.query.postID
     const forumTagID = req.query.forumTagID
-    const authorizedUserId = (await whoOwnsThis("ForumPostId", postID))[0].UserId;
+    const authorizedUserId = (await whoOwnsThis("ForumPostId", postID))[0].UserID;
     if(req.decodedToken.UserId !== authorizedUserId){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -973,7 +973,7 @@ app.post("/forumPostLikeDislike/", verifyJWTMiddleware, (req,res)=>{
 app.put("/forumPostChangeLikeDislike/", verifyJWTMiddleware, async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
     const rating = req.query.rating
-    const authorizedUserId = (await whoOwnsThis("ForumPostLikeDislikeID", LikeDislikeID))[0].UserId;
+    const authorizedUserId = (await whoOwnsThis("ForumPostLikeDislikeID", LikeDislikeID))[0].UserID;
     if(req.decodedToken.UserId !== authorizedUserId){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -990,7 +990,7 @@ app.put("/forumPostChangeLikeDislike/", verifyJWTMiddleware, async (req,res)=>{
 //Deletes like/dislike from database
 app.delete("/forumPostDeleteLikeDislike/", verifyJWTMiddleware, async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
-    const authorizedUserId = (await whoOwnsThis("ForumPostLikeDislikeID", LikeDislikeID))[0].UserId;
+    const authorizedUserId = (await whoOwnsThis("ForumPostLikeDislikeID", LikeDislikeID))[0].UserID;
     if(req.decodedToken.UserId !== authorizedUserId){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -1398,6 +1398,7 @@ app.get("/forumPostRecommendedPost/:postID", verifyJWTMiddleware, (req, res) =>{
 app.get("/fetchAllPlaylistVideosID", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
+    console.log("Autorized UserId: ", authorizedUserID)
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -1430,6 +1431,7 @@ app.get("/fetchVideoInPlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
+    console.log("Autorized UserId: ", authorizedUserID)
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -1448,6 +1450,7 @@ app.post("/addVideoToPlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
+    console.log("Autorized UserId: ", authorizedUserID)
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -1484,6 +1487,8 @@ app.delete("/deleteVideoFromPlaylist", verifyJWTMiddleware, async (req, res)=>{
 
 app.get("/fetchAllUserPlaylists", verifyJWTMiddleware, (req, res)=>{
     const userID = req.decodedToken.UserId
+    console.log("Autorized UserId: ", userID)
+
     const query = "SELECT * FROM Playlist WHERE userID = ?"
     db.query(query, [userID], (err, data)=>{
         if(err){
