@@ -20,15 +20,9 @@ const SettingsComponent = ()=>{
     const tokenVerify= async (e) => {
             try{
                 const response= await axios.get(`http://localhost:3001/verify-token`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    setUsername({userIdOfCurrentUser, username:response.data.username})
-                }
-                else {
-                    navigate("/");
-                }
+                const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+                setUsername({userIdOfCurrentUser, username:response.data.username})
             }
-    
             catch(error){
                 console.log(error);
                 navigate("/");

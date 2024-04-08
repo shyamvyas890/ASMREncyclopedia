@@ -18,34 +18,25 @@ const ChatComponent =()=>{
     };
 
     const tokenVerify= async () => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
             try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    setUsername({userIdOfCurrentUser, username:response.data.username})
-                    const friendsList = await axios.get(`${hostname}/ListOfFriends/${userIdOfCurrentUser}`);
-                    const theFriendsList=[];
-                    for(const friend of friendsList.data){
-                        const friendId= friend.UserId1===userIdOfCurrentUser?friend.UserId2:friend.UserId1;
-                        const friendUsername = (await axiosRequest(3,2,"users/id", {UserId:friendId})).data.username;
-                        theFriendsList.push({UserId:friendId, username:friendUsername});
-                    }
-                    setFriends(theFriendsList);
-                    setSocket(io(hostname, { transports : ['websocket'], query:{token:localStorage.getItem("token")}}));
+                const response= await axios.get(`http://localhost:3001/verify-token`)
+                const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+                setUsername({userIdOfCurrentUser, username:response.data.username})
+                const friendsList = await axios.get(`${hostname}/ListOfFriends/${userIdOfCurrentUser}`);
+                const theFriendsList=[];
+                for(const friend of friendsList.data){
+                    const friendId= friend.UserId1===userIdOfCurrentUser?friend.UserId2:friend.UserId1;
+                    const friendUsername = (await axiosRequest(3,2,"users/id", {UserId:friendId})).data.username;
+                    theFriendsList.push({UserId:friendId, username:friendUsername});
                 }
-                else {
-                    navigate("/");
-                }
+                setFriends(theFriendsList);
+                setSocket(io(hostname, { transports : ['websocket']}));
+                
             }
             catch(error){
+                navigate("/")
                 console.log(error);
             }
-        }
-        else{
-            navigate("/");
-        }
     }
 
     React.useEffect(()=>{

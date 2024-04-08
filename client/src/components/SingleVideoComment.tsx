@@ -12,26 +12,15 @@ const SingleVideoCommentComponent = () =>{
     const [username, setUsername]= React.useState<{userIdOfCurrentUser: number, username: string;} | null>(null);
     const navigate = useNavigate();
     const tokenVerify= async () => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
             try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    setUsername({userIdOfCurrentUser, username:response.data.username})
-                }
-                else {
-                    navigate("/");
-                }
+                const response= await axios.get(`http://localhost:3001/verify-token`)
+                const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+                setUsername({userIdOfCurrentUser, username:response.data.username})
             }
-    
             catch(error){
                 console.log(error);
+                navigate("/")
             }
-        }
-        else{
-            navigate("/");
-        }
     }
 
     const fetchAllCommentsForThisPost = async () => {

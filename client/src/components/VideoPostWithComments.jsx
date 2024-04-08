@@ -75,25 +75,14 @@ const VideoPostWithCommentsComponent = (props)=>{
       }
 
     const tokenVerify= async (e) => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
-            try{
-                const response= await axios.get(`${hostname}/verify-token/${theToken}`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    setUsername({userIdOfCurrentUser, username:response.data.username})
-                }
-                else {
-                    navigate("/");
-                }
-            }
-    
-            catch(error){
-                console.log(error);
-            }
+        try{
+            const response= await axios.get(`${hostname}/verify-token`)
+            const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+            setUsername({userIdOfCurrentUser, username:response.data.username})
         }
-        else{
+        catch(error){
             navigate("/");
+            console.log(error);
         }
     }
 
