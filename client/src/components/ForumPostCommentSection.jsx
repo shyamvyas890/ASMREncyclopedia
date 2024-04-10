@@ -13,10 +13,9 @@ export const FourmPostCommentSection = (props) => {
 
    //gets the username of the current user
    useEffect( () => {
-    const token = localStorage.getItem("token")
     const fetchUsername = async () => {
         try {
-          const response = await axios.get(`http://localhost:3001/verify-token/${token}`);
+          const response = await axios.get(`http://localhost:3001/verify-token`);
           setUsername(response.data.username);
         } catch (error) {
           console.log(error);
@@ -63,7 +62,7 @@ export const FourmPostCommentSection = (props) => {
     Comments for post {props.forumPostID}
 
     {parentCommentsObject && parentCommentsObject.map( (parentComment) => (
-      <ForumPostComment id = {parentComment.id} postID = {props.forumPostID} username = {parentComment.username} currentUser = {props.currentUser} userID = {userID} timestamp = {parentComment.comment_timestamp} body = {parentComment.body} deleted={parentComment.deleted}/>
+      <ForumPostComment id = {parentComment.id} postID={parentComment.forumPostID} username={parentComment.username} timestamp={parentComment.comment_timestamp} body = {parentComment.body} userID = {userID} deleted={parentComment.deleted}/>
     ))}
 
     <div>

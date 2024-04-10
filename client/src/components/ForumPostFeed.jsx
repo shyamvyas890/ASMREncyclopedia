@@ -26,7 +26,6 @@ export const ForumPostFeedComponent = (props) =>{
 
     //gets the username of the current user
     useEffect( () => {
-        const token = localStorage.getItem("token")
         const fetchUsername = async () => {
             try {
               const response = await axios.get(`http://localhost:3001/verify-token`);
@@ -325,7 +324,7 @@ return(<div>
           {post.username}
          </a> 
          @ {new Date(post.post_timestamp).toLocaleString()}</h2>
-            <p>{}</p>
+            <p>{post.body}</p>
             <div>
             Tags: {post.tags && post.tags.split(',').map(tag => ( //If tags!=null split tags
               <div>

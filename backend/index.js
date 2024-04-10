@@ -870,19 +870,66 @@ app.delete("/forumPostDelete/:id", verifyJWTMiddleware, async (req,res)=>{
 });
 
 app.put("/editForumPost/:id", verifyJWTMiddleware, async (req, res) =>{
+    console.log("ROUTE START")
     const forumPostID = req.params.id
+    const allPosts = req.body.allPosts
+    const tfidfVector = {}
+
     const postUsername = (await whoOwnsThis("ForumPostId", forumPostID))[0].username;
     if(req.decodedToken.username !== postUsername){
         return res.status(403).send("Incorrect User")
     }
 
-    const query = "UPDATE forumpost SET body=? WHERE id=?"
-    db.query(query, [req.body.newBody, forumPostID], (err, data)=>{
+    //add all previous posts to the corpus
+    allPosts.forEach(post => {
+        var tokenedPreviousPost = tokenizer.tokenize(post.body)
+        tokenedPreviousPost = stopwords.removeStopwords(tokenedPreviousPost, enStopwords)
+        tfidf.addDocument(tokenedPreviousPost)
+        tfidf.documents[tfidf.documents.length - 1].__key = post.id //key for idenfying which post is from
+    });
+
+     //add current post to the corpus
+     var tokenedCurrentPost = tokenizer.tokenize(req.body.newBody)
+     tokenedCurrentPost = stopwords.removeStopwords(tokenedCurrentPost, enStopwords)
+     tfidf.addDocument(tokenedCurrentPost)
+
+    //recalculate previous post tfidf vector
+    for(i = 0; i < tfidf.documents.length; i++){
+        let pastTfidfVector = {}
+        tfidf.listTerms(i).forEach(function(item){
+            pastTfidfVector[item.term] = item.tfidf
+        })
+        const stringTfidfVector = JSON.stringify(pastTfidfVector)
+        db.query('UPDATE forumpost SET tfidf_vector=? WHERE id=?', [stringTfidfVector, tfidf.documents[i].__key], function(err){
+            if(err){
+                console.log(err)
+                res.status(500).send(err)
+            }
+            else{
+                console.log("UPDATES TO OTHER POSTS COMPLETE")
+            }
+        })
+    }
+
+    //calculate currnent post tfidf vector
+    tfidf.listTerms(tfidf.documents.length - 1).forEach(function(item) {
+        tfidfVector[item.term] = item.tfidf
+    });
+
+    console.log("CALCULATED EDIT TFIDF")
+    //new tfidfVector from the edited post
+    const tfidfVectorString = JSON.stringify(tfidfVector)
+    console.log(tfidfVectorString)
+
+    const query = "UPDATE forumpost SET body=?, tfidf_vector=? WHERE id=?"
+    db.query(query, [req.body.newBody, tfidfVectorString, forumPostID], (err, data)=>{
         if(err){
+            console.log(err)
             return res.send(err)
         }
         else{
-            return res.json("Post Edit Successful")
+            console.log("UPDATE COMPLETE")
+            return res.status(201).send("Edit Done")
         }
     })
 })
@@ -1027,7 +1074,7 @@ app.get("/getForumPostCommentByID/:id", verifyJWTMiddleware, (req, res) =>{
     const forumPostCommentID = parseInt(req.params.id, 10)
     db.query("SELECT * FROM FORUMPOSTCOMMENTS WHERE id=?", [forumPostCommentID], function(err, data){
         if(err){
-            console.log(err)
+            return res.status(403).send("Error Occured")
         }
         else{
             return res.json(data)
@@ -1230,7 +1277,7 @@ app.post("/forumPostCommentReply/:id/:commentID", verifyJWTMiddleware, (req, res
     const body = req.body.body
     const timestamp = new Date().toISOString()
 
-    if(req.decodedToken.username != username){
+    if(req.decodedToken.username !== username){
         return res.status(403).send("Incorrect User")
     }
 

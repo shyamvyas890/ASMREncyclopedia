@@ -20,11 +20,12 @@ export const ForumPostComment = (props) => {
     const [isEditing, setIsEditing] = useState()
     const [commentBody, setCommentBody] = useState(props.body)
     const [editContent, setEditContent] = useState(props.body)
-    const [showReplies, setShowReplies] = useState(false)
+    const [showReplies, setShowReplies] = useState(true)
 
     const singleView = props.singleView
     const showReplyOption = props.replyOption
     const editDeleteOption = props.editDeleteOption
+    const singleViewID = parseInt(props.singleViewID, 10)
 
     const [hasParentComment, setHasParentComment] = useState()
     const [currentComment, setCurrentComment] = useState()
@@ -54,7 +55,23 @@ export const ForumPostComment = (props) => {
         const getReplies = async () =>{
              try{
                const response = await axios.get(`http://localhost:3001/forumPostParentGetReplies/${postID}/${props.id}`)
-               setReplies(response.data)
+               let replies = response.data
+               if(singleViewID){
+                console.log("HELLOOOOOOOO" + singleViewID)
+                const singleCommentIndex = replies.findIndex(comment => comment.id === singleViewID);
+                if(singleCommentIndex !== -1){
+                    const singleComment = replies.splice(singleCommentIndex, 1)[0];
+                    // Place it at the beginning of the array
+                    replies.unshift(singleComment);
+                    setReplies(replies)
+                }
+                else{
+                    setReplies(response.data)
+                }
+               }
+               else{
+                setReplies(response.data)
+               }
              }
              catch(error){
                console.log(error)
@@ -69,7 +86,7 @@ export const ForumPostComment = (props) => {
         const token = localStorage.getItem("token")
         const fetchUsername = async () => {
             try {
-              const response = await axios.get(`http://localhost:3001/verify-token/${token}`);
+              const response = await axios.get(`http://localhost:3001/verify-token`, {withCredentials: true});
               setCurrentUsername(response.data.username);
             } catch (error) {
               console.log(error);
@@ -92,7 +109,8 @@ export const ForumPostComment = (props) => {
             username: currentUsername,
             body: replyText, 
             parent_comment_id: replyCommentID
-        }).then( (res) => {
+            
+        },{withCredentials: true} ).then( (res) => {
             const replyToAdd = {
                 id: res.data.id,
                 body: replyText, 
@@ -109,23 +127,20 @@ export const ForumPostComment = (props) => {
     const handleDeleteComment = async () =>{
         const confirmDelete = window.confirm("Are you sure you want to delete your comment?")
         if(confirmDelete){
-            await axios.put(`http://localhost:3001/deleteForumPostComment/${props.id}`, {
-                username: currentUsername
-            })
+            await axios.put(`http://localhost:3001/deleteForumPostComment/${props.id}`, {withCredentials: true})
             setIsDeleted(true)
         }
 
     }
     
-
     const handleEditCancel = () =>{
         setIsEditing(false)
     }
 
     const handleEditSubmit = async() =>{
         await axios.put(`http://localhost:3001/editForumPostComment/${props.id}`, {
-        editedBody: editContent, username: currentUsername
-       })
+        editedBody: editContent
+       }, {withCredentials: true})
        setCommentBody(editContent)
        setIsEditing(false)
     }
@@ -176,7 +191,7 @@ export const ForumPostComment = (props) => {
 
          {isEditing ? (<div> <input value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button onClick={handleEditCancel}> Cancel Edit </button> <button onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
 
-            {showReplyOption && (<button onClick={() => handleReply(props.id)}> Reply to {props.username} </button>)}
+            {showReplyOption !== false && (<button onClick={() => handleReply(props.id)}> Reply to {props.username} </button>)}
             
             <button 
                 className={`like ${userLikedComments ? "liked" : ""}`} 
@@ -188,7 +203,7 @@ export const ForumPostComment = (props) => {
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 0)}>
                 {commentDislikes} Dislikes
             </button>
-            {currentUsername === commenterUsername && editDeleteOption? (<div>
+            {currentUsername === commenterUsername && !singleView? (<div>
               <button onClick={setIsEditing}> Edit Comment </button> <button onClick={handleDeleteComment}> Delete Comment </button> </div>
             ) : <div></div>}
             
