@@ -9,10 +9,11 @@ const SettingsComponent = ()=>{
     const [edit, setEdit] = useState({
         email: false,
         subscriptionPreferences:false,
-        subscriptionForumPreferences: false,
+        forumSubscriptionPreferences: false,
         password: false
     })
     const [subscriptionRadio, setSubscriptionRadio]= useState(null);
+    const [forumSubscriptionRadio, setForumSubscriptionRadio]= useState(null);
     const [videoTags, setVideoTags]= useState([]);
     const [forumTags, setForumTags]= useState([]);
 
@@ -48,11 +49,17 @@ const SettingsComponent = ()=>{
             sub.GenreName = (await axiosRequest(3,2,"genreName", {GenreId: sub.GenreId})).data[0].Genre;
             newTags.push(sub.GenreName);
         }
+        const newForumTags=[]
+        for(const sub of forumSubscriptions){
+            const val = sub.ForumTagName.trim()
+            console.log(val)
+            newForumTags.push(val)
+        }
         setVideoTags(newTags);
-        setForumTags(forumSubscriptions)
+        setForumTags(newForumTags)
         setEmailAndSubscriptionPreferences({email,videoSubscriptionOnly, videoSubscriptions, forumSubscriptionOnly, forumSubscriptions});
-        console.log("tags: ", forumSubscriptionOnly)
-        console.log("tags: ", forumSubscriptions)
+        console.log("videotags: ", newTags)
+        console.log("forumtags: ", newForumTags)
     }
     React.useEffect(()=>{
         if(username){
@@ -66,7 +73,7 @@ const SettingsComponent = ()=>{
         setEdit(prev=>({...prev, subscriptionPreferences:!prev.subscriptionPreferences}));
     }
     const changeEditForumSubscriptionPreferences = ()=>{
-        setEdit(prev=>({...prev, subscriptionForumPreferences:!prev.subscriptionForumPreferences}));
+        setEdit(prev=>({...prev, forumSubscriptionPreferences:!prev.forumSubscriptionPreferences}));
     }
     const changeEditPassword = ()=>{
         setEdit(prev=>({...prev, password:!prev.password}));
@@ -96,6 +103,7 @@ const SettingsComponent = ()=>{
             }
             console.log(addSubOnly);
             for(const tag of videoTags){
+                console.log("videoTag: ", tag)
                 const addSub= await axiosRequest(1,1,"videoSubscriptions", {UserId:username.userIdOfCurrentUser, Genre:tag});
                 console.log(addSub);
             }
@@ -103,6 +111,47 @@ const SettingsComponent = ()=>{
         getCurrentSettings();
         changeEditSubscriptionPreferences();
         setSubscriptionRadio(null);
+    }
+
+    const editForumSubscription = async (e)=>{
+        e.preventDefault();
+        console.log("go: ", emailAndSubscriptionPreferences.forumSubscriptionOnly)
+
+        if(emailAndSubscriptionPreferences.forumSubscriptionOnly){   //If exists delete
+            console.log("delete")
+            await axios.delete("http://localhost:3001/deleteForumSubscriptionOnly/")
+            await axios.delete("http://localhost:3001/deleteForumSubscription/")
+        }
+        if(forumSubscriptionRadio==="except" || forumSubscriptionRadio==="only"){
+            let addSubOnly;
+            if(forumSubscriptionRadio==="except"){
+                await axios.post("http://localhost:3001/createForumSubscriptionOnly/", {}, {
+                    params: { Only: 0 }
+                })
+            }
+            else {
+                await axios.post("http://localhost:3001/createForumSubscriptionOnly/", {}, {
+                    params: { Only: 1 }
+                })            
+            }
+            console.log(addSubOnly);
+            for(const tag of forumTags){ //Insert Ignore
+                console.log("forumTag: ", tag)
+                await axios.post("http://localhost:3001/forumTagCreate/", {}, {
+                    params: { forumTagName: tag }
+                })
+                const tagID = await axios.get("http://localhost:3001/fetchForumTag/", {
+                    params: { forumTagName: tag }
+                })
+                console.log("tagID: ", tagID)
+                await axios.post("http://localhost:3001/createForumSubscription/", {}, {
+                    params: { ForumTagID: tagID.data[0].ForumTagID }
+                })
+            }
+        }
+        getCurrentSettings();
+        changeEditForumSubscriptionPreferences();
+        setForumSubscriptionRadio(null);
     }
     const editPassword= async (e)=>{
         e.preventDefault();
@@ -137,9 +186,27 @@ const SettingsComponent = ()=>{
             setVideoTags(prevTags=>[...prevTags, newTag]);
         }
     }
+    const forumHandleOnKeyDown = (e)=>{
+        if(e.key==="Enter" || e.key===","){
+            e.preventDefault();
+            const val= e.target.value.trim();
+            console.log(val)
+            addForumTag(val)
+            e.target.value="";
+        }
+    }
+    const handleRemovalOfForumTag = (e, removeThis)=>{
+        e.preventDefault();
+        setVideoTags(prevTags=>prevTags.filter(theTag=> theTag!==removeThis));
+    }
+    const addForumTag = (newTag)=>{
+        if(newTag && !forumTags.includes(newTag)){
+            setForumTags(prevTags=>[...prevTags, newTag]);
+        }
+    }
     return (
         <React.Fragment>
-            {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password)? 
+            {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences)? 
                 (<>
                     <div>Your Current Settings</div>
                     <div>Email</div>
@@ -155,18 +222,17 @@ const SettingsComponent = ()=>{
                     
                     <div>Forum Subscription Preferences</div>
                      
-                    <div>{emailAndSubscriptionPreferences.forumSubscriptionOnly.length===0? "All Genres": emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===1?"Only These Genres": "All Genres Except These:"}</div>
+                    <div>{emailAndSubscriptionPreferences.forumSubscriptionOnly.length===0? "All Genres": emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===1?"Only These Tags": "All Genres Except These:"}</div>
                     {emailAndSubscriptionPreferences.forumSubscriptionOnly.length!==0 && (emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===1 || emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===0) &&
                     emailAndSubscriptionPreferences.forumSubscriptions.map((tag, index)=>(
                         <div key={index}>{tag.ForumTagName}</div>
                     ))}
                     <button onClick={changeEditForumSubscriptionPreferences}>Update Forum Post Subscription Preferences</button>
-                    <div>a{}</div>
                     <div>Security</div>
                     <button onClick={changeEditPassword}>Change Password</button>
                 </>
                 ):
-                (username && emailAndSubscriptionPreferences && edit.email && !edit.subscriptionPreferences && !edit.password)?
+                (username && emailAndSubscriptionPreferences && edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences)?
                 (
                     <form onSubmit={editEmail}>
                         <label>
@@ -176,7 +242,57 @@ const SettingsComponent = ()=>{
                         <button type="submit">Save Email</button>
                     </form>
                 ):
-                (username && emailAndSubscriptionPreferences && !edit.email && edit.subscriptionPreferences && !edit.password)?
+                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && edit.forumSubscriptionPreferences)?
+                (
+                    <form onSubmit={editForumSubscription}>
+                        <style>
+                            {`
+                            .tag {
+                                display: inline-block;
+                                background-color: yellow;
+                                color: black; 
+                                padding: 5px;
+                                margin: 5px;
+                                border-radius: 5px;
+                            }
+                            
+                            .tag-container {
+                                display: inline-block;
+                                padding: 5px;
+                                margin-top: 5px;
+                                border-radius: 5px;
+                            }
+                            `}
+                        </style>
+                        <div>Which ASMR forum tags do you want to subscribe to?</div>
+                        <label>All Tags
+                            <input type="radio" name="forumSubscriptionQuestion" value="all" onChange={()=>{setForumSubscriptionRadio("all")}} checked={forumSubscriptionRadio==="all"}/>
+                        </label>
+                        <label>All Tags Except:
+                        <input type="radio" name="forumSubscriptionQuestion" value="except" onChange={()=>{setForumSubscriptionRadio("except")}} checked={forumSubscriptionRadio==="except"}/>
+                        </label>
+                        <label>Only These Tags:
+                        <input type="radio" name="forumSubscriptionQuestion" value="only" onChange={()=>{setForumSubscriptionRadio("only")}} checked={forumSubscriptionRadio==="only"}/>
+                        </label>
+                        {(forumSubscriptionRadio==="except" || forumSubscriptionRadio==="only") &&
+                        <>
+                            <label> Enter the tags, separated by commas (or press enter to add a tag)
+                            <br/>
+                            <input className="tag-container" onKeyDown={forumHandleOnKeyDown} />
+                            </label>
+                            <br />
+                            {forumTags.map((tag, index)=>(
+                                <div key={index} className="tag">
+                                    {tag}
+                                    <button onClick={(e)=>{handleRemovalOfForumTag(e,tag)}}>&times;</button>
+                                </div>
+                            ))}
+                        </>
+                        }
+                        <button type="submit">Update Subscription Preferences</button>
+                    </form>
+                ):
+                (username && emailAndSubscriptionPreferences && !edit.email && edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences)?
                 (
                     <form onSubmit={editSubscription}>
                         <style>
@@ -226,11 +342,7 @@ const SettingsComponent = ()=>{
                         <button type="submit">Update Subscription Preferences</button>
                     </form>
                 ):
-                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && edit.password)?
-                (
-                    <div></div>
-                ):
-                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && edit.password)?
+                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && edit.password && !edit.forumSubscriptionPreferences)?
                 (
                     <form onSubmit={editPassword}>
                         <label>

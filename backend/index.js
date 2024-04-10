@@ -729,7 +729,7 @@ app.post("/forumTagCreate", verifyJWTMiddleware, async (req,res)=>{
 app.get("/fetchForumTag", verifyJWTMiddleware, (req,res)=>{
     const forumTagName = req.query.forumTagName
     console.log("Fetching Tag Name: ", forumTagName)
-    const query = "SELECT ForumTagID FROM ForumTag WHERE forumTagName = ?"
+    const query = "SELECT ForumTagID FROM ForumTag WHERE ForumTagName = ?"
     db.query(query, [forumTagName], (err, data)=>{
         if(err){
             res.send(err)
@@ -769,7 +769,7 @@ app.post("/forumPostTagCreate", verifyJWTMiddleware, async (req,res)=>{
     }
 })
 
-app.post("/fetchForumPostTagID", verifyJWTMiddleware, async (req, res)=>{   //change to get later
+app.get("/fetchForumPostTagID", verifyJWTMiddleware, async (req, res)=>{   //change to get later
     const postID = req.query.postID
     const query = "SELECT ForumTagID FROM ForumPostTag WHERE ForumPostID = ?"
     db.query(query, [postID], (err, data)=>{
@@ -810,6 +810,66 @@ app.get("/fetchForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
         }
     })
 })
+
+app.post("/createForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
+    const userID = req.decodedToken.UserId
+    const only = req.query.Only
+    console.log("userID: ", userID)
+    const query = "INSERT INTO ForumSubscriptionOnly (UserID, Only) VALUES (?, ?)"
+    db.query(query, [userID, only], (err, data)=>{
+        if(err){
+            console.log(err)
+            res.status(500).send(err);
+        } else{
+            console.log(data)
+            return res.status(204).send("ForumSubscriptionOnly created successfully")
+        }
+    })
+})
+
+app.post("/createForumSubscription", verifyJWTMiddleware, (req, res)=>{
+    const userID = req.decodedToken.UserId
+    const ForumTagID = req.query.ForumTagID
+    console.log("id: ", ForumTagID)
+    const query = "INSERT INTO ForumSubscriptions (UserID, ForumTagID) VALUES (?, ?)"
+    db.query(query, [userID, ForumTagID], (err, data)=>{
+        if(err){
+            res.status(500).send(err);
+            console.log(err)
+        } else{
+            console.log(data)
+            return res.status(201).send("ForumSubscriptions created successfully")
+        }
+    })
+})
+
+app.delete("/deleteForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
+    const userID = req.decodedToken.UserId
+    const query = "DELETE FROM ForumSubscriptionOnly WHERE UserID = ?"
+    db.query(query, [userID], (err, data)=>{
+        if(err){
+            res.status(500).send(err);
+
+        } else{
+            console.log("delete")
+            return res.status(201).send("ForumSubscriptionOnly deleted successfully")
+        }
+    })
+})
+
+app.delete("/deleteForumSubscription", verifyJWTMiddleware, (req, res)=>{
+    const userID = req.decodedToken.UserId
+    const query = "DELETE FROM ForumSubscriptions WHERE UserID = ?"
+    db.query(query, [userID], (err, data)=>{
+        if(err){
+            res.status(500).send(err)
+            console.log(err)
+        } else{
+            return res.status(204).send("ForumSubscriptions deleted successfully")
+        }
+    })
+})
+
 
 //viewing all posts, mainly for testing purposes can change the condition later
 app.get("/forumPostsAll", verifyJWTMiddleware, (req,res)=>{
@@ -1549,6 +1609,7 @@ app.put("/editPlaylistName", verifyJWTMiddleware, async (req, res)=>{
         }
     })
 })
+
 
 app.get("/videoComments/:VideoPostId", verifyJWTMiddleware, (req,res)=>{
     const VideoPostId= req.params.VideoPostId;
