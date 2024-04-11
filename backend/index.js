@@ -743,8 +743,8 @@ app.get("/fetchForumTag", verifyJWTMiddleware, (req,res)=>{
 app.post("/forumPostTagCreate", verifyJWTMiddleware, async (req,res)=>{
     const postID = req.query.postID
     const forumTagID = req.query.forumTagID
-    const authorizedUserId = (await whoOwnsThis("ForumPostId", postID))[0].UserID;
-    if(req.decodedToken.UserId !== authorizedUserId){
+    const authorizedUsername = (await whoOwnsThis("ForumPostId", postID))[0].username;
+    if(req.decodedToken.username !== authorizedUsername){
         return res.status(403).send("You do not have permission to do that");
     }
     console.log("Creating PostID: ", postID)
@@ -873,19 +873,33 @@ app.delete("/deleteForumSubscription", verifyJWTMiddleware, (req, res)=>{
 
 //viewing all posts, mainly for testing purposes can change the condition later
 app.get("/forumPostsAll", verifyJWTMiddleware, (req,res)=>{
+    const userID = req.decodedToken.UserId
     const query = `
     SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
     FROM ForumPost
+    ${ /* Combine all tables */'' }
     LEFT JOIN ForumPostTag ON ForumPost.id = ForumPostTag.ForumPostID
     LEFT JOIN ForumTag ON ForumPostTag.ForumTagID = ForumTag.ForumTagID
+    LEFT JOIN ForumSubscriptions ON ForumSubscriptions.ForumTagID = ForumTag.ForumTagID
+    LEFT JOIN ForumSubscriptionOnly ON ForumSubscriptionOnly.UserID = ForumSubscriptions.UserID
+    WHERE 
+        (ForumSubscriptionOnly.UserID IS NULL  ${ /* If ForumSubscriptionOnly null, show all */'' }
+    OR 
+        (ForumSubscriptionOnly.Only = FALSE ${ /* If ForumSubscriptionOnly false, show all except*/'' }
+            AND ForumTag.ForumTagID NOT IN (SELECT ForumTagID FROM ForumSubscriptions WHERE UserID = ?))
+    OR
+        (ForumSubscriptionOnly.Only = TRUE ${ /* If ForumSubscriptionOnly true, show only*/'' }
+            AND ForumTag.ForumTagID IN (SELECT ForumTagID FROM ForumSubscriptions WHERE UserID = ?))
+        )
     GROUP BY ForumPost.id
     ORDER BY ForumPost.post_timestamp DESC;
 `;
-    db.query(query, (err, data)=>{
+    db.query(query, [userID, userID], (err, data)=>{
         if(err){
-            res.send(err)
+            console.log(err)
+            res.status(500).send(err);
         }
-        console.log(data)
+        console.log("forum posts: ", data)
         return res.json(data)
     })
 })
