@@ -1061,11 +1061,11 @@ app.post("/forumPostComment/:id", verifyJWTMiddleware, (req, res) => {
         return res.status(403).send("Incorrect User")
     }
 
-   db.query("INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp) VALUES (?, ?, ?, NOW())", [forumPostID, username, body], function (err){
+   db.query("INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp) VALUES (?, ?, ?, NOW())", [forumPostID, username, body], function (err, insertResult){
     if(err){
         console.log(err)
     }else{
-        return res.status(201).send("Comment Successful")
+        return res.status(201).json({ id: insertResult.insertId, message: "Comment Successful" });
     }
     })
 })
