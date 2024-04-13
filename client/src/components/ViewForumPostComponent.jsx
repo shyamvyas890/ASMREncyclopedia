@@ -16,6 +16,7 @@ export const ViewForumPostComponent = () =>{
    const {postID} = useParams()
    const {userID} = useParams()
    const [postObject, setPostObject] = useState()
+   const [allPosts, setAllPosts] = useState([])
    const [postLikes, setPostLikes] = useState(new Map())
    const [postDislikes, setPostDislikes] = useState(new Map())
    const [userLikedPosts, setUserLikedPosts] = useState([])
@@ -29,7 +30,7 @@ export const ViewForumPostComponent = () =>{
    useEffect( () =>{
       const fetchRecommendedPosts = async() =>{
         try{
-          const response = await axios.get(`http://localhost:3001/forumPostRecommendedPost/${postID}`)
+          const response = await axios.get(`http://localhost:3001/forumPostRecommendedPost/${postID}`, {withCredentials: true})
           setRecommendedPosts(response.data.recommendedPosts)
         }catch(error){
           console.log(error)
@@ -38,11 +39,24 @@ export const ViewForumPostComponent = () =>{
       fetchRecommendedPosts()
    }, [])
 
+   useEffect( () =>{
+    const fetchAllPosts = async () =>{
+      try{
+        const res = await axios.get("http://localhost:3001/forumPostsAll")
+        setAllPosts(res.data)
+      }
+      catch(err){
+        console.log(err)
+      }
+    }
+    fetchAllPosts()
+   }, [])
+
+
    useEffect( () => {
-    const token = localStorage.getItem("token")
     const fetchUsername = async () => {
         try {
-          const response = await axios.get(`http://localhost:3001/verify-token/${token}`);
+          const response = await axios.get(`http://localhost:3001/verify-token`, {withCredentials: true});
           setCurrentUsername(response.data.username);
         } catch (error) {
           console.log(error);
@@ -54,7 +68,7 @@ export const ViewForumPostComponent = () =>{
    useEffect(() => {
     const getForumPost = async () => {
         try{
-           const response = await axios.get(`http://localhost:3001/forumPostsById/${postID}`)
+           const response = await axios.get(`http://localhost:3001/forumPostsById/${postID}`, {withCredentials: true})
             setPostObject(response.data)
             setEditContent(response.data[0].body)
         }
@@ -88,7 +102,7 @@ export const ViewForumPostComponent = () =>{
       if(confirmDelete){
          await axios.delete(`http://localhost:3001/forumPostDelete/${postID}`, {
           currentUsername, currentUsername
-         })
+         }, {withCredentials: true})
          navigate("/")
       }
     }
@@ -99,11 +113,17 @@ export const ViewForumPostComponent = () =>{
     }
 
     const submitEdit = async () =>{
-       await axios.put(`http://localhost:3001/editForumPost/${postID}`, {
-        newBody: editContent, username: currentUsername
-       })
-       setPostBody(editContent)
-       setIsEditing(false)
+
+       try{
+        await axios.put(`http://localhost:3001/editForumPost/${postID}`, {
+          newBody: editContent, username: currentUsername, allPosts: allPosts
+         }, {withCredentials: true})
+         setPostBody(editContent)
+         setIsEditing(false)
+       }
+       catch(err){
+        console.log(err)
+       }
     }
 
     console.log(recommendedPosts)

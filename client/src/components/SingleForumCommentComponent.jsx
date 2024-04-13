@@ -10,33 +10,14 @@ export const SingleForumCommentComponent = () => {
     const [currentUserID, setCurrentUserID] = useState()
     const [hasParentComment, setHasParentComment] = useState(false)
     const [parentCommentID, setParentCommentID] = useState()
+    const [enableViewParent, setEnableViewParent] = useState(true)
     const [forumPostCommentBody, setForumPostCommentBody] = useState()
 
     const navigate = useNavigate()
     
-    useEffect(() => {
-        const getComment = async () => {
-            try {
-                const response = await axios.get(`http://localhost:3001/getForumPostCommentByID/${forumPostCommentID}`)
-                console.log("RESPONSE: " + response.data[0])
-                setForumPostComment(response.data[0])
-                setForumPostCommentBody(response.data[0].body)
-                if(response.data[0].parent_comment_id){
-                    console.log("COMMENT ID: " + response.data[0].parent_comment_id)
-                    setHasParentComment(true)
-                    setParentCommentID(response.data[0].parent_comment_id)
-                }
-            } catch (error) {
-                console.log(error)
-            }
-        }
-        getComment()
-    }, [])
-
-    
     const getParentComment = async () => {
         try {
-            const response = await axios.get(`http://localhost:3001/getForumPostCommentByID/${parentCommentID}`)
+            const response = await axios.get(`http://localhost:3001/getForumPostCommentByID/${parentCommentID}`, {withCredentials: true})
             console.log("RESPONSE: " + response.data[0])
             console.log("BODY: " + response.data[0].body)
             setForumPostComment(response.data[0])
@@ -46,43 +27,65 @@ export const SingleForumCommentComponent = () => {
                 setHasParentComment(true)
                 setParentCommentID(response.data[0].parent_comment_id)
             }
+            else{
+                setEnableViewParent(false)
+            }
         } catch (error) {
             console.log(error)
         }
     }
+
+    useEffect(() => {
+        const getComment = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3001/getForumPostCommentByID/${forumPostCommentID}`, {withCredentials: true})
+                console.log("RESPONSE: " + response.data[0])
+                //setForumPostComment(response.data[0])
+                //setForumPostCommentBody(response.data[0].body)
+                if(response.data[0].parent_comment_id){
+                    const response2 = await axios.get(`http://localhost:3001/getForumPostCommentByID/${response.data[0].parent_comment_id}`, {withCredentials: true})
+                    setForumPostComment(response2.data[0])
+                    setForumPostCommentBody(response2.data[0].body)
+                    if(response2.data[0].parent_comment_id){
+                        console.log("OMG")
+                        setHasParentComment(true)
+                        setParentCommentID(response2.data[0].parent_comment_id)
+                    }
+                }
+                else{
+                    setForumPostComment(response.data[0])
+                    setForumPostCommentBody(response.data[0].body)
+                    setEnableViewParent(false)
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        getComment()
+    }, [])
+
+    
+    
     
 
-    //gets the username of the current user
-    useEffect(() => {
-        const token = localStorage.getItem("token")
+    //gets the username and id of the current user
+    useEffect( () => {
         const fetchUsername = async () => {
             try {
-                const response = await axios.get(`http://localhost:3001/verify-token/${token}`);
-                setCurrentUser(response.data.username);
+              const response = await axios.get(`http://localhost:3001/verify-token`, {withCredentials: true});
+              setCurrentUser(response.data.username);
+              setCurrentUserID(response.data.UserId)
             } catch (error) {
-                console.log(error);
+              console.log(error);
             }
-        };
+          };
         fetchUsername()
     }, [])
 
-    //gets the ID of the current user
-    useEffect(() => {
-        const fetchID = async () => {
-            try {
-                const response = await axios.get(`http://localhost:3001/users/id?username=${currentUser}`);
-                setCurrentUserID(response.data.id)
-            } catch (error) {
-                console.log(error);
-            }
-        };
-        if (currentUser) {
-            fetchID()
-        }
-    }, [currentUser])
+
 
     const handleViewParentComment = () => {
-        navigate(`/singleForumComment/${parentCommentID}`)
+        navigate(`/SingleForumComment/${parentCommentID}`)
         getParentComment()
     }
 
@@ -101,9 +104,11 @@ export const SingleForumCommentComponent = () => {
                         deleted={forumPostComment.deleted}
                         replyOption={false}
                         singleView={true}
+                        singleViewID={forumPostCommentID}
                     />
                     {console.log(hasParentComment)}
-                    {hasParentComment && (
+                    
+                    {enableViewParent && (
                         <div>
                             <button onClick={handleViewParentComment}> View Parent Comment </button>
                         </div>
@@ -115,6 +120,3 @@ export const SingleForumCommentComponent = () => {
         </div>
     )
 }
-
-
-
