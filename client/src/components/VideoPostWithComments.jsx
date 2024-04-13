@@ -88,6 +88,10 @@ const VideoPostWithCommentsComponent = (props)=>{
 
     const fetchInformation = async ()=>{
         try{
+
+            console.log(VideoPostId)
+            console.log(username.userIdOfCurrentUser)
+
             const videoBasicInfo= await axiosRequest(3,2, "video/id", {VideoPostId});
             videoBasicInfo.data[0].username= (await axios.get(`${hostname}/users/id`, 
             {

@@ -165,7 +165,7 @@ async function whoOwnsThis(item, itemValue){
     }
 
     else if (item === "ForumPostCommentLikeDislikeId"){
-        return await queryTheDatabaseGiveResults("SELECT UserID FROM ForumPostCommentLikeDislikeId WHERE LikeDislikeID = ?", [itemValue]);
+        return await queryTheDatabaseGiveResults("SELECT UserID FROM ForumCommentLikeDislike WHERE LikeDislikeID = ?", [itemValue]);
     }
     else if (item === "VideoPostCommentId"){
         return await queryTheDatabaseGiveResults("SELECT UserId FROM VideoPostComments WHERE VideoPostCommentId = ?", [itemValue]);
@@ -556,9 +556,7 @@ app.get('/video-by-genre-or-user', verifyJWTMiddleware, (req,res)=>{
 app.get('/video-rating', verifyJWTMiddleware, async (req,res)=>{   
     const {VideoPostId, UserId}= req.query
     if(VideoPostId && UserId){
-        const theLikeDislikeId = (await queryTheDatabaseGiveResults("SELECT LikeDislikeId FROM LikeDislike WHERE VideoPostId = ? AND UserId = ?", [VideoPostId, UserId]))[0].LikeDislikeID;
-        const authorizedUserId = (await whoOwnsThis("LikeDislikeId", theLikeDislikeId))[0].UserId;
-        if(req.decodedToken.UserId !== authorizedUserId){
+        if(req.decodedToken.UserId !== parseInt(UserId)){
             return res.status(403).send("You do not have permission to do that");
         }
         db.query('SELECT * FROM LikeDislike WHERE VideoPostId = ? AND UserId= ?', [VideoPostId, UserId], (err, results)=>{
@@ -1506,7 +1504,6 @@ app.get("/forumPostRecommendedPost/:postID", verifyJWTMiddleware, (req, res) =>{
 app.get("/fetchAllPlaylistVideosID", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
-    console.log("Autorized UserId: ", authorizedUserID)
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -1793,7 +1790,7 @@ app.post("/videoCommentRating", verifyJWTMiddleware, (req, res)=>{
 
 app.get("/videoCommentRating", verifyJWTMiddleware, async (req, res)=>{
     const {VideoPostCommentId, UserId} = req.query;
-    if(req.decodedToken.UserId!==UserId){
+    if(req.decodedToken.UserId!==parseInt(UserId)){
         return res.status(403).send("You do not have permission to do that");
     }
     db.query("SELECT * FROM VideoPostCommentLikeDislike WHERE UserId= ? AND VideoPostCommentId = ?", [UserId, VideoPostCommentId], (error, results)=>{
@@ -1950,7 +1947,17 @@ app.get("/FriendRelationship", verifyJWTMiddleware, (req,res)=>{
 
 app.post('/video-genre', verifyJWTMiddleware, async (req,res)=>{
     const {VideoPostId, Genre}= req.body;
-    const authorizedUserId = await whoOwnsThis("VideoPostId", VideoPostId)[0].UserId;
+    console.log(`Decoded Token`)
+    console.log(req.decodedToken)
+    console.log(`VideoPostId`)
+    console.log(VideoPostId)
+    console.log(`Genre`)
+    console.log(Genre)
+    const owner = await whoOwnsThis("VideoPostId", VideoPostId);
+    console.log(`owner`)
+    console.log(owner)
+
+    const authorizedUserId = (await whoOwnsThis("VideoPostId", VideoPostId))[0].UserId;
     if(req.decodedToken.UserId !== authorizedUserId){
         return res.status(403).send("You do not have permission to this.");
     }
