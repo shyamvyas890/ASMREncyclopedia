@@ -53,30 +53,54 @@ export const ForumPostFeedComponent = (props) =>{
 
     //get all forumposts upon page load, initially sort from newest to oldest 
     useEffect(()=>{
+      fetchAllPosts()
+    }, [])
+
     const fetchAllPosts = async ()=>{
-        try{
-            const res = await axios.get("http://localhost:3001/forumPostsAll")
-            //initially sort from newest to oldest
-            setAllPosts(res.data)
-            console.log(res.data)
-            const intialPosts = res.data.sort((a, b) => {
-              if(a.post_timestamp > b.post_timestamp){
-                return -1;
+      try{
+        const only = await axios.get("http://localhost:3001/fetchForumSubscriptionOnly")
+        const sub = await axios.get("http://localhost:3001/fetchForumSubscriptions")
+        const res = await axios.get("http://localhost:3001/forumPostsAll")
+        let arr = []
+        if(only.data.length !== 0 && sub.data.length !== 0){   //If there is a preference
+          const subTags = sub.data.map(tag => tag.ForumTagName);
+          for(const post of res.data){
+            if(post.tags){
+              const postTags = post.tags.split(",")
+              const taggedPost = subTags.some(subTag => postTags.includes(subTag)) // If includes at least one tag
+              if(taggedPost && only.data[0].Only == 1){   //If Only and tags match, add to arr
+                arr.push(post)
+              } else if(!taggedPost && only.data[0].Only == 0){  //If !Only (Except) and no tags match, add to arr
+                arr.push(post)
               }
-              else if(a.post_timestamp < b.post_timestamp){
-                return 1;
-              }
-              else{
-                return 0;
-              }
-            })
-            setAllPosts(intialPosts)
-        }catch(err){
-            console.log(err)
+            } else {  //If post has no tags push either way
+              arr.push(post)
+            }
+          }
+        } else {    //No Preference
+          for(const post of res.data){
+            arr.push(post)
+          }
         }
+          //initially sort from newest to oldest
+          setAllPosts(arr)
+          console.log(arr)
+          const intialPosts = arr.sort((a, b) => {
+            if(a.post_timestamp > b.post_timestamp){
+              return -1;
+            }
+            else if(a.post_timestamp < b.post_timestamp){
+              return 1;
+            }
+            else{
+              return 0;
+            }
+          })
+          setAllPosts(intialPosts)
+      } catch(err){
+          console.log(err)
+      }
     } 
-    fetchAllPosts()
-}, [])
 
 //get like/dislike information for posts
 useEffect(() => {
@@ -211,21 +235,7 @@ const onSubmit =  async (e) => {
       }
 
       //get all posts including new post, resort from newest to oldest
-      const response2 = await axios.get('http://localhost:3001/forumPostsAll') 
-      response2.data.sort((a, b) => {
-        if(a.post_timestamp > b.post_timestamp){
-          return -1;
-        }
-        else if(a.post_timestamp < b.post_timestamp){
-          return 1;
-        }
-        else{
-          return 0;
-        }
-      })
-      
-      setAllPosts(response2.data)
-
+      fetchAllPosts()
       //resetting useStates and text boxes
       setTitle("")
       setBody("")

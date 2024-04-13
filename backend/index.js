@@ -703,7 +703,7 @@ app.post("/forumPostCreate", verifyJWTMiddleware, async (req, res) => {
 })
 
 app.post("/forumTagCreate", verifyJWTMiddleware, async (req,res)=>{
-    const forumTagName = req.query.forumTagName;
+    const forumTagName = req.query.forumTagName.trim().toLowerCase();
     //inserts tag into db, if already exists do nothing
     const query = "INSERT IGNORE INTO ForumTag (forumTagName) VALUES (?)";
     console.log("Creating Tag Name: ", forumTagName);
@@ -727,9 +727,9 @@ app.post("/forumTagCreate", verifyJWTMiddleware, async (req,res)=>{
 });
 
 app.get("/fetchForumTag", verifyJWTMiddleware, (req,res)=>{
-    const forumTagName = req.query.forumTagName
+    const forumTagName = req.query.forumTagName.trim().toLowerCase();
     console.log("Fetching Tag Name: ", forumTagName)
-    const query = "SELECT ForumTagID FROM ForumTag WHERE forumTagName = ?"
+    const query = "SELECT ForumTagID FROM ForumTag WHERE ForumTagName = ?"
     db.query(query, [forumTagName], (err, data)=>{
         if(err){
             res.send(err)
@@ -743,8 +743,8 @@ app.get("/fetchForumTag", verifyJWTMiddleware, (req,res)=>{
 app.post("/forumPostTagCreate", verifyJWTMiddleware, async (req,res)=>{
     const postID = req.query.postID
     const forumTagID = req.query.forumTagID
-    const authorizedUserId = (await whoOwnsThis("ForumPostId", postID))[0].UserId;
-    if(req.decodedToken.UserId !== authorizedUserId){
+    const authorizedUsername = (await whoOwnsThis("ForumPostId", postID))[0].username;
+    if(req.decodedToken.username !== authorizedUsername){
         return res.status(403).send("You do not have permission to do that");
     }
     console.log("Creating PostID: ", postID)
@@ -769,7 +769,7 @@ app.post("/forumPostTagCreate", verifyJWTMiddleware, async (req,res)=>{
     }
 })
 
-app.post("/fetchForumPostTagID", verifyJWTMiddleware, async (req, res)=>{   //change to get later
+app.get("/fetchForumPostTagID", verifyJWTMiddleware, async (req, res)=>{   //change to get later
     const postID = req.query.postID
     const query = "SELECT ForumTagID FROM ForumPostTag WHERE ForumPostID = ?"
     db.query(query, [postID], (err, data)=>{
@@ -800,7 +800,7 @@ app.get("/fetchForumSubscriptions", verifyJWTMiddleware, (req, res)=>{
 
 app.get("/fetchForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
     const userID = req.decodedToken.UserId
-    const query = "SELECT * FROM ForumSubscriptionOnly WHERE UserID = ?"
+    const query = "SELECT Only FROM ForumSubscriptionOnly WHERE UserID = ?"
     db.query(query, [userID], (err, data)=>{
         if(err){
             res.send(err)
@@ -811,21 +811,82 @@ app.get("/fetchForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
     })
 })
 
+app.post("/createForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
+    const userID = req.decodedToken.UserId
+    const only = req.query.Only
+    console.log("userID: ", userID)
+    const query = "INSERT INTO ForumSubscriptionOnly (UserID, Only) VALUES (?, ?)"
+    db.query(query, [userID, only], (err, data)=>{
+        if(err){
+            console.log(err)
+            res.status(500).send(err);
+        } else{
+            console.log(data)
+            return res.status(204).send("ForumSubscriptionOnly created successfully")
+        }
+    })
+})
+
+app.post("/createForumSubscription", verifyJWTMiddleware, (req, res)=>{
+    const userID = req.decodedToken.UserId
+    const ForumTagID = req.query.ForumTagID
+    console.log("id: ", ForumTagID)
+    const query = "INSERT INTO ForumSubscriptions (UserID, ForumTagID) VALUES (?, ?)"
+    db.query(query, [userID, ForumTagID], (err, data)=>{
+        if(err){
+            res.status(500).send(err);
+            console.log(err)
+        } else{
+            console.log(data)
+            return res.status(201).send("ForumSubscriptions created successfully")
+        }
+    })
+})
+
+app.delete("/deleteForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
+    const userID = req.decodedToken.UserId
+    const query = "DELETE FROM ForumSubscriptionOnly WHERE UserID = ?"
+    db.query(query, [userID], (err, data)=>{
+        if(err){
+            res.status(500).send(err);
+
+        } else{
+            console.log("delete")
+            return res.status(201).send("ForumSubscriptionOnly deleted successfully")
+        }
+    })
+})
+
+app.delete("/deleteForumSubscription", verifyJWTMiddleware, (req, res)=>{
+    const userID = req.decodedToken.UserId
+    const query = "DELETE FROM ForumSubscriptions WHERE UserID = ?"
+    db.query(query, [userID], (err, data)=>{
+        if(err){
+            res.status(500).send(err)
+            console.log(err)
+        } else{
+            return res.status(204).send("ForumSubscriptions deleted successfully")
+        }
+    })
+})
+
 //viewing all posts, mainly for testing purposes can change the condition later
 app.get("/forumPostsAll", verifyJWTMiddleware, (req,res)=>{
-    const query = `
+    const userID = req.decodedToken.UserId
+    let query = `
     SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
     FROM ForumPost
+    ${ /* Combine all tables */'' }
     LEFT JOIN ForumPostTag ON ForumPost.id = ForumPostTag.ForumPostID
     LEFT JOIN ForumTag ON ForumPostTag.ForumTagID = ForumTag.ForumTagID
     GROUP BY ForumPost.id
-    ORDER BY ForumPost.post_timestamp DESC;
-`;
+    ORDER BY ForumPost.post_timestamp DESC;`
     db.query(query, (err, data)=>{
         if(err){
-            res.send(err)
+            console.log(err)
+            res.status(500).send(err);
         }
-        console.log(data)
+        console.log("forum posts: ", data)
         return res.json(data)
     })
 })
@@ -1020,7 +1081,7 @@ app.post("/forumPostLikeDislike/", verifyJWTMiddleware, (req,res)=>{
 app.put("/forumPostChangeLikeDislike/", verifyJWTMiddleware, async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
     const rating = req.query.rating
-    const authorizedUserId = (await whoOwnsThis("ForumPostLikeDislikeID", LikeDislikeID))[0].UserId;
+    const authorizedUserId = (await whoOwnsThis("ForumPostLikeDislikeID", LikeDislikeID))[0].UserID;
     if(req.decodedToken.UserId !== authorizedUserId){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -1037,7 +1098,7 @@ app.put("/forumPostChangeLikeDislike/", verifyJWTMiddleware, async (req,res)=>{
 //Deletes like/dislike from database
 app.delete("/forumPostDeleteLikeDislike/", verifyJWTMiddleware, async (req,res)=>{
     const LikeDislikeID = req.query.LikeDislikeID
-    const authorizedUserId = (await whoOwnsThis("ForumPostLikeDislikeID", LikeDislikeID))[0].UserId;
+    const authorizedUserId = (await whoOwnsThis("ForumPostLikeDislikeID", LikeDislikeID))[0].UserID;
     if(req.decodedToken.UserId !== authorizedUserId){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -1445,6 +1506,7 @@ app.get("/forumPostRecommendedPost/:postID", verifyJWTMiddleware, (req, res) =>{
 app.get("/fetchAllPlaylistVideosID", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
+    console.log("Autorized UserId: ", authorizedUserID)
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -1477,6 +1539,7 @@ app.get("/fetchVideoInPlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
+    console.log("Autorized UserId: ", authorizedUserID)
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -1495,6 +1558,7 @@ app.post("/addVideoToPlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
+    console.log("Autorized UserId: ", authorizedUserID)
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -1531,6 +1595,8 @@ app.delete("/deleteVideoFromPlaylist", verifyJWTMiddleware, async (req, res)=>{
 
 app.get("/fetchAllUserPlaylists", verifyJWTMiddleware, (req, res)=>{
     const userID = req.decodedToken.UserId
+    console.log("Autorized UserId: ", userID)
+
     const query = "SELECT * FROM Playlist WHERE userID = ?"
     db.query(query, [userID], (err, data)=>{
         if(err){
@@ -1591,6 +1657,7 @@ app.put("/editPlaylistName", verifyJWTMiddleware, async (req, res)=>{
         }
     })
 })
+
 
 app.get("/videoComments/:VideoPostId", verifyJWTMiddleware, (req,res)=>{
     const VideoPostId= req.params.VideoPostId;
