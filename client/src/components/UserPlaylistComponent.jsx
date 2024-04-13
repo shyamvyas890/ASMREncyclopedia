@@ -14,29 +14,29 @@ export const UserPlaylistComponent = ()=>{
     const navigate = useNavigate()
 
     useEffect(()=> {
-        const token = localStorage.getItem("token")
         const fetchUsername = async () => {
             try {
-            const res = await axios.get(`http://localhost:3001/verify-token/${token}`);
-            setCurrentUsername(res.data.username);
+              const response = await axios.get(`http://localhost:3001/verify-token`);
+              setCurrentUsername(response.data.username);
             } catch (error) {
-            console.log(error);
+              console.log(error);
             }
-        };
+          };
         fetchUsername()
     }, [])
 
     //gets the ID of the current user
-    useEffect(() => {
+    useEffect( () => {
         const fetchID = async () => {
             try {
-                const res = await axios.get(`http://localhost:3001/users/id?username=${currentUsername}`);
-                setCurrentUserID(res.data.id)
+              const response = await axios.get(`http://localhost:3001/users/id?username=${currentUsername}`);
+              setCurrentUserID(response.data.id)
             } catch (error) {
-                console.log(error);
+              console.log(error);
             }
-        }
+          };
         fetchID()
+        
     }, [currentUsername])
 
     useEffect(()=>{
