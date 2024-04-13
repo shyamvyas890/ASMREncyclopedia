@@ -703,7 +703,7 @@ app.post("/forumPostCreate", verifyJWTMiddleware, async (req, res) => {
 })
 
 app.post("/forumTagCreate", verifyJWTMiddleware, async (req,res)=>{
-    const forumTagName = req.query.forumTagName;
+    const forumTagName = req.query.forumTagName.trim().toLowerCase();
     //inserts tag into db, if already exists do nothing
     const query = "INSERT IGNORE INTO ForumTag (forumTagName) VALUES (?)";
     console.log("Creating Tag Name: ", forumTagName);
@@ -727,7 +727,7 @@ app.post("/forumTagCreate", verifyJWTMiddleware, async (req,res)=>{
 });
 
 app.get("/fetchForumTag", verifyJWTMiddleware, (req,res)=>{
-    const forumTagName = req.query.forumTagName
+    const forumTagName = req.query.forumTagName.trim().toLowerCase();
     console.log("Fetching Tag Name: ", forumTagName)
     const query = "SELECT ForumTagID FROM ForumTag WHERE ForumTagName = ?"
     db.query(query, [forumTagName], (err, data)=>{
@@ -800,7 +800,7 @@ app.get("/fetchForumSubscriptions", verifyJWTMiddleware, (req, res)=>{
 
 app.get("/fetchForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
     const userID = req.decodedToken.UserId
-    const query = "SELECT * FROM ForumSubscriptionOnly WHERE UserID = ?"
+    const query = "SELECT Only FROM ForumSubscriptionOnly WHERE UserID = ?"
     db.query(query, [userID], (err, data)=>{
         if(err){
             res.send(err)
@@ -870,31 +870,18 @@ app.delete("/deleteForumSubscription", verifyJWTMiddleware, (req, res)=>{
     })
 })
 
-
 //viewing all posts, mainly for testing purposes can change the condition later
 app.get("/forumPostsAll", verifyJWTMiddleware, (req,res)=>{
     const userID = req.decodedToken.UserId
-    const query = `
+    let query = `
     SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
     FROM ForumPost
     ${ /* Combine all tables */'' }
     LEFT JOIN ForumPostTag ON ForumPost.id = ForumPostTag.ForumPostID
     LEFT JOIN ForumTag ON ForumPostTag.ForumTagID = ForumTag.ForumTagID
-    LEFT JOIN ForumSubscriptions ON ForumSubscriptions.ForumTagID = ForumTag.ForumTagID
-    LEFT JOIN ForumSubscriptionOnly ON ForumSubscriptionOnly.UserID = ForumSubscriptions.UserID
-    WHERE 
-        (ForumSubscriptionOnly.UserID IS NULL  ${ /* If ForumSubscriptionOnly null, show all */'' }
-    OR 
-        (ForumSubscriptionOnly.Only = FALSE ${ /* If ForumSubscriptionOnly false, show all except*/'' }
-            AND ForumTag.ForumTagID NOT IN (SELECT ForumTagID FROM ForumSubscriptions WHERE UserID = ?))
-    OR
-        (ForumSubscriptionOnly.Only = TRUE ${ /* If ForumSubscriptionOnly true, show only*/'' }
-            AND ForumTag.ForumTagID IN (SELECT ForumTagID FROM ForumSubscriptions WHERE UserID = ?))
-        )
     GROUP BY ForumPost.id
-    ORDER BY ForumPost.post_timestamp DESC;
-`;
-    db.query(query, [userID, userID], (err, data)=>{
+    ORDER BY ForumPost.post_timestamp DESC;`
+    db.query(query, (err, data)=>{
         if(err){
             console.log(err)
             res.status(500).send(err);
