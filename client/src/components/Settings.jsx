@@ -197,7 +197,7 @@ const SettingsComponent = ()=>{
     }
     const handleRemovalOfForumTag = (e, removeThis)=>{
         e.preventDefault();
-        setVideoTags(prevTags=>prevTags.filter(theTag=> theTag!==removeThis));
+        setForumTags(prevTags=>prevTags.filter(theTag=> theTag!==removeThis));
     }
     const addForumTag = (newTag)=>{
         if(newTag && !forumTags.includes(newTag)){
