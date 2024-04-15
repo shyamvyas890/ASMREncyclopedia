@@ -10,7 +10,7 @@ export const SingleForumCommentComponent = () => {
     const [currentUserID, setCurrentUserID] = useState()
     const [hasParentComment, setHasParentComment] = useState(false)
     const [parentCommentID, setParentCommentID] = useState()
-    const [enableViewParent, setEnableViewParent] = useState(true)
+    const [enableViewParent, setEnableViewParent] = useState(false)
     const [forumPostCommentBody, setForumPostCommentBody] = useState()
 
     const navigate = useNavigate()
@@ -25,6 +25,7 @@ export const SingleForumCommentComponent = () => {
             if(response.data[0].parent_comment_id){
                 console.log("COMMENT ID: " + response.data[0].parent_comment_id)
                 setHasParentComment(true)
+                setEnableViewParent(true)
                 setParentCommentID(response.data[0].parent_comment_id)
             }
             else{
@@ -49,6 +50,7 @@ export const SingleForumCommentComponent = () => {
                     if(response2.data[0].parent_comment_id){
                         console.log("OMG")
                         setHasParentComment(true)
+                        setEnableViewParent(true)
                         setParentCommentID(response2.data[0].parent_comment_id)
                     }
                 }
