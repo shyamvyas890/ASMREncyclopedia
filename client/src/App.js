@@ -21,6 +21,7 @@ import { UserPlaylistComponent } from './components/UserPlaylistComponent';
 import { ViewUserPlaylistComponent } from './components/ViewUserPlaylistComponent';
 import { SingleForumCommentComponent } from './components/SingleForumCommentComponent.jsx';
 import NotificationsComponent from './components/Notifications.jsx';
+import "./App.css"
 function App() {
   return (
     <div className="App">

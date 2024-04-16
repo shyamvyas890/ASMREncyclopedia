@@ -60,19 +60,23 @@ export const ViewUserPlaylistComponent = ()=>{
     return (
         <div>
             <h1>Playlist Videos</h1>
-            <div classname="playlist-videos">
-                {playlistVideos.map(video=>(
+            <div className="playlist-videos">
+            {playlistVideos.length !== 0 ? (
+                playlistVideos.map(video => (
                     <div className="video" key={video.VideoPostId}>
-                    <h5><Link to={`/video/${video.VideoPostId}`}>{video.Title}</Link></h5>
+                        <h5><Link to={`/video/${video.VideoPostId}`}>{video.Title}</Link></h5>
                         <p>{video.VideoLinkId}</p>
                         <button 
                             className="remove-video-from-playlist"
-                            onClick={()=>removeVideoFromPlaylist(video.VideoPostId)}>
+                            onClick={() => removeVideoFromPlaylist(video.VideoPostId)}>
                             Remove Video
                         </button>
                     </div>
-                ))}
-            </div>
+                ))
+            ) : (
+                <div><Link to={`/`}>No videos in this playlist. Perhaps add some?</Link></div>
+            )}
+        </div>
         </div>
     )
 }
