@@ -537,7 +537,7 @@ app.delete('/video', verifyJWTMiddleware, async (req, res)=>{
 
     }
     else if(VideoPostCommentId && UserId){
-        if(req.decodedToken.UserId !== UserId){
+        if(req.decodedToken.UserId !== parseInt(UserId)){
             return res.status(403).send("You do not have permission to do that");
         }
         db.query('DELETE FROM VideoPostCommentLikeDislike WHERE VideoPostCommentId = ? AND UserId = ?', [VideoPostCommentId, UserId], (err)=>{
