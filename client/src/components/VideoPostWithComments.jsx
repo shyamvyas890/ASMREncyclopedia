@@ -114,6 +114,7 @@ const VideoPostWithCommentsComponent = (props)=>{
     }
     React.useEffect(()=>{
         tokenVerify();
+        fetchAllUserPlaylist()
     },[]);
 
     React.useEffect(()=>{
@@ -131,10 +132,13 @@ const VideoPostWithCommentsComponent = (props)=>{
 
   const fetchAllUserPlaylist = async () => {
     try{
-      const res = await axios.get("http://localhost:3001/fetchAllUserPlaylists", {
-        params: { userID: username.userIdOfCurrentUser}
-      })
-      setUserPlaylists(res.data)
+      //check if username is null first
+      if (username !== null && username.userIdOfCurrentUser !== null) {
+        const res = await axios.get("http://localhost:3001/fetchAllUserPlaylists", {
+          params: { userID: username.userIdOfCurrentUser}
+        })
+        setUserPlaylists(res.data)
+      }
       } catch (error) {
           console.log(error)
     }
