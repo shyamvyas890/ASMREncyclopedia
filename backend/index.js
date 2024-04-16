@@ -223,7 +223,7 @@ io.on('connection', (socket) => {
 });
 app.put("/changePassword",
      verifyJWTMiddleware, 
-    (req,res,next)=>{ //secure
+    (req,res,next)=>{
         const username = req.body.username;
         if(username !== req.decodedToken.username){
             return res.status(403).send("You do not have permission to do that");
@@ -231,11 +231,63 @@ app.put("/changePassword",
         next();
     },
     async (req, res)=>{
-        const {username, password}= req.body;
-        const hashedPassword = await bcrypt.hash(password, 13);
-        queryTheDatabase("UPDATE users SET password = ? WHERE username= ? ", [hashedPassword,username], res);
+        const {username, oldPassword, newPassword}= req.body;
+        db.query(
+            'SELECT * FROM users WHERE username = ?',
+            [username],
+            async (err, results) => {
+                if(err){
+                    console.log(err);
+                    res.status(500).send("Error logging in.")
+                }
+                else if (results.length>0){
+                    const match = await bcrypt.compare(oldPassword, results[0].password);
+                    console.log(match)
+                    if (match) {
+                        const hashedPassword = await bcrypt.hash(newPassword, 13);
+                        queryTheDatabase("UPDATE users SET password = ? WHERE username= ? ", [hashedPassword,username], res);
+                    } 
+                    else {
+                        res.status(401).send('Your password is incorrect.');
+
+                    }
+                }
+                else {
+                    res.status(404).send('This username does not exist.');
+                }
+            }
+        );
     }
 )
+
+app.post("/accountDeletionRequest", verifyJWTMiddleware, async (req, res)=>{
+    const {password}= req.body;
+    db.query(
+        'SELECT * FROM users WHERE username = ?',
+        [req.decodedToken.username],
+        async (err, results) => {
+            if(err){
+                console.log(err);
+                res.status(500).send("Error logging in.")
+            }
+            else if (results.length>0){
+                const match = await bcrypt.compare(password, results[0].password);
+                if (match) {
+                    res.clearCookie('theJWTToken');
+                    queryTheDatabase("DELETE FROM users WHERE username = ?", [req.decodedToken.username], res);
+                } 
+                else {
+                    res.status(401).send('Your password is incorrect.');
+
+                }
+            }
+            else {
+                res.status(404).send('This username does not exist.');
+            }
+        }
+    );
+})
+
 app.post("/login", async (req, res)=>{ // secure
     const { username, password } = req.body;
     db.query(
@@ -607,7 +659,6 @@ app.get("/forums", (req,res)=>{
 
 app.get("/UserPosts", verifyJWTMiddleware, (req,res)=>{
     const username = req.decodedToken.username
-    console.log("USER POSTS USERNAME: " + username)
     db.query('SELECT * FROM forumpost WHERE username = ?', [username], (err, data)=>{
         const query = `
         SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
@@ -621,7 +672,6 @@ app.get("/UserPosts", verifyJWTMiddleware, (req,res)=>{
             if(err){
                 res.send(err)
             }
-            console.log(data)
             return res.json(data)
         })
     })
@@ -704,7 +754,6 @@ app.post("/forumTagCreate", verifyJWTMiddleware, async (req,res)=>{
     const forumTagName = req.query.forumTagName.trim().toLowerCase();
     //inserts tag into db, if already exists do nothing
     const query = "INSERT IGNORE INTO ForumTag (forumTagName) VALUES (?)";
-    console.log("Creating Tag Name: ", forumTagName);
     try {
         const data = await new Promise((resolve, reject) => {
             db.query(query, [forumTagName], (err, data)=>{
@@ -715,8 +764,6 @@ app.post("/forumTagCreate", verifyJWTMiddleware, async (req,res)=>{
                 }
             });
         });
-        
-        console.log(data.insertId);
         res.status(200).json({ data: data });
     } catch (error) {
         console.error(error);
@@ -726,13 +773,11 @@ app.post("/forumTagCreate", verifyJWTMiddleware, async (req,res)=>{
 
 app.get("/fetchForumTag", verifyJWTMiddleware, (req,res)=>{
     const forumTagName = req.query.forumTagName.trim().toLowerCase();
-    console.log("Fetching Tag Name: ", forumTagName)
     const query = "SELECT ForumTagID FROM ForumTag WHERE ForumTagName = ?"
     db.query(query, [forumTagName], (err, data)=>{
         if(err){
             res.send(err)
         } else{
-            console.log(data)
             return res.json(data)
         }
     })
@@ -745,8 +790,6 @@ app.post("/forumPostTagCreate", verifyJWTMiddleware, async (req,res)=>{
     if(req.decodedToken.username !== authorizedUsername){
         return res.status(403).send("You do not have permission to do that");
     }
-    console.log("Creating PostID: ", postID)
-    console.log("With TagID: ", forumTagID)
     
     const query = "INSERT INTO ForumPostTag (ForumPostID, ForumTagID) VALUES (?, ?)";
     try {
@@ -759,7 +802,6 @@ app.post("/forumPostTagCreate", verifyJWTMiddleware, async (req,res)=>{
                 }
             })
         })
-        console.log(data);
         res.status(200).json({ data: data });
     } catch (error) {
         console.error(error);
@@ -774,7 +816,6 @@ app.get("/fetchForumPostTagID", verifyJWTMiddleware, async (req, res)=>{   //cha
         if(err){
             res.send(err)
         } else{
-            console.log(data)
             return res.json(data)
         }
     })
@@ -790,7 +831,6 @@ app.get("/fetchForumSubscriptions", verifyJWTMiddleware, (req, res)=>{
         if(err){
             res.send(err)
         } else{
-            console.log("data: ", data)
             return res.json(data)
         }
     })
@@ -803,7 +843,6 @@ app.get("/fetchForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
         if(err){
             res.send(err)
         } else{
-            console.log(data)
             return res.json(data)
         }
     })
@@ -1536,7 +1575,6 @@ app.get("/fetchVideoInPlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
-    console.log("Autorized UserId: ", authorizedUserID)
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }

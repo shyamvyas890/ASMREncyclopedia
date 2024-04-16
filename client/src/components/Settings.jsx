@@ -10,12 +10,14 @@ const SettingsComponent = ()=>{
         email: false,
         subscriptionPreferences:false,
         forumSubscriptionPreferences: false,
-        password: false
+        password: false,
+        accountDeletion: false
     })
     const [subscriptionRadio, setSubscriptionRadio]= useState(null);
     const [forumSubscriptionRadio, setForumSubscriptionRadio]= useState(null);
     const [videoTags, setVideoTags]= useState([]);
     const [forumTags, setForumTags]= useState([]);
+    const [errorMessageForChangingPasswordAndDeletingAccount, setErrorMessageForChangingPasswordAndDeletingAccount] = React.useState("");
 
     const navigate= useNavigate();
     const tokenVerify= async (e) => {
@@ -77,6 +79,9 @@ const SettingsComponent = ()=>{
     }
     const changeEditPassword = ()=>{
         setEdit(prev=>({...prev, password:!prev.password}));
+    }
+    const changeEditDeleteAccount = ()=>{
+        setEdit(prev=>({...prev, accountDeletion:!prev.accountDeletion}));
     }
     const editEmail = async (e)=>{
         e.preventDefault();
@@ -156,19 +161,43 @@ const SettingsComponent = ()=>{
     const editPassword= async (e)=>{
         e.preventDefault();
         if(e.target.elements.newPassword1.value!==e.target.elements.newPassword2.value){
-            console.log("New passwords dont match")
+            e.target.elements.newPassword1.value=""
+            e.target.elements.newPassword2.value=""
+            e.target.elements.currentPassword.value=""
+            setErrorMessageForChangingPasswordAndDeletingAccount("New passwords dont match")
             return;
         }
-        const tryLoggingIn= await axiosRequest(1,1,"login", {username:username.username, password:e.target.elements.currentPassword.value});
-        if(tryLoggingIn.status===200){
-            const blacklistToken= await axios.post(`${hostname}/logout/${tryLoggingIn.data.token}`);
-            const changePassword= await axiosRequest(4,1,"changePassword",{username:username.username, password:e.target.elements.newPassword1.value})
+        try{
+            const changePassword= await axiosRequest(4,1,"changePassword",{username:username.username, oldPassword:e.target.elements.currentPassword.value, newPassword:e.target.elements.newPassword1.value})
+            console.log(changePassword)
+            setErrorMessageForChangingPasswordAndDeletingAccount("")
             changeEditPassword();
         }
-        else{
-            console.log("Current Password is incorrect, try again.")
+        catch(error){
+            e.target.elements.newPassword1.value=""
+            e.target.elements.newPassword2.value=""
+            e.target.elements.currentPassword.value=""
+            setErrorMessageForChangingPasswordAndDeletingAccount(error.response.data);
         }
     }
+    const tryDeletion = async (e)=>{
+        e.preventDefault()
+        console.log(e);
+        try{
+            const accountDeletionAttempt = await axiosRequest(1,1,"accountDeletionRequest", {password: e.target.elements.currentPassword.value});
+            e.target.elements.currentPassword.value="";
+            console.log(accountDeletionAttempt);
+            navigate("/");
+        }
+        catch(error){
+            e.target.elements.currentPassword.value=""
+            setErrorMessageForChangingPasswordAndDeletingAccount(error.response.data);
+        }
+
+
+    }
+
+
     const handleOnKeyDown = (e)=>{
         if(e.key==="Enter" || e.key===","){
             e.preventDefault();
@@ -197,7 +226,7 @@ const SettingsComponent = ()=>{
     }
     const handleRemovalOfForumTag = (e, removeThis)=>{
         e.preventDefault();
-        setVideoTags(prevTags=>prevTags.filter(theTag=> theTag!==removeThis));
+        setForumTags(prevTags=>prevTags.filter(theTag=> theTag!==removeThis));
     }
     const addForumTag = (newTag)=>{
         if(newTag && !forumTags.includes(newTag)){
@@ -206,7 +235,7 @@ const SettingsComponent = ()=>{
     }
     return (
         <React.Fragment>
-            {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences)? 
+            {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)? 
                 (<>
                     <div>Your Current Settings</div>
                     <div>Email</div>
@@ -230,9 +259,10 @@ const SettingsComponent = ()=>{
                     <button onClick={changeEditForumSubscriptionPreferences}>Update Forum Post Subscription Preferences</button>
                     <div>Security</div>
                     <button onClick={changeEditPassword}>Change Password</button>
+                    <button style={{color:"red"}} onClick={changeEditDeleteAccount}>Delete Account</button>
                 </>
                 ):
-                (username && emailAndSubscriptionPreferences && edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences)?
+                (username && emailAndSubscriptionPreferences && edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)?
                 (
                     <form onSubmit={editEmail}>
                         <label>
@@ -242,7 +272,7 @@ const SettingsComponent = ()=>{
                         <button type="submit">Save Email</button>
                     </form>
                 ):
-                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && edit.forumSubscriptionPreferences)?
+                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && edit.forumSubscriptionPreferences && !edit.accountDeletion)?
                 (
                     <form onSubmit={editForumSubscription}>
                         <style>
@@ -292,7 +322,7 @@ const SettingsComponent = ()=>{
                         <button type="submit">Update Subscription Preferences</button>
                     </form>
                 ):
-                (username && emailAndSubscriptionPreferences && !edit.email && edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences)?
+                (username && emailAndSubscriptionPreferences && !edit.email && edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)?
                 (
                     <form onSubmit={editSubscription}>
                         <style>
@@ -342,7 +372,7 @@ const SettingsComponent = ()=>{
                         <button type="submit">Update Subscription Preferences</button>
                     </form>
                 ):
-                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && edit.password && !edit.forumSubscriptionPreferences)?
+                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)?
                 (
                     <form onSubmit={editPassword}>
                         <label>
@@ -357,9 +387,22 @@ const SettingsComponent = ()=>{
                         Enter new password again.
                         <input name="newPassword2" type="password" />
                         </label>
+                        <button onClick={()=>{setEdit(prevEdit=>{setErrorMessageForChangingPasswordAndDeletingAccount(""); return {...prevEdit, password: !prevEdit.password};})}}>Cancel</button>
+                        <div style={{color:"red"}}>{errorMessageForChangingPasswordAndDeletingAccount}</div>
                         <button type="submit"> Change Password</button>
                     </form>
                 ):
+                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && edit.accountDeletion)?
+                (<form onSubmit={tryDeletion}>
+                    <div style={{color:"red"}}>Are you sure you want to do this? This action cannot be undone. If you are sure, enter your password below to confirm this action.</div>
+                    <label>
+                        Enter your current password.
+                        <input name="currentPassword" type="password" />
+                        <button onClick={()=>{setEdit(prevEdit=>{setErrorMessageForChangingPasswordAndDeletingAccount(""); return {...prevEdit, accountDeletion: !prevEdit.accountDeletion};})}}>Cancel</button>
+                        <button type="submit">Delete</button>
+                        <div style={{color:"red"}}>{errorMessageForChangingPasswordAndDeletingAccount}</div>
+                    </label>
+                </form>):
                 null}
         </React.Fragment>
     )
