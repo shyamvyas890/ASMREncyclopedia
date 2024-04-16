@@ -100,7 +100,7 @@ const ProfilePageComponent = ()=>{
                 }
             </>}
             <div>
-                <button onClick={ () => navigate(`/userHistory/${theirUsername}`)}> View History </button>
+                <UserProfileComponent />
             </div>        
             </> 
     

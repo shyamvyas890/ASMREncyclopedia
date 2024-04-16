@@ -31,7 +31,8 @@ export const ForumPostFeedComponent = (props) =>{
               const response = await axios.get(`http://localhost:3001/verify-token`);
               setCurrentUsername(response.data.username);
             } catch (error) {
-              console.log(error);
+              //window.alert("You must be logged in")
+              navigate("/")
             }
           };
         fetchUsername()
@@ -278,7 +279,9 @@ const searchForumPosts = () =>{
    navigate(`/forumPost/search_by/${searchInput}`)
 }
 
-return(<div>
+
+return(
+<div>
   <form> 
           <label> Post Title </label>
           <input type="text" value={title} onChange= {(event) => {setTitle(event.target.value)}} name="title"/>
