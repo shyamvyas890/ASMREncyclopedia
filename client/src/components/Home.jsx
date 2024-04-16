@@ -5,6 +5,9 @@ import axios from '../utils/AxiosWithCredentials';
 import AddVideoPostComponent from './AddVideoPost';
 import {axiosRequest} from "../utils/utils.js";
 import { useNavigate } from 'react-router-dom';
+import NavigationComponent from './Navigation.jsx';
+import "../css/home.css"
+
 const HomeComponent= () => {
     const [username, setUsername] = useState('');
     const [userIdOfCurrentUser, setUserIdOfCurrentUser]= useState(null);
@@ -210,25 +213,36 @@ const HomeComponent= () => {
             />
 
             {(isLoggedIn && videoPostsAndRatings && sortedVideos && userIdOfCurrentUser) ? (
-                <>
-                    <h3>Add a new Video!</h3>
-                    <AddVideoPostComponent 
-                    userIdOfCurrentUser={userIdOfCurrentUser}
-                    fetchVideoPosts={fetchVideoPosts}    
-                    />
-                    <form onSubmit={handleSearchButton}>    
-                        <input type='text' placeholder='Search videos...' name='inputElement' />
-                        <button type='submit'>🔍</button>
-                    </form>
+                
+                
+                    <>
+                   <div>
+                        <NavigationComponent />
+                    </div>
+             
+                  
+                   
+
+
+                  <div className='add-video'>
                     <div>
-                        <label>Sort By:</label>
+                      <AddVideoPostComponent 
+                       userIdOfCurrentUser={userIdOfCurrentUser}
+                       fetchVideoPosts={fetchVideoPosts}    
+                      />
+                    </div>
+                  </div> 
+
+                    <div className='video-post-feed'>
                         <select value={sortOption} onChange={handleSort}>
+                            <option value="none"> Sort videos by...</option>
                             <option value="latest">Latest</option>
                             <option value="oldest">Oldest</option>
                             <option value="best">Best</option>
                             <option value="worst">Worst</option>
                         </select>
-                    </div>
+
+                        <div>
                     {sortedVideos.map((post, index)=>(
                         <div key={index+sortedVideos.length} >
                             <PostComponent 
@@ -248,6 +262,14 @@ const HomeComponent= () => {
                             />    
                         </div>
                     ))}
+                    </div>
+                    </div>
+
+                    
+
+
+                    
+                  
                 </>
             ):null}
         </div>

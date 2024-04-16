@@ -25,9 +25,9 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter>
-          <NavigationComponent />
           <Routes>
             <Route path="/" element={<HomeComponent />}/>
+            <Route path="/navTest" element={<NavigationComponent />} />
             <Route path="/register" element={<RegistrationComponent/>}/>
             <Route path="/forums" element={<ForumComponent/>}/>
             <Route path="/forumPosts" element={<AllForumPostComponent />} />

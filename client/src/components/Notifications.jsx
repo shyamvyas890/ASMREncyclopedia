@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {hostname, axiosRequest } from "../utils/utils";
 import io from 'socket.io-client';
 import "../index.css";
+import "../css/notifications.css"
 const NotificationsComponent = (props)=>{
     const [username, setUsername]= React.useState(null);
     const [socket,setSocket]= React.useState(null);
@@ -169,8 +170,7 @@ const NotificationsComponent = (props)=>{
     return (
         props.AllNotificationsPage === undefined? 
         (<div style={{position:"relative", width:"300px"}}>
-            <button onClick= {()=>{setShowDropdown(prev=>!prev)}}style = {{marginLeft:"15rem", cursor:"pointer", borderRadius:"50%", backgroundColor:"black", border:"none", width:"55px", height:"55px"}}>
-                <svg style={{stroke:"white"}} width="24" height="24" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> 
+                <svg onClick= {()=>{setShowDropdown(prev=>!prev)}}  width="24" height="24" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> 
                     <path
                         style={{stroke:"white"}}
                         d="M18.1336 11C18.7155 16.3755 21 18 21 18H3C3 18 6 15.8667 6 8.4C6 6.70261 6.63214 5.07475 7.75736 3.87452C8.88258 2.67428 10.4087 2 12 2C12.3373 2 12.6717 2.0303 13 2.08949" 
@@ -191,11 +191,11 @@ const NotificationsComponent = (props)=>{
                         strokeLinejoin="round"/> 
                 </svg>
                 {unreadNotifications!==null && unreadNotifications!==0 && <span className="notification-badge">{unreadNotifications}</span>}
-            </button> 
+      
             
                 {
                     showDropdown &&
-                        <div style={{ position: "absolute", top: "calc(100%)", right: "0px", width: "200px", maxHeight: "200px", overflowY: "auto", backgroundColor: "black", zIndex: 1 }}>
+                        <div className='notification-element'>
                             {notificationsElements && notificationsElements.length > 0 ? (
                                <> 
                                 {notificationsElements}
@@ -210,7 +210,7 @@ const NotificationsComponent = (props)=>{
                 }
             
         </div>): (
-            <div style={{position:"relative", width:"100%"}}>
+            <div style={{position:"absolute", width:"50%"}}>
                 <div>All Notifications</div>
                 {notificationsElements && notificationsElements.length > 0 ? (
                         <>
