@@ -97,10 +97,11 @@ app.post("/register", async (req,res)=>{
 });
 
 const authenticateUser = (socket, next)=>{
-    const token= socket.handshake.headers.cookie.split("=")[1];
+    let token= socket.handshake.headers.cookie;
     if (!token) {
         return next(new Error('Authentication error: Token missing'));
     }
+    token=token.split("=")[1];
     jwt.verify(token, secretKey, (err, value)=>{
         if(err){
             return next(new Error('Authentication error: Invalid token'));
@@ -1796,6 +1797,17 @@ app.get("/videoCommentRating", verifyJWTMiddleware, async (req, res)=>{
         return res.status(403).send("You do not have permission to do that");
     }
     db.query("SELECT * FROM VideoPostCommentLikeDislike WHERE UserId= ? AND VideoPostCommentId = ?", [UserId, VideoPostCommentId], (error, results)=>{
+        if (error){
+            console.log(error);
+            return res.status(500).send("Internal Server Error");
+        }
+        return res.json(results);
+    })
+})
+
+app.get("/videoCommentRatings", verifyJWTMiddleware, (req,res)=>{
+    const {VideoPostCommentId} = req.query;
+    db.query("SELECT * FROM VideoPostCommentLikeDislike WHERE VideoPostCommentId = ?", [VideoPostCommentId], (error, results)=>{
         if (error){
             console.log(error);
             return res.status(500).send("Internal Server Error");
