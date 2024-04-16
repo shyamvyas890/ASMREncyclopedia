@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from '../utils/AxiosWithCredentials';
+import "../css/login.css"
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 const LoginComponent = (props) => {
   const [feedback, setFeedback]= useState("");
   const handleLogin = async (e) => {
@@ -50,30 +53,48 @@ const LoginComponent = (props) => {
   return (
     <div>
         {props.isLoggedIn?(
-            <div>
-            <h1>Welcome, {props.username}!</h1>
-            <button onClick={handleLogout}>Logout</button>
+            <div className="login-info">
+             <h3>Welcome, {props.username}!</h3>
+             <button onClick={handleLogout}>Logout</button>
             </div>
 
-        ) :props.isLoggedIn===false? (<div>
-        <h2>Login</h2>
-        <form onSubmit={handleLogin}>
-            <label>
-            Username:
-            <input type="text" value={props.username} onChange={(e) => props.setUsername(e.target.value)} />
-            </label>
-            <br />
-            <label>
-            Password:
-            <input type="password" name="passwordInput"/>
-            </label>
-            <br />
-            <button type="submit">Login</button>
-        </form>
-        <div>Don't have an account? <Link to="/register">Register here!</Link></div>
-        {feedback && (feedback==="Your password is incorrect." || feedback==="This username does not exist." || feedback==="Error logging in.") && <p style={{color:'red'}}>{feedback}</p>}
-        {feedback && feedback ==="Login Successful" && <p style={{color:'green'}}>{feedback}</p>}
-        </div>):null
+        ) :props.isLoggedIn===false? (
+        
+          <div className="container">
+          <div className="body d-md-flex align-items-center justify-content-between">
+            <div className="box-1 mt-md-0 mt-5">
+              <img src="https://images.pexels.com/photos/2033997/pexels-photo-2033997.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"/>
+            </div>
+            <div className=" box-2 d-flex flex-column h-100">
+              <div className="mt-5">
+                <p className="mb-1 h-1"> ASMR Encyclopedia </p>
+                <p className="mb-2"> Experience ASMR today.</p>
+                <div className="d-flex flex-column ">
+                  
+                  <div className="align-items-center">
+                   <form onSubmit={handleLogin}>
+                     <input type="text" placeholder="Username" value={props.username} onChange={(e) => props.setUsername(e.target.value)} />
+                     <br />
+                     <input type="password" placeholder='Password' name="passwordInput"/>
+                     <br />
+                     <button className="btn btn-primary" type="submit">Login</button>
+                   </form>
+
+                  </div>
+                </div>
+              </div>
+    
+              <p className="after-text"> Connect with ASMR enthusiasts around the world.</p>
+              <p className="after-text"> Share videos and create posts to discuss ASMR. </p>
+
+              <p className="after-text"> Don't have an account? <Link to="/register"> Register Here! </Link></p>
+              {feedback && (feedback==="Your password is incorrect." || feedback==="This username does not exist." || feedback==="Error logging in.") && <p style={{color:'red'}}>{feedback}</p>}
+              {feedback && feedback ==="Login Successful" && <p style={{color:'green'}}>{feedback}</p>}
+            </div>
+            <span className="fas fa-times" />
+          </div>
+        </div>
+        ):null
         }
 
     </div>

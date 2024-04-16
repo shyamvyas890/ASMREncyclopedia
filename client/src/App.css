@@ -1,6 +1,4 @@
-.App {
-  /*text-align: center;*/
-}
+
 
 .App-logo {
   height: 40vmin;
@@ -55,10 +53,13 @@
   position: fixed;
 }
 
+/*
 .overlay {
   background: rgba(49,49,49,.8)
 }
+*/
 
+/*
 .modal-content {
   position: absolute;
   top: 40%;
@@ -71,13 +72,16 @@
   max-width: 600px;
   min-width: 300px;
 }
+*/
 
+/*
 .close-modal {
   position: absolute;
   top: 10px;
   right: 10px;
   padding: 5px, 7px;
 }
+*/
 
 @keyframes App-logo-spin {
   from {

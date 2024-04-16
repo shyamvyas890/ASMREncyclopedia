@@ -1,0 +1,13 @@
+.notification-element{
+    margin-top: auto;
+    color: red;
+}
+
+.notif-bell{
+    cursor: pointer;
+    border-radius: 50%;
+    border: none;
+    width: 25px;
+    height: 25px;
+    margin: auto;
+}

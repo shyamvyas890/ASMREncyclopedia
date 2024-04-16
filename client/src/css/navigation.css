@@ -1,0 +1,55 @@
+.nav {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #657786;
+  margin-top: 50px;
+  position: relative;
+  background-color: #657786;
+}
+
+.navbar {
+  width: 100%; /* Adjust height to leave space for the border */
+}
+
+.navbar-nav.mr-auto {
+  margin: auto;
+}
+
+.nav-item {
+  cursor: pointer;
+  border-radius: 50%;
+  border: none;
+  height: 25px;
+  width: 100px;
+}
+
+.navbar-brand {
+  color: white;
+}
+
+.nav-link {
+  color: white;
+}
+
+@media only screen and (max-width: 768px) {
+  .nav {
+    flex-direction: row;
+  }
+
+  .navbar-nav.mr-auto {
+    margin: 0;
+  }
+
+  .nav-item {
+    width: auto; /* Adjust width to fit content */
+    margin-right: 10px; /* Add some spacing between items */
+  }
+}
+
+
+
+
+
+
+
