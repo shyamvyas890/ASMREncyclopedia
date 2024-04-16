@@ -200,8 +200,8 @@ const PostComponent = (props) =>{
                 <div>{genre.GenreName}</div>
               </React.Fragment>
             ))}
-            {props.totalLikes ? <button onClick={handleLike} style={highlightLikeButtonRating}>Like ({props.totalLikes}) </button> : <div> </div>}
-            {props.totaDislikes ? <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike ({props.totalDislikes})</button> : <div> </div>}
+            {props.totalLikes !==null ? <button onClick={handleLike} style={highlightLikeButtonRating}>Like ({props.totalLikes}) </button> : <div> </div>}
+            {props.totaDislikes !== null? <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike ({props.totalDislikes})</button> : <div> </div>}
             {props.username === props.usernameOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
             <button onClick={()=>navigate(`/video/${props.VideoPostId}`)}>Comments</button>
             <button onClick={toggleModal} className="btn-Modal"> Add to Playlist</button>
