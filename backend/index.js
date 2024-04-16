@@ -223,7 +223,7 @@ io.on('connection', (socket) => {
 });
 app.put("/changePassword",
      verifyJWTMiddleware, 
-    (req,res,next)=>{ //secure
+    (req,res,next)=>{
         const username = req.body.username;
         if(username !== req.decodedToken.username){
             return res.status(403).send("You do not have permission to do that");
@@ -231,11 +231,62 @@ app.put("/changePassword",
         next();
     },
     async (req, res)=>{
-        const {username, password}= req.body;
-        const hashedPassword = await bcrypt.hash(password, 13);
-        queryTheDatabase("UPDATE users SET password = ? WHERE username= ? ", [hashedPassword,username], res);
+        const {username, oldPassword, newPassword}= req.body;
+        db.query(
+            'SELECT * FROM users WHERE username = ?',
+            [username],
+            async (err, results) => {
+                if(err){
+                    console.log(err);
+                    res.status(500).send("Error logging in.")
+                }
+                else if (results.length>0){
+                    const match = await bcrypt.compare(oldPassword, results[0].password);
+                    if (match) {
+                        const hashedPassword = await bcrypt.hash(newPassword, 13);
+                        queryTheDatabase("UPDATE users SET password = ? WHERE username= ? ", [hashedPassword,username], res);
+                    } 
+                    else {
+                        res.status(401).send('Your password is incorrect.');
+
+                    }
+                }
+                else {
+                    res.status(404).send('This username does not exist.');
+                }
+            }
+        );
     }
 )
+
+app.post("/accountDeletionRequest", verifyJWTMiddleware, async (req, res)=>{
+    const {password}= req.body;
+    db.query(
+        'SELECT * FROM users WHERE username = ?',
+        [req.decodedToken.username],
+        async (err, results) => {
+            if(err){
+                console.log(err);
+                res.status(500).send("Error logging in.")
+            }
+            else if (results.length>0){
+                const match = await bcrypt.compare(password, results[0].password);
+                if (match) {
+                    res.clearCookie('theJWTToken');
+                    queryTheDatabase("DELETE FROM users WHERE username = ?", [req.decodedToken.username], res);
+                } 
+                else {
+                    res.status(401).send('Your password is incorrect.');
+
+                }
+            }
+            else {
+                res.status(404).send('This username does not exist.');
+            }
+        }
+    );
+})
+
 app.post("/login", async (req, res)=>{ // secure
     const { username, password } = req.body;
     db.query(
@@ -304,11 +355,15 @@ app.get('/users',(req,res)=>{
     })
 })
 
-app.post('/video/:VideoId', verifyJWTMiddleware, (req,res)=>{ //secure 
+app.post('/video/:VideoId', verifyJWTMiddleware, async (req,res)=>{ //secure 
     const VideoLinkId= req.params.VideoId;
     const {UserId, Title} = req.body
     if(req.decodedToken.UserId !== UserId){
         return res.status(403).send("You do not have permission to do that");
+    }
+    const isItAlreadyThere = await queryTheDatabaseGiveResults("SELECT * FROM VideoPost WHERE VideoLinkId = ?", [VideoLinkId]);
+    if(isItAlreadyThere.length!==0){
+        return res.status(400).send("Video already exists");
     }
     db.query('INSERT INTO VideoPost (UserId, Title, VideoLinkId) VALUES (?, ?, ?)', [UserId, Title, VideoLinkId], (err, results)=>{
         if(err){
@@ -607,7 +662,6 @@ app.get("/forums", (req,res)=>{
 
 app.get("/UserPosts", verifyJWTMiddleware, (req,res)=>{
     const username = req.decodedToken.username
-    console.log("USER POSTS USERNAME: " + username)
     db.query('SELECT * FROM forumpost WHERE username = ?', [username], (err, data)=>{
         const query = `
         SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
@@ -621,7 +675,6 @@ app.get("/UserPosts", verifyJWTMiddleware, (req,res)=>{
             if(err){
                 res.send(err)
             }
-            console.log(data)
             return res.json(data)
         })
     })
@@ -704,7 +757,6 @@ app.post("/forumTagCreate", verifyJWTMiddleware, async (req,res)=>{
     const forumTagName = req.query.forumTagName.trim().toLowerCase();
     //inserts tag into db, if already exists do nothing
     const query = "INSERT IGNORE INTO ForumTag (forumTagName) VALUES (?)";
-    console.log("Creating Tag Name: ", forumTagName);
     try {
         const data = await new Promise((resolve, reject) => {
             db.query(query, [forumTagName], (err, data)=>{
@@ -715,8 +767,6 @@ app.post("/forumTagCreate", verifyJWTMiddleware, async (req,res)=>{
                 }
             });
         });
-        
-        console.log(data.insertId);
         res.status(200).json({ data: data });
     } catch (error) {
         console.error(error);
@@ -726,13 +776,11 @@ app.post("/forumTagCreate", verifyJWTMiddleware, async (req,res)=>{
 
 app.get("/fetchForumTag", verifyJWTMiddleware, (req,res)=>{
     const forumTagName = req.query.forumTagName.trim().toLowerCase();
-    console.log("Fetching Tag Name: ", forumTagName)
     const query = "SELECT ForumTagID FROM ForumTag WHERE ForumTagName = ?"
     db.query(query, [forumTagName], (err, data)=>{
         if(err){
             res.send(err)
         } else{
-            console.log(data)
             return res.json(data)
         }
     })
@@ -745,8 +793,6 @@ app.post("/forumPostTagCreate", verifyJWTMiddleware, async (req,res)=>{
     if(req.decodedToken.username !== authorizedUsername){
         return res.status(403).send("You do not have permission to do that");
     }
-    console.log("Creating PostID: ", postID)
-    console.log("With TagID: ", forumTagID)
     
     const query = "INSERT INTO ForumPostTag (ForumPostID, ForumTagID) VALUES (?, ?)";
     try {
@@ -759,7 +805,6 @@ app.post("/forumPostTagCreate", verifyJWTMiddleware, async (req,res)=>{
                 }
             })
         })
-        console.log(data);
         res.status(200).json({ data: data });
     } catch (error) {
         console.error(error);
@@ -774,7 +819,6 @@ app.get("/fetchForumPostTagID", verifyJWTMiddleware, async (req, res)=>{   //cha
         if(err){
             res.send(err)
         } else{
-            console.log(data)
             return res.json(data)
         }
     })
@@ -790,7 +834,6 @@ app.get("/fetchForumSubscriptions", verifyJWTMiddleware, (req, res)=>{
         if(err){
             res.send(err)
         } else{
-            console.log("data: ", data)
             return res.json(data)
         }
     })
@@ -803,7 +846,6 @@ app.get("/fetchForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
         if(err){
             res.send(err)
         } else{
-            console.log(data)
             return res.json(data)
         }
     })
@@ -812,14 +854,12 @@ app.get("/fetchForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
 app.post("/createForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
     const userID = req.decodedToken.UserId
     const only = req.query.Only
-    console.log("userID: ", userID)
     const query = "INSERT INTO ForumSubscriptionOnly (UserID, Only) VALUES (?, ?)"
     db.query(query, [userID, only], (err, data)=>{
         if(err){
             console.log(err)
             res.status(500).send(err);
         } else{
-            console.log(data)
             return res.status(204).send("ForumSubscriptionOnly created successfully")
         }
     })
@@ -828,14 +868,12 @@ app.post("/createForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
 app.post("/createForumSubscription", verifyJWTMiddleware, (req, res)=>{
     const userID = req.decodedToken.UserId
     const ForumTagID = req.query.ForumTagID
-    console.log("id: ", ForumTagID)
     const query = "INSERT INTO ForumSubscriptions (UserID, ForumTagID) VALUES (?, ?)"
     db.query(query, [userID, ForumTagID], (err, data)=>{
         if(err){
             res.status(500).send(err);
             console.log(err)
         } else{
-            console.log(data)
             return res.status(201).send("ForumSubscriptions created successfully")
         }
     })
@@ -849,7 +887,6 @@ app.delete("/deleteForumSubscriptionOnly", verifyJWTMiddleware, (req, res)=>{
             res.status(500).send(err);
 
         } else{
-            console.log("delete")
             return res.status(201).send("ForumSubscriptionOnly deleted successfully")
         }
     })
@@ -884,7 +921,6 @@ app.get("/forumPostsAll", verifyJWTMiddleware, (req,res)=>{
             console.log(err)
             res.status(500).send(err);
         }
-        console.log("forum posts: ", data)
         return res.json(data)
     })
 })
@@ -892,8 +928,6 @@ app.get("/forumPostsAll", verifyJWTMiddleware, (req,res)=>{
 //viewing a post by its id
 app.get("/forumPostsById/:postID", verifyJWTMiddleware, async (req,res)=>{
     const id = parseInt(req.params.postID, 10)
-    console.log(typeof(id))
-    console.log(id)
     const query = `
     SELECT ForumPost.id, ForumPost.username, ForumPost.title, ForumPost.body, ForumPost.post_timestamp, GROUP_CONCAT(ForumTag.ForumTagName) AS tags
     FROM ForumPost
@@ -907,8 +941,6 @@ app.get("/forumPostsById/:postID", verifyJWTMiddleware, async (req,res)=>{
         if(err){
             res.send(err)
         }
-        console.log(data)
-        console.log("hi")
         return res.json(data)
     })
 })
@@ -929,7 +961,6 @@ app.delete("/forumPostDelete/:id", verifyJWTMiddleware, async (req,res)=>{
 });
 
 app.put("/editForumPost/:id", verifyJWTMiddleware, async (req, res) =>{
-    console.log("ROUTE START")
     const forumPostID = req.params.id
     const allPosts = req.body.allPosts
     const tfidfVector = {}
@@ -964,9 +995,6 @@ app.put("/editForumPost/:id", verifyJWTMiddleware, async (req, res) =>{
                 console.log(err)
                 res.status(500).send(err)
             }
-            else{
-                console.log("UPDATES TO OTHER POSTS COMPLETE")
-            }
         })
     }
 
@@ -974,11 +1002,8 @@ app.put("/editForumPost/:id", verifyJWTMiddleware, async (req, res) =>{
     tfidf.listTerms(tfidf.documents.length - 1).forEach(function(item) {
         tfidfVector[item.term] = item.tfidf
     });
-
-    console.log("CALCULATED EDIT TFIDF")
     //new tfidfVector from the edited post
     const tfidfVectorString = JSON.stringify(tfidfVector)
-    console.log(tfidfVectorString)
 
     const query = "UPDATE forumpost SET body=?, tfidf_vector=? WHERE id=?"
     db.query(query, [req.body.newBody, tfidfVectorString, forumPostID], (err, data)=>{
@@ -987,7 +1012,6 @@ app.put("/editForumPost/:id", verifyJWTMiddleware, async (req, res) =>{
             return res.send(err)
         }
         else{
-            console.log("UPDATE COMPLETE")
             return res.status(201).send("Edit Done")
         }
     })
@@ -1148,8 +1172,6 @@ app.put("/deleteForumPostComment/:commentID",verifyJWTMiddleware, async (req, re
     if(req.decodedToken.username !== commentUser){
         return res.status(403).send("Incorrect User")
     }
-
-    console.log(commentID)
     db.query("UPDATE FORUMPOSTCOMMENTS SET DELETED=? WHERE id=?", [true, commentID], function(err){
         if(err){
             console.log(err)
@@ -1161,11 +1183,9 @@ app.put("/deleteForumPostComment/:commentID",verifyJWTMiddleware, async (req, re
 })
 
 app.put("/editForumPostComment/:commentID", verifyJWTMiddleware, async (req, res) =>{
-    console.log("HELLO")
     const commentID = parseInt(req.params.commentID, 10)
     const editedBody = req.body.editedBody
     const commentUser = (await whoOwnsThis("ForumPostCommentId", commentID))[0].username;
-    console.log(editedBody)
     if(req.decodedToken.username !== commentUser){
         return res.status(403).send("Incorrect User")
     }
@@ -1339,11 +1359,6 @@ app.post("/forumPostCommentReply/:id/:commentID", verifyJWTMiddleware, (req, res
     if(req.decodedToken.username !== username){
         return res.status(403).send("Incorrect User")
     }
-
-    console.log("FORUM POST COMMENT REPLY FOR POST " + forumPostID)
-    console.log("TYPE OF FORUM POST ID " + typeof(forumPostID))
-    console.log("PARENT COMMENT " + commentID)
-    console.log()
     const reply = {
         username,
         body,
@@ -1480,7 +1495,6 @@ app.get("/forumPostRecommendedPost/:postID", verifyJWTMiddleware, (req, res) =>{
         }
         else{
             const post = data[0]
-            console.log(post)
             db.query("SELECT * from forumpost WHERE ID!=?", [postID], function(err, data){
                 if(err){
                     console.log(err)
@@ -1490,7 +1504,6 @@ app.get("/forumPostRecommendedPost/:postID", verifyJWTMiddleware, (req, res) =>{
                     data.forEach(otherPost =>{
                         if(cosineSimilarity(post.tfidf_vector, otherPost.tfidf_vector) >= similarityThreshold){
                             recommendedPosts.push(otherPost)
-                            console.log(recommendedPosts)
                         }
                     })
                     return res.status(201).send({recommendedPosts: recommendedPosts})
@@ -1520,7 +1533,6 @@ app.get("/fetchAllPlaylistVideosID", verifyJWTMiddleware, async (req, res)=>{
 
 app.get("/fetchAllVideos", verifyJWTMiddleware, (req, res)=>{
     const videoPostID = req.query.videoPostID
-    console.log(videoPostID)
     const query = "SELECT * FROM VideoPost WHERE VideoPostID = ?"
     db.query(query, [videoPostID], (err, data)=>{
         if(err){
@@ -1536,7 +1548,6 @@ app.get("/fetchVideoInPlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
-    console.log("Autorized UserId: ", authorizedUserID)
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -1555,12 +1566,9 @@ app.post("/addVideoToPlaylist", verifyJWTMiddleware, async (req, res)=>{
     const playlistID = req.query.playlistID
     const videoPostID = req.query.videoPostID
     const authorizedUserID = (await whoOwnsThis("PlaylistID", playlistID))[0].UserID
-    console.log("Autorized UserId: ", authorizedUserID)
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
-    console.log("playlistID: ", playlistID)
-    console.log("videoPostID: ", videoPostID)
     const query = "INSERT INTO playlistvideoposts (DateAdded, PlaylistID, VideoPostID) VALUES (NOW(), ?, ?)"
     db.query(query, [playlistID, videoPostID], (err, data)=>{
         if (err) {
@@ -1578,8 +1586,7 @@ app.delete("/deleteVideoFromPlaylist", verifyJWTMiddleware, async (req, res)=>{
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
-    console.log("playlistID: ", playlistID)
-    console.log("videoPostID: ", videoPostID)
+
     const query = "DELETE FROM playlistvideoposts WHERE PlaylistID = ? AND VideoPostID = ?"
     db.query(query, [playlistID, videoPostID], (err)=>{
         if (err) {
@@ -1592,7 +1599,6 @@ app.delete("/deleteVideoFromPlaylist", verifyJWTMiddleware, async (req, res)=>{
 
 app.get("/fetchAllUserPlaylists", verifyJWTMiddleware, (req, res)=>{
     const userID = req.decodedToken.UserId
-    console.log("Autorized UserId: ", userID)
 
     const query = "SELECT * FROM Playlist WHERE userID = ?"
     db.query(query, [userID], (err, data)=>{
@@ -1608,7 +1614,6 @@ app.get("/fetchAllUserPlaylists", verifyJWTMiddleware, (req, res)=>{
 app.post("/createPlaylist", verifyJWTMiddleware, (req, res)=>{
     const playlistName = req.query.playlistName
     const userID = req.decodedToken.UserId
-    console.log(playlistName)
     const query = "INSERT INTO Playlist (playlistName, dateCreated, userID) VALUES (?, NOW(), ?)"
     db.query(query, [playlistName, userID], (err, data)=>{
         if(err){
@@ -1625,7 +1630,6 @@ app.delete("/deletePlaylist", verifyJWTMiddleware, async (req, res)=>{
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
-    console.log(playlistID)
     const query = "DELETE FROM Playlist WHERE PlaylistID = ?"
     db.query(query, [playlistID], (err)=>{
         if (err) {
@@ -1643,8 +1647,6 @@ app.put("/editPlaylistName", verifyJWTMiddleware, async (req, res)=>{
     if(req.decodedToken.UserId !== authorizedUserID){
         return res.status(403).send("You do not have permission to do that");
     }
-    console.log("ID: ", playlistID)
-    console.log("new name: ", newPlaylistName)
     const query = "UPDATE Playlist SET PlaylistName = ? WHERE PlaylistID = ?"
     db.query(query, [newPlaylistName, playlistID], (err)=>{
         if (err) {
@@ -1947,15 +1949,7 @@ app.get("/FriendRelationship", verifyJWTMiddleware, (req,res)=>{
 
 app.post('/video-genre', verifyJWTMiddleware, async (req,res)=>{
     const {VideoPostId, Genre}= req.body;
-    console.log(`Decoded Token`)
-    console.log(req.decodedToken)
-    console.log(`VideoPostId`)
-    console.log(VideoPostId)
-    console.log(`Genre`)
-    console.log(Genre)
     const owner = await whoOwnsThis("VideoPostId", VideoPostId);
-    console.log(`owner`)
-    console.log(owner)
 
     const authorizedUserId = (await whoOwnsThis("VideoPostId", VideoPostId))[0].UserId;
     if(req.decodedToken.UserId !== authorizedUserId){
