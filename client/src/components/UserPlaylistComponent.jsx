@@ -19,7 +19,7 @@ export const UserPlaylistComponent = ()=>{
               const response = await axios.get(`http://localhost:3001/verify-token`);
               setCurrentUsername(response.data.username);
             } catch (error) {
-              console.log(error);
+              navigate("/")
             }
           };
         fetchUsername()

@@ -6,6 +6,7 @@ import "../css/addvideopost.css"
 const AddVideoPostComponent = (props)=>{
     const hostname= "http://localhost:3001";
     const [videoTags, setVideoTags]= useState([]);
+    const [errorMessage, setErrorMessage] = React.useState("");
     const titleRef= useRef(null);
     const linkRef= useRef(null);
     const tagRef= useRef(null);
@@ -58,10 +59,24 @@ const AddVideoPostComponent = (props)=>{
             console.log("You must have at least one tag");
             return;
         }
-        const addPost = await axios.post(`http://localhost:3001/video/${theId}`, {
-            UserId: props.userIdOfCurrentUser,
-            Title:theTitle    
-        })
+        let addPost;
+        try{
+            addPost = await axios.post(`http://localhost:3001/video/${theId}`, {
+                UserId: props.userIdOfCurrentUser,
+                Title:theTitle    
+            })
+        }
+        catch(error){
+
+
+            setErrorMessage(error.response.data)
+            titleRef.current.value="";
+            linkRef.current.value="";
+            tagRef.current.value="";
+            setVideoTags([]);
+            return;
+        }
+            
         for(const videoTag of videoTags){
             const addTag= await axios.post(`${hostname}/video-genre`, {
                 VideoPostId: addPost.data.insertId, Genre:videoTag
@@ -110,6 +125,7 @@ const AddVideoPostComponent = (props)=>{
                         <button onClick={(e)=>{handleRemovalOfTag(e,tag)}}>&times;</button>
                     </div>
                 ))}
+            <div style={{color:"red"}}>{errorMessage}</div>
             <button type="submit" className="btn btn-primary"> Post </button>
         </form>
     </div>
