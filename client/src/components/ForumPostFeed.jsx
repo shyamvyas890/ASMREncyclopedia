@@ -3,7 +3,9 @@ import { useState, useEffect } from "react";
 import { redirectDocument, useNavigate } from "react-router-dom";
 import LikeDislikeComponent from "./LikeDislikeComponent"
 import * as yup from "yup"
+import "../css/forumpostfeed.css"
 import '../index.css';
+import NavigationComponent from './Navigation';
 
 export const ForumPostFeedComponent = (props) =>{
     const [allPosts, setAllPosts] = useState([])
@@ -275,87 +277,81 @@ const handleInputKeyDown = (e) =>{
   }
 }
 
-const searchForumPosts = () =>{
-   navigate(`/forumPost/search_by/${searchInput}`)
-}
+
+ return(
 
 
-return(
-<div>
-  <form> 
-          <label> Post Title </label>
-          <input type="text" value={title} onChange= {(event) => {setTitle(event.target.value)}} name="title"/>
-          <br></br>
-          <label> Post Body </label>
-          <input type="text"  value={body} onChange= {(event) => {setBody(event.target.value)}} name="body"/>
-          <br>
-          </br>
-          <div>
-           <label> Press "Enter" to create post tag(s) </label>
-           <input type="text" value={tagInput} onChange={ (event) => {setTagInput(event.target.value)}} onKeyDown={handleInputKeyDown}/>
-           <br>
-           </br>
-           <div>
-             {tagOptions.map( (tag) => (
-                <div key={tag}>
-                    {tag}
-                    <button onClick={() => handleTagDelete(tag)}> x </button>
-                </div>
-             ))}
-           </div>
-          </div>
-         <button onClick={onSubmit}> Create Post </button>
-        </form>
+  <div>
+    <NavigationComponent />
+    <div className="container"> 
+      <form className='forum-post-form'>
+        <input id="forum-post-title" type="text" placeholder="Title" value={title} onChange={(event) => {setTitle(event.target.value)}} name="title"/>
+        <br />
+        <textarea type="text" value={body} placeholder="Body" onChange={(event) => {setBody(event.target.value)}} name="body"/>
+        <br />
+        <input placeholder="Press 'Enter' to create tag(s)" type="text" value={tagInput} onChange={(event) => {setTagInput(event.target.value)}} onKeyDown={handleInputKeyDown}/>
+         <div className="tag-container">
+          {tagOptions.map((tag) => (
+            <div key={tag}>
+              {tag}
+              <button id="tag-button" onClick={() => handleTagDelete(tag)}> x </button>
+            </div>
+          ))}
+         </div>
 
-<h1>All Posts Feed</h1>
+        <button onClick={onSubmit}> Post </button>
+      </form>
+    </div>
+    
 
-<form onSubmit={sortForumPosts}>
- <select onChange={(e) => setSortType(e.target.value)}>
-    <option value="none"> Sort posts by... </option>
-    <option value="1"> Newest to Oldest (default) </option>
-    <option value="2"> Oldest To Newest </option>
-    <option value="3"> Most Liked to Least Liked </option>
-    <option value="4"> Least Liked to Most Liked </option>
- </select>
- <button> Sort </button>
-</form>
+  <form className="form" onSubmit={sortForumPosts}>
+    <select onChange={(e) => setSortType(e.target.value)}>
+      <option value="none"> Sort by... </option>
+      <option value="1"> Newest to Oldest (default) </option>
+      <option value="2"> Oldest To Newest </option>
+      <option value="3"> Most Liked to Least Liked </option>
+      <option value="4"> Least Liked to Most Liked </option>
+    </select>
+    <button className="sort-button"> Sort </button>
+  </form>
 
-<form onSubmit={searchForumPosts}>
-  <input value={searchInput} type="text" placeholder="Search posts by title..." onChange={ (e) => setSearchInput(e.target.value)}/>
-  <button> Search </button>
-</form>
 
-<div className="feed-posts">
+  <div className="feed-posts">
     {allPosts.map(post=>(
-        <div className="user-posts" key={post.id}>
-            <h2>{post.title} by <a 
+      <div className="user-posts" key={post.id}>
+        <h2> <a 
           style={{textDecoration: 'none'}}
           onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
           onMouseOut={(e) => e.target.style.textDecoration = 'none'}
-          onClick={() => {navigate(`/userHistory/${post.username}`)}}
+          onClick={() => {navigate(`/username/${post.username}`)}}
           >
           {post.username}
-         </a> 
-         @ {new Date(post.post_timestamp).toLocaleString()}</h2>
-            <p>{post.body}</p>
-            <div>
-            Tags: {post.tags && post.tags.split(',').map(tag => ( //If tags!=null split tags
-              <div>
-              <span key={tag ? tag.trim() : 'null'}>{tag ? tag.trim() : 'null'}</span>
-              </div>
-            ))}
+        </a> 
+        ◦ {new Date(post.post_timestamp).toLocaleString()}</h2>
+        <h4 style={{fontWeight: "bold"}}> {post.title} </h4>
+
+        <p>{post.body}</p>
+        <div>
+          Tag(s) {post.tags && post.tags.split(',').map(tag => ( //If tags!=null split tags
+            <div key={tag ? tag.trim() : 'null'}>
+              <span>{tag ? tag.trim() : 'null'}</span>
             </div>
-            <button onClick={ () => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)}> View Post </button>
-            <button 
-                className={`like ${userLikedPosts.includes(post.id) ? "liked" : ""}`} 
-                onClick={()=>handlePostLikeDislike(post.id, currentUserID, 1)}>
-                {allPostLikes.get(post.id)} Likes
-            </button>
-            <button className={`dislike ${userDislikedPosts.includes(post.id) ? "disliked" : ""}`}
-                onClick={()=>handlePostLikeDislike(post.id, currentUserID, 0)}>
-                {allPostDislikes.get(post.id)} Dislikes</button>
+          ))}
         </div>
+        <button onClick={() => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)} style={{backgroundColor: "#3B9EBF"}}> View Post </button>
+        <button className={`like ${userLikedPosts.includes(post.id) ? "liked" : ""}`} onClick={() => handlePostLikeDislike(post.id, currentUserID, 1)}>
+          {allPostLikes.get(post.id)} Likes
+        </button>
+        <button className={`dislike ${userDislikedPosts.includes(post.id) ? "disliked" : ""}`} onClick={() => handlePostLikeDislike(post.id, currentUserID, 0)}>
+          {allPostDislikes.get(post.id)} Dislikes
+        </button>
+      </div>
     ))}
+  </div>
 </div>
-</div>)
+
+
+ )
+
+
 }

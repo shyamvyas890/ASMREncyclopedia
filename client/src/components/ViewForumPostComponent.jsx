@@ -7,7 +7,8 @@ import { useNavigate } from "react-router-dom"
 import { FourmPostCommentSection } from "./ForumPostCommentSection"
 import LikeDislikeComponent from "./LikeDislikeComponent"
 import '../index.css';
-
+import '../css/viewforumpost.css'
+import NavigationComponent from './Navigation';
 export const ViewForumPostComponent = () =>{
    const location = useLocation()
    const state = location.state
@@ -103,7 +104,7 @@ export const ViewForumPostComponent = () =>{
          await axios.delete(`http://localhost:3001/forumPostDelete/${postID}`, {
           currentUsername, currentUsername
          }, {withCredentials: true})
-         navigate("/")
+         navigate("/forumPosts")
       }
     }
 
@@ -126,72 +127,85 @@ export const ViewForumPostComponent = () =>{
        }
     }
 
-    console.log(recommendedPosts)
-    return (
-    (postObject ?
-    <div>
-    <div>
-        <h1> {postObject[0].title} by <a 
-          style={{textDecoration: 'none'}}
-          onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-          onMouseOut={(e) => e.target.style.textDecoration = 'none'}
-          onClick={() => {navigate(`/userHistory/${postObject[0].username}`)}}
-          >
-          {postObject[0].username}
-         </a>
+    console.log("Recommendations: " + recommendedPosts)
 
-        @ {new Date(postObject[0].post_timestamp).toLocaleString()} </h1>
-        {isEditing ? (<div> <input value={editContent} onChange={ (e) => {setEditContent(e.target.value)}}/> <button onClick={cancelEdit}> Cancel Edit </button> <button onClick={submitEdit}> Confirm Edit </button></div>) : (<p> {editContent} </p>)}
-        <button 
-          className={`like ${userLikedPosts.includes(postObject[0].id) ? "liked" : ""}`}
-          onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 1)}>
-          {postLikes.get(postObject[0].id)} Likes</button>
-        <button 
-          className={`dislike ${userDislikedPosts.includes(postObject[0].id) ? "disliked" : ""}`}
-          onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 0)}>
-          {postDislikes.get(postObject[0].id)} Dislikes</button>
-          {currentUsername === postObject[0].username ? <div>
-          <button onClick={handleDeletePost}> Delete Post </button> <button onClick = {setIsEditing}> Edit Post </button>
+    return (
+        (postObject ?
+        <div>
+          <NavigationComponent />
+          <div className="user-posts-view">
+            <h2> <a 
+            style={{textDecoration: 'none'}}
+            onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+            onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+            onClick={() => {navigate(`/username/${postObject[0].username}`)}}
+            >
+            {postObject[0].username}
+           </a> 
+           ◦ {new Date(postObject[0].post_timestamp).toLocaleString()}</h2>
+           <h4 style={{fontWeight: "bold"}}> {postObject[0].title} </h4>
+
+           <p>{isEditing ? (<div> <input value={editContent} onChange={ (e) => {setEditContent(e.target.value)}}/> <button onClick={cancelEdit} style={{border: "none"}}> Cancel Edit </button> <button style={{border: "none"}} onClick={submitEdit}> Confirm Edit </button></div>) : (<p> {editContent} </p>)}</p>
+
+          <div>
+            Tag(s) {postObject[0].tags && postObject[0].tags.split(',').map(tag => ( //If tags!=null split tags
+             <div key={tag ? tag.trim() : 'null'}>
+               <span>{tag ? tag.trim() : 'null'}</span>
+             </div>
+           ))}
           </div>
-          : <div> </div>}
-        <div>
-        <div>
-            Tags: {postObject[0].tags && postObject[0].tags.split(',').map(tag => ( //If tags!=null split tags
-              <div>
-              <span key={tag ? tag.trim() : 'null'}>{tag ? tag.trim() : 'null'}</span>
-              </div>
-            ))}
-            </div>
-        </div> 
-      <div>
-            <FourmPostCommentSection currentUser = {currentUsername} userID = {userID}/>
-            <br></br>
+
+        <div style={{display: "flex"}}>
+          <button onClick = {setIsEditing} style={{backgroundColor: "#4CAF50", border: "none"}}> Edit </button>
+          <button onClick={handleDeletePost} style={{backgroundColor: "red", border: "none"}}> Delete </button> 
+          
+
+          <button 
+            className={`like ${userLikedPosts.includes(postObject[0].id) ? "liked" : ""}`}
+            onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 1)}>
+            {postLikes.get(postObject[0].id)} Likes</button>
+          <button 
+            className={`dislike ${userDislikedPosts.includes(postObject[0].id) ? "disliked" : ""}`}
+            onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 0)}>
+            {postDislikes.get(postObject[0].id)} Dislikes</button>
+
+            {currentUsername === postObject[0].username ? <div>
+          
+        </div> : <div> </div>}
         </div>
         
+
       </div>
-    
-      <div>
-        <h2> Recommended Posts </h2>
-        {recommendedPosts.length > 0 ? <div>
+
+      <div style={{ display: 'flex' }}>
+        <FourmPostCommentSection />
+        <div className="recommended-posts">
+          
+          {recommendedPosts.length > 0 ? <div>
+            <h2 style={{color: "white"}}> You might also like... </h2>
            {recommendedPosts.map( (post) => (
-            <div>
-              <h3> {post.title} by <a 
+            <div className="recommended-post">
+              <h4> <a 
           style={{textDecoration: 'none'}}
           onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
           onMouseOut={(e) => e.target.style.textDecoration = 'none'}
-          onClick={() => {navigate(`/userProfile/${post.username}`)}}
+          onClick={() => {navigate(`/username/${post.username}`)}}
           >
           {post.username}
-         </a>  @ {new Date(post.post_timestamp).toLocaleString()} </h3>
-              <button onClick={ () => {
+         </a>  ◦ {new Date(post.post_timestamp).toLocaleString()} </h4>
+
+             <h5 style={{fontWeight: "bold"}}> {post.title}</h5>
+              <button style={{backgroundColor: "#3B9EBF", color: "#FFF", border: "none"}} onClick={ () => {
                  navigate(`/forumPost/${post.id}/viewing/${userID}/user`)
                  window.location.reload()
               }}> View Post </button>
             </div>
            ))}
-         </div> : <h3> No similar posts were found </h3>}
-      </div>
-     </div>
+         </div> : <h4> No recommendations found </h4>}
+          
+        </div>
+      </div>       
+   </div>
       : <p> Loading... </p>)
-   )
+       )
 }

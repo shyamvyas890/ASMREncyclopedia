@@ -1,16 +1,18 @@
 body {
   margin: 0;
-  font-family: "Nunito", sans-serif;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
   background-color: black;
   color:white;
 }
+/*
 a{
   color:white;
 }
-
+*/
+/*
 .like,
 .dislike{
   padding: 8px 12px;
@@ -42,3 +44,4 @@ a{
   align-items: center;
   font-size: 9px;
 }
+*/

@@ -1,0 +1,133 @@
+body {
+    background-color: #1e1e1e;
+    color: #fff;
+    font-family: Arial, sans-serif;
+  }
+  
+  .container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    height: 100%; /* Set a minimum height of 100% of the viewport height */
+  }
+  
+  
+  .form {
+    margin-bottom: 20px;
+  }
+  
+  .form label {
+    color: #bbb;
+  }
+  
+  .form input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #333;
+    border: none;
+    color: #fff;
+  }
+  
+  .form input[type="text"]:focus {
+    outline: none;
+  }
+  
+  .form select {
+    padding: 8px;
+    background-color: #333;
+    border: none;
+    color: #fff;
+  }
+  
+  .form button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  .form button:hover {
+    background-color: #45a049;
+  }
+  
+  .feed-posts {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .user-posts-view {
+    margin-top: 20px;
+    background-color: #333;
+    padding: 20px;
+    margin-bottom: 20px;
+    width: 50vw;
+  }
+  
+  .user-posts-view h2 {
+    margin-bottom: 10px;
+  }
+  
+  .user-posts-view p {
+    margin-bottom: 15px;
+  }
+  
+  .user-posts-view a {
+    color: #4CAF50;
+  }
+  
+  .user-posts-view a:hover {
+    text-decoration: underline;
+  }
+  
+  .user-posts-view button {
+    padding: 8px 16px;
+    margin-right: 10px;
+    
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  .user-posts-view button:hover {
+    background-color: #45a049;
+  }
+  
+  .like.liked,
+  .dislike.disliked {
+    background-color: #ff4500;
+  }
+  
+  .like,
+  .dislike {
+    padding: 8px 16px;
+    margin-right: 10px;
+    background-color: #333;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  .like:hover,
+  .dislike:hover {
+    background-color: #4CAF50;
+  }
+
+  .recommended-posts{
+    background-color: #222;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin-left: 20px;
+    text-align: left; 
+    width: 50%;
+    overflow-y: auto;
+  }
+
+  .recommended-post{
+    margin-top: 20px;
+  }
+  
+  

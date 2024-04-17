@@ -3,6 +3,7 @@ import axios from '../utils/AxiosWithCredentials';
 import { useParams } from "react-router-dom"
 import LikeDislikeComponent from "./LikeDislikeComponent"
 import { useNavigate } from "react-router-dom"
+import "../css/forumpostcomment.css"
 export const ForumPostComment = (props) => {
 
     const {postID} = useParams() //ID of the forum post
@@ -20,7 +21,8 @@ export const ForumPostComment = (props) => {
     const [isEditing, setIsEditing] = useState()
     const [commentBody, setCommentBody] = useState(props.body)
     const [editContent, setEditContent] = useState(props.body)
-    const [showReplies, setShowReplies] = useState(true)
+    const [showReplies, setShowReplies] = useState(false)
+    const [showRepliesText, setShowRepliesText] = useState('+')
 
     const singleView = props.singleView
     const showReplyOption = props.replyOption
@@ -146,7 +148,14 @@ export const ForumPostComment = (props) => {
     }
 
     const showReplyStatus = () =>{
+        if(showReplies){
+            setShowRepliesText('+')
+        }
+        else{
+            setShowRepliesText('-')
+        }
         setShowReplies(!showReplies)
+        
         console.log(showReplies)
     }
 
@@ -169,45 +178,44 @@ export const ForumPostComment = (props) => {
     };
 
     return(
-        <div>
-        {props.deleted || isDeleted ? <div><div> Deleted Comment </div> <div style={replyStyle}>
+        <div id='forum-post-comment'>
+           {props.deleted || isDeleted ? <div> <div className="deleted-comment"> [Deleted Comment] </div> <div style={replyStyle}>
              {replies && replies.map && showReplies === true && replies.map( (reply) => (
                <ForumPostComment id = {reply.id} postID = {reply.forum_post_id} username = {reply.username} timestamp = {reply.comment_timestamp} body = {reply.body} userID = {props.userID} deleted={reply.deleted}/>
             ))}
             </div> </div>: 
-            
-        
-        
-        <div>
+
+        <div clasName='forum-post-comment-show'>
           
           <a 
           style={{textDecoration: 'none'}}
           onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
           onMouseOut={(e) => e.target.style.textDecoration = 'none'}
-          onClick={() => {navigate(`/userHistory/${props.username}`)}}
+          onClick={() => {navigate(`/username/${props.username}`)}}
           >
           {props.username}
-         </a>  @ {new Date(props.timestamp).toLocaleString()}: {props.body}
+         </a>  ◦ {new Date(props.timestamp).toLocaleString()} <br></br> {props.body}
 
-         {isEditing ? (<div> <input value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button onClick={handleEditCancel}> Cancel Edit </button> <button onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
+         {isEditing ? (<div> <textarea value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button style={{border: "none"}} onClick={handleEditCancel}> Cancel Edit </button> <button style={{border: "none"}} onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
 
-            {showReplyOption !== false && (<button onClick={() => handleReply(props.id)}> Reply to {props.username} </button>)}
+            {showReplyOption !== false && (<button style={{border: "none"}} className='reply-option-button' onClick={() => handleReply(props.id)}> Reply to {props.username} </button>) }
             
+            <button className='show-replies-button' onClick={showReplyStatus}> {showRepliesText} </button>
             <button 
                 className={`like ${userLikedComments ? "liked" : ""}`} 
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 1)}>
                 {commentLikes} Likes
             </button>
             <button
-                className={`dislike ${userDislikedComments ? "disliked" : ""}`}
+                className={`dislike ${userDislikedComments ? "disliked" : ""}`} 
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 0)}>
                 {commentDislikes} Dislikes
             </button>
             {currentUsername === commenterUsername && !singleView? (<div>
-              <button onClick={setIsEditing}> Edit Comment </button> <button onClick={handleDeleteComment}> Delete Comment </button> </div>
+              <button style={{border: "none"}} onClick={setIsEditing}> Edit </button> <button style={{border: "none"}} onClick={handleDeleteComment}> Delete </button> </div>
             ) : <div></div>}
             
-            <button onClick={showReplyStatus}> + </button>
+            
 
             <div style={replyStyle}>
             
@@ -219,14 +227,15 @@ export const ForumPostComment = (props) => {
 
             {(isReplying && replyCommentID === props.id && (
                 <div>
-                   <input type="text" value={replyText} placeholder="Reply here" onChange={ (event) => {setReplyText(event.target.value)}} />
-                   <button onClick={() => {postReply()}}> Reply </button>
-                   <button onClick={() => {setIsReplying(false)}}> Cancel Reply </button>
+                   <textarea type="text" value={replyText} placeholder="What do you think about that?" onChange={ (event) => {setReplyText(event.target.value)}} />
+                   <button onClick={() => {postReply()}} className='confirm-reply-button'> Reply </button>
+                   <button onClick={() => {setIsReplying(false)}} className='cancel-reply-button'> Cancel </button>
                 </div>)
             )}
         </div>}
-        
-        
         </div>
+        
+        
+        
     )
 }

@@ -433,17 +433,20 @@ const fetchAllCommentsLikesAndDislikes = async (commentID) => {
     ) : (
         <>
             <form onSubmit={sortForumPosts}>
-                <select onChange={(e) => setSortType(e.target.value)}>
+                <select style={{padding: "8px", backgroundColor: "#333", border: "none", color: "#fff"}} onChange={(e) => setSortType(e.target.value)}>
                     <option value="none"> Sort posts by... </option>
                     <option value="1"> Newest to Oldest </option>
                     <option value="2"> Oldest To Newest </option>
                 </select>
-                <button type="submit"> Sort </button>
+                <button style={{padding: "8px 16px", backgroundColor: "#4CAF50",  border: "none",color: "#fff",cursor: "pointer",marginLeft: "10px"}} type="submit"> Sort </button>
             </form>
 
             {forumPosts.map(post => (
-                <div key={post.id}>
-                    <h2>{post.title} by {post.username} @ {new Date(post.post_timestamp).toLocaleString()}</h2>
+                <div key={post.id} style={{marginTop: "20px", backgroundColor: "#333",
+                 padding: "20px",
+                 marginBottom: "20px"}}>
+                    <h2>{post.username} ◦ {new Date(post.post_timestamp).toLocaleString()}</h2>
+                    <h4 style={{fontWeight: "bold"}}> {post.title}</h4>
                     <p>{post.body}</p>
                     <div>
                       <div>
@@ -453,7 +456,7 @@ const fetchAllCommentsLikesAndDislikes = async (commentID) => {
                           </div>
                         ))}
                       </div>
-                    <button onClick={() => navigate(`/forumPost/${post.id}/viewing/${userID}/user`)}>
+                    <button style={{backgroundColor: "#3B9EBF", color: "#FFF", padding: "8px 16px", border: "none"}} onClick={() => navigate(`/forumPost/${post.id}/viewing/${userID}/user`)}>
                         View Post
                     </button>
                     </div>

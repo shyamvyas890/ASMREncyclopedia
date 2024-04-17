@@ -53,51 +53,35 @@ const LoginComponent = (props) => {
   return (
     <div>
         {props.isLoggedIn?(
-            <div className="login-info">
+            <div>
              <h3>Welcome, {props.username}!</h3>
              <button onClick={handleLogout}>Logout</button>
             </div>
 
         ) :props.isLoggedIn===false? (
-        
-          <div className="container">
-          <div className="body d-md-flex align-items-center justify-content-between">
-            <div className="box-1 mt-md-0 mt-5">
-              <img src="https://images.pexels.com/photos/2033997/pexels-photo-2033997.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"/>
-            </div>
-            <div className=" box-2 d-flex flex-column h-100">
-              <div className="mt-5">
-                <p className="mb-1 h-1"> ASMR Encyclopedia </p>
-                <p className="mb-2"> Experience ASMR today.</p>
-                <div className="d-flex flex-column ">
-                  
-                  <div className="align-items-center">
-                   <form onSubmit={handleLogin}>
-                     <input type="text" placeholder="Username" value={props.username} onChange={(e) => props.setUsername(e.target.value)} />
-                     <br />
-                     <input type="password" placeholder='Password' name="passwordInput"/>
-                     <br />
-                     <button className="btn btn-primary" type="submit">Login</button>
-                   </form>
 
-                  </div>
-                </div>
-              </div>
-    
-              <p className="after-text"> Connect with ASMR enthusiasts around the world.</p>
-              <p className="after-text"> Share videos and create posts to discuss ASMR. </p>
 
-              <p className="after-text"> Don't have an account? <Link to="/register"> Register Here! </Link></p>
-              {feedback && (feedback==="Your password is incorrect." || feedback==="This username does not exist." || feedback==="Error logging in.") && <p style={{color:'red'}}>{feedback}</p>}
-              {feedback && feedback ==="Login Successful" && <p style={{color:'green'}}>{feedback}</p>}
-            </div>
-            <span className="fas fa-times" />
+          <div className='login-container'>
+          <div className='login-form-container'>
+            <div className='websiteTitle'> ASMR Encyclopedia </div>
+            <form onSubmit={handleLogin}>
+              <input type="text" placeholder="Username" value={props.username} onChange={(e) => props.setUsername(e.target.value)} />
+              <input type="password" placeholder='Password' name="passwordInput"/>
+              <button type="submit">Login</button>
+            </form>
           </div>
+          <div className='link-container'>
+            <p>Don't have an account? <Link to="/register">Register Here!</Link></p>
+          </div>
+          {feedback && feedback ==="Login Successful" && <p className='feedback-message' style={{color:'green'}}>{feedback}</p>}
         </div>
+
         ):null
         }
 
     </div>
   );
+
+  ;
 };
 export default LoginComponent;

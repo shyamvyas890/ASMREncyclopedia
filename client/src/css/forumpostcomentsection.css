@@ -1,0 +1,86 @@
+
+
+.comment-section-container {
+    background-color: #222;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin: 0;
+    text-align: left; 
+    width: 50%;
+    overflow-y: auto;
+  }
+  
+  .form-container {
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  
+  .sort-form label {
+    color: #bbb;
+  }
+  
+  .sort-form{
+    display: flex; 
+    align-items: center; 
+  }
+
+  .sort-form input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #333;
+    border: none;
+    color: #fff;
+  }
+  
+  .sort-form input[type="text"]:focus {
+    outline: none;
+  }
+  
+  .sort-form select {
+    padding: 8px;
+    background-color: #333;
+    border: none;
+    color: #fff;
+  }
+  
+  .sort-form button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    margin-left: 10px;
+  }
+  
+  .sort-form button:hover {
+    background-color: #45a049;
+  }
+  
+  .sort-form{
+    width: 50%;
+  }
+  .comment {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .comment textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border-radius: 5px;
+    resize: none;
+  }
+
+  .comment-button{
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  
+  

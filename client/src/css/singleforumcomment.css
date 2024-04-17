@@ -1,0 +1,15 @@
+#single-forum-comment .single-comment{
+    margin-top: 20px;
+}
+
+#single-forum-comment .view-all-comments-button{
+    background-color: #4CAF50;
+    color: white;
+    margin-top: 10px;
+}
+
+#single-forum-comment .view-parent-button{
+    background-color: #3B9EBF; 
+    color: white;
+    margin-top: 10px;
+}

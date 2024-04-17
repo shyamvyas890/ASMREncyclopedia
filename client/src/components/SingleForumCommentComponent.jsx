@@ -2,7 +2,8 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import { useNavigate, useParams } from "react-router-dom"
 import { ForumPostComment } from "./ForumPostComment"
-
+import NavigationComponent from "./Navigation"
+import "../css/singleforumcomment.css"
 export const SingleForumCommentComponent = () => {
     const { forumPostCommentID } = useParams()
     const [forumPostComment, setForumPostComment] = useState()
@@ -92,9 +93,13 @@ export const SingleForumCommentComponent = () => {
     }
 
     return (
-        <div>
+        <div id='single-forum-comment'>
+            <div>
+                <NavigationComponent />
+            </div>
+
             {forumPostComment && (
-                <div>
+                <div className='single-comment'>
                     <ForumPostComment
                         id={forumPostComment.id}
                         postID={forumPostComment.forum_post_id}
@@ -112,11 +117,11 @@ export const SingleForumCommentComponent = () => {
                     
                     {enableViewParent && (
                         <div>
-                            <button onClick={handleViewParentComment}> View Parent Comment </button>
+                            <button className='view-parent-button' onClick={handleViewParentComment}> View Parent Comment </button>
                         </div>
                     )}
 
-                    <div> <button onClick={ () => navigate(`/forumPost/${forumPostComment.forum_post_id}/viewing/${currentUserID}/user`)}> View All Comments </button> </div>
+                   <button className='view-all-comments-button'onClick={ () => navigate(`/forumPost/${forumPostComment.forum_post_id}/viewing/${currentUserID}/user`)}> View All Comments </button> 
                 </div>
             )}
         </div>

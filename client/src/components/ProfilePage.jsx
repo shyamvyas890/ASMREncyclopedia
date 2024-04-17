@@ -3,6 +3,7 @@ import axios from '../utils/AxiosWithCredentials';
 import { useNavigate, useParams } from "react-router-dom";
 import { axiosRequest } from "../utils/utils";
 import { UserProfileComponent } from "./UserProfileComponent";
+import NavigationComponent from "./Navigation";
 
 const ProfilePageComponent = ()=>{
     const hostname= "http://localhost:3001";
@@ -86,25 +87,32 @@ const ProfilePageComponent = ()=>{
     }
     
     return (
-        
-            username!==null && profileUsername!==null && <>
-            <div>{theirUsername}</div>
-            {friendStatus!==null && friendStatus!==4 && <>
-                {friendStatus===0? <button onClick={handleAddFriend}>Add Friend</button> : 
-                friendStatus===1? <button onClick={handleUnfriend}>Unfriend</button> : 
-                friendStatus===2? <button onClick={handleCancelFriendRequest}>Cancel Friend Request</button>: 
-                <div>
-                    <button onClick={handleAcceptFriendRequest}>✅</button>
-                    <button onClick={handleDeclineFriendRequest}>❌</button>
-                </div>
-                }
-            </>}
-            <div>
-                <UserProfileComponent />
-            </div>        
-            </> 
-    
-    )
+        <div>
+            <NavigationComponent />
+            {username !== null && profileUsername !== null && (
+                <>
+                    <div>{theirUsername}</div>
+                    {friendStatus !== null && friendStatus !== 4 && (
+                        <>
+                            {friendStatus === 0 ? (
+                                <button onClick={handleAddFriend}>Add Friend</button>
+                            ) : friendStatus === 1 ? (
+                                <button onClick={handleUnfriend}>Unfriend</button>
+                            ) : friendStatus === 2 ? (
+                                <button onClick={handleCancelFriendRequest}>Cancel Friend Request</button>
+                            ) : (
+                                <div>
+                                    <button onClick={handleAcceptFriendRequest}>✅</button>
+                                    <button onClick={handleDeclineFriendRequest}>❌</button>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </>
+            )}
+            <UserProfileComponent />
+        </div>
+    );    
 }
 
 export default ProfilePageComponent;

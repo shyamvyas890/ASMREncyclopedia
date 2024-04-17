@@ -3,7 +3,7 @@ import axios from '../utils/AxiosWithCredentials';
 import { ForumPostComment } from "./ForumPostComment"
 import { useParams } from "react-router-dom"
 import {LikeDislikeComponent} from "./LikeDislikeComponent"
-
+import "../css/forumpostcomentsection.css"
 //props contains ID of forum post and current username
 export const FourmPostCommentSection = (props) => {
    const {postID} = useParams()
@@ -12,8 +12,7 @@ export const FourmPostCommentSection = (props) => {
    const [commentText, setCommentText] = useState()
    const [username, setUsername] = useState()
    const [sorted, setSorted] = useState()
-
-
+   
    const [sortType, setSortType] = useState()
    //gets the username of the current user
    useEffect( () => {
@@ -137,30 +136,48 @@ export const FourmPostCommentSection = (props) => {
 
     //console.log(parentCommentsObject)
     //for each parent comment, render a ForumPostComment 
-   return (<div>
-    Comments for post {props.forumPostID}
+   return (
 
-    <form onSubmit={sortForumPostComments}>
-     <select onChange={(e) => setSortType(e.target.value)}>
-      <option value="none"> Sort Comments by... </option>
-      <option value="1"> Oldest to Newest (Default) </option>
-      <option value="2"> Newest to oldest </option>
-      <option value="3"> Most Liked to Least Liked </option>
-      <option value="4"> Least Liked to Most Liked </option>
-     </select>
-     <button> Sort </button>
-    </form>
-
-
-    {parentCommentsObject && parentCommentsObject.map( (parentComment) => (
-      <ForumPostComment id = {parentComment.id} postID={parentComment.forumPostID} username={parentComment.username} timestamp={parentComment.comment_timestamp} body = {parentComment.body} userID = {userID} deleted={parentComment.deleted}/>
-      
-    ))}
-
-
-    <div>
-         <input type="text" value={commentText} placeholder="Comment here" autoComplete="off" onChange={ (event) => {setCommentText(event.target.value)}} />
-         <button onClick={addParentComment}> Add Comment </button>
-    </div>
-   </div>)
+   <div className="comment-section-container">
+     
+       <form className="sort-form" onSubmit={sortForumPostComments}>
+         <select onChange={(e) => setSortType(e.target.value)}>
+           <option value="none">Sort By...</option>
+           <option value="1">Oldest to Newest (Default)</option>
+           <option value="2">Newest to oldest</option>
+           <option value="3">Most Liked to Least Liked</option>
+           <option value="4">Least Liked to Most Liked</option>
+         </select>
+         <button>Sort</button>
+       </form>
+     
+   
+     {parentCommentsObject && parentCommentsObject.map((parentComment) => (
+       <div className="comment" key={parentComment.id}>
+         <ForumPostComment
+           id={parentComment.id}
+           postID={parentComment.forumPostID}
+           username={parentComment.username}
+           timestamp={parentComment.comment_timestamp}
+           body={parentComment.body}
+           userID={userID}
+           deleted={parentComment.deleted}
+         />
+       </div>
+     ))}
+   
+     <div className="comment">
+       <textarea
+         type="text"
+         value={commentText}
+         placeholder="What do you think?"
+         autoComplete="off"
+         onChange={(event) => {
+           setCommentText(event.target.value);
+         }}
+       />
+       <button className='comment-button' onClick={addParentComment}> Comment </button>
+     </div>
+   </div>
+   )
 }
