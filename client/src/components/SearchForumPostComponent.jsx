@@ -3,19 +3,18 @@ import { useParams } from "react-router-dom"
 import { useState } from "react"
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-export const SearchForumPostComponent = () =>{
+export const SearchForumPostComponent = (props) =>{
     const navigate = useNavigate()
-    const {searchTitle} = useParams()
+    const searchTitle = props.searchTitle
     const [searchResults, setSearchResults] = useState([])
     const [currentUsername, setCurrentUsername] = useState()
     const [currentUserID, setCurrentUserID] = useState()
    
     //gets the username of the current user
     useEffect( () => {
-        const token = localStorage.getItem("token")
         const fetchUsername = async () => {
             try {
-              const response = await axios.get(`http://localhost:3001/verify-token/${token}`);
+              const response = await axios.get(`http://localhost:3001/verify-token`);
               setCurrentUsername(response.data.username);
             } catch (error) {
               console.log(error);

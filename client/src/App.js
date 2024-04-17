@@ -22,6 +22,7 @@ import { ViewUserPlaylistComponent } from './components/ViewUserPlaylistComponen
 import { SingleForumCommentComponent } from './components/SingleForumCommentComponent.jsx';
 import NotificationsComponent from './components/Notifications.jsx';
 import "./App.css"
+import SearchCombinedComponent from './components/SearchCombined.jsx';
 function App() {
   return (
     <div className="App">
@@ -33,13 +34,14 @@ function App() {
             <Route path="/forums" element={<ForumComponent/>}/>
             <Route path="/forumPosts" element={<AllForumPostComponent />} />
             <Route path="/forumPost/:postID/viewing/:userID/user" element={<ViewForumPostComponent />} />
-            <Route path="/forumPost/search_by/:searchTitle" element={<SearchForumPostComponent />} />
+            {/* <Route path="/forumPost/search_by/:searchTitle" element={<SearchForumPostComponent />} /> */}
             <Route path="/friends" element= {<FriendsComponent />}/>
             <Route path="/messages" element= {<ChatComponent />}/>
             <Route path="/settings" element= {<SettingsComponent />} />
             <Route path="/video/:VideoPostId" element={<VideoPostWithCommentsComponent />} />
             <Route path="/username/:ProfileUsername" element={<ProfilePageComponent />} />
-            <Route path="/search/videos/:keyword" element={<SearchVideosComponent />} />
+            {/* <Route path="/search/videos/:keyword" element={<SearchVideosComponent />} /> */}
+            <Route path="/search/:keyword" element={<SearchCombinedComponent />} />
             <Route path="/random" element={<RandomVideoComponent />}/>
             <Route path= "/SingleVideoComment/:VideoPostCommentId" element={<SingleVideoCommentComponent />} />
             <Route path= "/singleForumComment/:forumPostCommentID" element={<SingleForumCommentComponent />} />

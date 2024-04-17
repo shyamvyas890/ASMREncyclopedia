@@ -3,8 +3,8 @@ import axios from '../utils/AxiosWithCredentials';
 import { useNavigate, useParams } from "react-router-dom";
 import { axiosRequest, hostname } from "../utils/utils";
 import PostComponent from "./Post";
-const SearchVideosComponent = ()=>{
-    const [keyword, setKeyword] = React.useState(useParams().keyword);
+const SearchVideosComponent = (props)=>{
+    const [keyword, setKeyword] = React.useState(props.keyword);
     const [username, setUsername] = useState(null);
     const [userIdOfCurrentUser, setUserIdOfCurrentUser]= useState(null);
     const [videoPostsAndRatings, setVideoPostsAndRatings] = useState(null);
@@ -25,7 +25,6 @@ const SearchVideosComponent = ()=>{
             navigate("/")
             console.log(error);
         }
-
     }
 
     const fetchVideoPosts = async ()=>{
