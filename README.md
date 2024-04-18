@@ -17,7 +17,7 @@ Welcome to the ASMR Encyclopedia, a meticulously crafted social media platform f
   - [Account Settings](#account-settings)
   - [Random Video Option](#random-video)
   - [Real Time Notification System](#notifications)
-  - [Playlists] (#playlists)
+  - [Playlists](#playlists)
   - [Profile Page](#profile-page)
   - [About Us](#about-us-page)
 
