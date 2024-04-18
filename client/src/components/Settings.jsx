@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from "react-router-dom";
 import { axiosRequest } from "../utils/utils";
+import settingsHome from '../css/settingsHome.module.css';
+import settingsEmail from "../css/settingsEmail.module.css";
+import settingsForumPreferences from "../css/settingsForumPreferences.module.css"
+import settingsChangePassword from "../css/settingsChangePassword.module.css"
+import settingsAccountDeletion from "../css/settingsAccountDeletion.module.css"
 const SettingsComponent = ()=>{
     const hostname= "http://localhost:3001";
     const [username, setUsername]= React.useState(null);
@@ -237,172 +242,151 @@ const SettingsComponent = ()=>{
         <React.Fragment>
             {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)? 
                 (<>
-                    <div>Your Current Settings</div>
-                    <div>Email</div>
-                    <div>{emailAndSubscriptionPreferences.email===null? "No email provided":emailAndSubscriptionPreferences.email}</div>
-                    <button onClick={changeEditEmail}>{emailAndSubscriptionPreferences.email===null? "Add email": "Change email"}</button>
-                    <div>Video Subscription Preferences</div>
-                    <div>{emailAndSubscriptionPreferences.videoSubscriptionOnly.length===0? "All Genres": emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only===1?"Only These Genres": "All Genres Except These:"}</div>
-                    {emailAndSubscriptionPreferences.videoSubscriptionOnly.length!==0 && (emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only===1 || emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only===0) &&
-                    emailAndSubscriptionPreferences.videoSubscriptions.map((genre, index)=>(
-                        <div key={index}>{genre.GenreName}</div>
-                    ))}
-                    <button onClick={changeEditSubscriptionPreferences}>Update Video Subscription Preferences</button>
-                    
-                    <div>Forum Subscription Preferences</div>
-                     
-                    <div>{emailAndSubscriptionPreferences.forumSubscriptionOnly.length===0? "All Genres": emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===1?"Only These Tags": "All Genres Except These:"}</div>
-                    {emailAndSubscriptionPreferences.forumSubscriptionOnly.length!==0 && (emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===1 || emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===0) &&
-                    emailAndSubscriptionPreferences.forumSubscriptions.map((tag, index)=>(
-                        <div key={index}>{tag.ForumTagName}</div>
-                    ))}
-                    <button onClick={changeEditForumSubscriptionPreferences}>Update Forum Post Subscription Preferences</button>
-                    <div>Security</div>
-                    <button onClick={changeEditPassword}>Change Password</button>
-                    <button style={{color:"red"}} onClick={changeEditDeleteAccount}>Delete Account</button>
-                </>
+                    <div className={settingsHome.container}>
+                      <div className={settingsHome.settingsItem}>
+                        <h1>Your Current Settings</h1>
+                        <h2>Email</h2>
+                        <h3>{emailAndSubscriptionPreferences.email === null ? "No email provided" : emailAndSubscriptionPreferences.email}</h3>
+                        <button className={settingsHome.button} onClick={changeEditEmail}>{emailAndSubscriptionPreferences.email === null ? "Add email" : "Change email"}</button>
+                      </div>
+                  
+                      <div className={settingsHome.settingsItem}>
+                        <h2>Video Subscription Preferences</h2>
+                        <h3>{emailAndSubscriptionPreferences.videoSubscriptionOnly.length === 0 ? "All Genres" : emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only === 1 ? "Only These Genres" : "All Genres Except These:"}</h3>
+                        {emailAndSubscriptionPreferences.videoSubscriptionOnly.length !== 0 && (emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only === 1 || emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only === 0) &&
+                          emailAndSubscriptionPreferences.videoSubscriptions.map((genre, index) => (
+                            <div key={index}>{genre.GenreName}</div>
+                          ))}
+                        <button className={settingsHome.button} onClick={changeEditSubscriptionPreferences}>Update Video Subscription Preferences</button>
+                      </div>
+                  
+                      <div className={settingsHome.settingsItem}>
+                        <h2>Forum Subscription Preferences</h2>
+                        <h3>{emailAndSubscriptionPreferences.forumSubscriptionOnly.length === 0 ? "All Genres" : emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only === 1 ? "Only These Tags" : "All Genres Except These:"}</h3>
+                        {emailAndSubscriptionPreferences.forumSubscriptionOnly.length !== 0 && (emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only === 1 || emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only === 0) &&
+                          emailAndSubscriptionPreferences.forumSubscriptions.map((tag, index) => (
+                            <div key={index}>{tag.ForumTagName}</div>
+                          ))}
+                        <button className={settingsHome.button} onClick={changeEditForumSubscriptionPreferences}>Update Forum Post Subscription Preferences</button>
+                      </div>
+                  
+                      <div className={settingsHome.settingsItem}>
+                        <h2>Security</h2>
+                        <button className={`${settingsHome.button} ${settingsHome.redButton}`} onClick={changeEditPassword}>Change Password</button>
+                        <button className={`${settingsHome.button} ${settingsHome.redButton}`} onClick={changeEditDeleteAccount}>Delete Account</button>
+                      </div>
+                    </div>
+                  </>
                 ):
                 (username && emailAndSubscriptionPreferences && edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)?
                 (
-                    <form onSubmit={editEmail}>
+                    <form onSubmit={editEmail} className={settingsEmail.formContainer}>
                         <label>
-                        Enter the new email.
-                        <input type="email" name="emailInput" />
+                            Enter the new email.
+                            <input type="email" name="emailInput" />
                         </label>
-                        <button type="submit">Save Email</button>
+                        <button type="submit" className={settingsEmail.button}>Save Email</button>
                     </form>
                 ):
                 (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && edit.forumSubscriptionPreferences && !edit.accountDeletion)?
                 (
-                    <form onSubmit={editForumSubscription}>
-                        <style>
-                            {`
-                            .tag {
-                                display: inline-block;
-                                background-color: yellow;
-                                color: black; 
-                                padding: 5px;
-                                margin: 5px;
-                                border-radius: 5px;
-                            }
-                            
-                            .tag-container {
-                                display: inline-block;
-                                padding: 5px;
-                                margin-top: 5px;
-                                border-radius: 5px;
-                            }
-                            `}
-                        </style>
+                    <form onSubmit={editForumSubscription} className={settingsForumPreferences.formContainer}>
                         <div>Which ASMR forum tags do you want to subscribe to?</div>
-                        <label>All Tags
-                            <input type="radio" name="forumSubscriptionQuestion" value="all" onChange={()=>{setForumSubscriptionRadio("all")}} checked={forumSubscriptionRadio==="all"}/>
+                        <label>
+                            <input type="radio" name="forumSubscriptionQuestion" value="all" onChange={() => { setForumSubscriptionRadio("all") }} checked={forumSubscriptionRadio === "all"} />
+                            All Tags
                         </label>
-                        <label>All Tags Except:
-                        <input type="radio" name="forumSubscriptionQuestion" value="except" onChange={()=>{setForumSubscriptionRadio("except")}} checked={forumSubscriptionRadio==="except"}/>
+                        <label>
+                            <input type="radio" name="forumSubscriptionQuestion" value="except" onChange={() => { setForumSubscriptionRadio("except") }} checked={forumSubscriptionRadio === "except"} />
+                            All Tags Except:
                         </label>
-                        <label>Only These Tags:
-                        <input type="radio" name="forumSubscriptionQuestion" value="only" onChange={()=>{setForumSubscriptionRadio("only")}} checked={forumSubscriptionRadio==="only"}/>
+                        <label>
+                            <input type="radio" name="forumSubscriptionQuestion" value="only" onChange={() => { setForumSubscriptionRadio("only") }} checked={forumSubscriptionRadio === "only"} />
+                            Only These Tags:
                         </label>
-                        {(forumSubscriptionRadio==="except" || forumSubscriptionRadio==="only") &&
-                        <>
-                            <label> Enter the tags, separated by commas (or press enter to add a tag)
-                            <br/>
-                            <input className="tag-container" onKeyDown={forumHandleOnKeyDown} />
-                            </label>
-                            <br />
-                            {forumTags.map((tag, index)=>(
-                                <div key={index} className="tag">
+                        {(forumSubscriptionRadio === "except" || forumSubscriptionRadio === "only") &&
+                            <>
+                                <label> Enter the tags, separated by commas (or press enter to add a tag)
+                                    <br />
+                                    <input className={settingsForumPreferences.tagContainer} onKeyDown={forumHandleOnKeyDown} />
+                                </label>
+                                <br />
+                                {forumTags.map((tag, index) => (
+                                    <div key={index} className={settingsForumPreferences.tag}>
                                     {tag}
-                                    <button onClick={(e)=>{handleRemovalOfForumTag(e,tag)}}>&times;</button>
-                                </div>
-                            ))}
-                        </>
+                                    <button onClick={(e) => { handleRemovalOfForumTag(e, tag) }}>&times;</button>
+                                    </div>
+                                ))}
+                            </>
                         }
-                        <button type="submit">Update Subscription Preferences</button>
+                        <button type="submit" className={settingsForumPreferences.button}>Update Subscription Preferences</button>
                     </form>
                 ):
                 (username && emailAndSubscriptionPreferences && !edit.email && edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)?
                 (
-                    <form onSubmit={editSubscription}>
-                        <style>
-                            {`
-                            .tag {
-                                display: inline-block;
-                                background-color: yellow;
-                                color: black; 
-                                padding: 5px;
-                                margin: 5px;
-                                border-radius: 5px;
-                            }
-                            
-                            .tag-container {
-                                display: inline-block;
-                                padding: 5px;
-                                margin-top: 5px;
-                                border-radius: 5px;
-                            }
-                            `}
-                        </style>
+                    <form onSubmit={editSubscription} className={settingsForumPreferences.formContainer}>
                         <div>Which ASMR video genres do you want to subscribe to?</div>
-                        <label>All Genres
+                        <label>
                             <input type="radio" name="subscriptionQuestion" value="all" onChange={()=>{setSubscriptionRadio("all")}} checked={subscriptionRadio==="all"}/>
+                            All Genres
                         </label>
-                        <label>All Genres Except:
+                        <label>
                         <input type="radio" name="subscriptionQuestion" value="except" onChange={()=>{setSubscriptionRadio("except")}} checked={subscriptionRadio==="except"}/>
+                        All Genres Except:
                         </label>
-                        <label>Only These Genres:
+                        <label>
                         <input type="radio" name="subscriptionQuestion" value="only" onChange={()=>{setSubscriptionRadio("only")}} checked={subscriptionRadio==="only"}/>
+                        Only These Genres:
                         </label>
                         {(subscriptionRadio==="except" || subscriptionRadio==="only") &&
                         <>
                             <label> Enter the genres, separated by commas (or press enter to add a genre)
                             <br/>
-                            <input className="tag-container" onKeyDown={handleOnKeyDown} />
+                            <input className={settingsForumPreferences.tagContainer} onKeyDown={handleOnKeyDown} />
                             </label>
                             <br />
                             {videoTags.map((tag, index)=>(
-                                <div key={index} className="tag">
+                                <div key={index} className={settingsForumPreferences.tag}>
                                     {tag}
                                     <button onClick={(e)=>{handleRemovalOfTag(e,tag)}}>&times;</button>
                                 </div>
                             ))}
                         </>
                         }
-                        <button type="submit">Update Subscription Preferences</button>
+                        <button type="submit" className={settingsForumPreferences.button}>Update Subscription Preferences</button>
                     </form>
                 ):
                 (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)?
                 (
-                    <form onSubmit={editPassword}>
+                    <form onSubmit={editPassword} className={settingsChangePassword.formContainer}>
                         <label>
-                        Enter current password.
-                        <input name="currentPassword" type="password" />
+                            Enter current password.
+                            <input name="currentPassword" type="password" />
                         </label>
                         <label>
-                        Enter new password.
-                        <input name="newPassword1" type="password" />
+                            Enter new password.
+                            <input name="newPassword1" type="password" />
                         </label>
                         <label>
-                        Enter new password again.
-                        <input name="newPassword2" type="password" />
+                            Enter new password again.
+                            <input name="newPassword2" type="password" />
                         </label>
-                        <button onClick={()=>{setEdit(prevEdit=>{setErrorMessageForChangingPasswordAndDeletingAccount(""); return {...prevEdit, password: !prevEdit.password};})}}>Cancel</button>
-                        <div style={{color:"red"}}>{errorMessageForChangingPasswordAndDeletingAccount}</div>
-                        <button type="submit"> Change Password</button>
+                        <button type="button" className={settingsChangePassword.cancelButton} onClick={() => { setEdit(prevEdit => { setErrorMessageForChangingPasswordAndDeletingAccount(""); return { ...prevEdit, password: !prevEdit.password }; }) }}>Cancel</button>
+                        <button type="submit">Change Password</button>
+                        <div className={settingsChangePassword.errorMessage}>{errorMessageForChangingPasswordAndDeletingAccount}</div>
                     </form>
                 ):
                 (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && edit.accountDeletion)?
-                (<form onSubmit={tryDeletion}>
-                    <div style={{color:"red"}}>Are you sure you want to do this? This action cannot be undone. If you are sure, enter your password below to confirm this action.</div>
+                (<form onSubmit={tryDeletion} className={settingsAccountDeletion.formContainer}>
+                    <div style={{ color: "red" }}>Are you sure you want to do this? This action cannot be undone. If you are sure, enter your password below to confirm this action.</div>
                     <label>
-                        Enter your current password.
-                        <input name="currentPassword" type="password" />
-                        <button onClick={()=>{setEdit(prevEdit=>{setErrorMessageForChangingPasswordAndDeletingAccount(""); return {...prevEdit, accountDeletion: !prevEdit.accountDeletion};})}}>Cancel</button>
-                        <button type="submit">Delete</button>
-                        <div style={{color:"red"}}>{errorMessageForChangingPasswordAndDeletingAccount}</div>
+                      Enter your current password.
+                      <input name="currentPassword" type="password" />
+                      <button type="button" className={settingsAccountDeletion.button} onClick={() => { setEdit(prevEdit => { setErrorMessageForChangingPasswordAndDeletingAccount(""); return { ...prevEdit, accountDeletion: !prevEdit.accountDeletion }; }) }}>Cancel</button>
+                      <button type="submit" className={settingsAccountDeletion.button}>Delete</button>
+                      <div className={settingsAccountDeletion.errorMessage}>{errorMessageForChangingPasswordAndDeletingAccount}</div>
                     </label>
-                </form>):
+                  </form>):
                 null}
         </React.Fragment>
     )

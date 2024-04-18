@@ -1,0 +1,44 @@
+.formContainer {
+  max-width: 400px; 
+  margin:1rem;
+  font-size: 1.5rem;
+}
+
+.formContainer label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.formContainer input[type="radio"] {
+  margin-right: 5px;
+}
+
+.formContainer button[type="submit"] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.formContainer button[type="submit"]:hover {
+  background-color: #45a049;
+}
+
+.tag {
+  display: inline-block;
+  background-color: yellow;
+  color: black; 
+  padding: 5px;
+  margin: 5px;
+  border-radius: 5px;
+}
+
+.tag-container {
+  display: inline-block;
+  padding: 5px;
+  margin-top: 5px;
+  border-radius: 5px;
+}
