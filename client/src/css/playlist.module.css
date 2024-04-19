@@ -22,8 +22,8 @@ h1 {
 
 .userPlaylistForm input[type="name"] {
     width: 70%;
-    padding: 8px;
-    margin: 5px px;
+    padding: 8px 5px;
+    margin: 2px 5px;
     background-color: #333;
     border: none;
     color: #fff;
@@ -35,8 +35,6 @@ h1 {
     margin-right: 40px;
     padding: 20px;
     margin-bottom: 20px;
-    border-style: solid;
-    border-color: #7876FD;
 }
 
 .userPlaylist h2 {
@@ -82,7 +80,7 @@ h1 {
 .editPlaylistForm input[type="name"] {
     width: 100%;
     padding: 8px;
-    margin: 10px 0;
+    margin: 10px;
     background-color: #333;
     border: none;
     color: #fff;
