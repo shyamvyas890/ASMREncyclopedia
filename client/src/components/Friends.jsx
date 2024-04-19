@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from "react-router-dom";
+import NavigationComponent from "./Navigation";
 
 const FriendsComponent = (props)=>{
     const hostname= "http://localhost:3001";
@@ -83,6 +84,7 @@ const FriendsComponent = (props)=>{
         populateFriends();
     }
     return (isLoggedIn && username && incomingOutgoingFriendRequestsAndFriendships? <React.Fragment>
+            <NavigationComponent />
             <div>Incoming Friend Requests</div>
             {incomingOutgoingFriendRequestsAndFriendships.incomingFriendRequests.map((request, index)=>(
                 <React.Fragment key={index}>

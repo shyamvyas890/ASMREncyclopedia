@@ -7,6 +7,8 @@ import settingsEmail from "../css/settingsEmail.module.css";
 import settingsForumPreferences from "../css/settingsForumPreferences.module.css"
 import settingsChangePassword from "../css/settingsChangePassword.module.css"
 import settingsAccountDeletion from "../css/settingsAccountDeletion.module.css"
+import NavigationComponent from "./Navigation";
+
 const SettingsComponent = ()=>{
     const hostname= "http://localhost:3001";
     const [username, setUsername]= React.useState(null);
@@ -240,6 +242,7 @@ const SettingsComponent = ()=>{
     }
     return (
         <React.Fragment>
+            <NavigationComponent />
             {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)? 
                 (<>
                     <div className={settingsHome.container}>

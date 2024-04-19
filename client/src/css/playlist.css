@@ -1,0 +1,53 @@
+h1 {
+    margin-left: 40px;
+}
+
+.create-playlist-container {
+    width: 30%;
+    margin: 0 auto;
+    padding: 20px;
+    height: 100%;
+}
+
+.user-playlist-container h2 {
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.user-playlist-form {
+    margin-bottom: 20px;
+}
+
+.user-playlist-form input[type="name"] {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #333;
+    border: none;
+    color: #fff;
+}
+
+.user-playlist-form button {
+    padding: 8px 16px;
+    background-color: #3B9EBF;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+.user-playlist-form button:hover {
+    background-color: #358fad;
+}
+
+.user-playlist {
+    background-color: #333;
+    margin-left: 40px;
+    margin-right: 40px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.user-playlist h2 {
+    color: #fff;
+    margin-bottom: 10px;
+}
