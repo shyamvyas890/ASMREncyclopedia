@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import {useNavigate } from "react-router-dom";
 import * as yup from "yup"
 import axios from '../utils/AxiosWithCredentials';
+import NavigationComponent from "./Navigation";
+import "../css/playlist.css"
 
 export const UserPlaylistComponent = ()=>{
     const [currentUsername, setCurrentUsername] = useState()
@@ -113,29 +115,27 @@ export const UserPlaylistComponent = ()=>{
             })
         } catch (error){
             console.log(error)
-
         }
         fetchAllUserPlaylist()
     }
 
     return (
         <div>
+            <NavigationComponent />
+            <div className="create-playlist-container">
+                <h2>Create New Playlist</h2>
+                <form className="user-playlist-form">
+                    <input type="name" placeholder="Playlist Name" value={playlistName} onChange={(event) => { setPlaylistName(event.target.value) }} />
+                    <button onClick={postPlaylistSubmit}>Create</button>
+                </form>
+            </div>
             <h1>Playlists</h1>
-
-            <h2>Create Playlist</h2>
-            <forms>
-                <label> Playlist Name</label>
-                <input type="name" value={playlistName} onChange= {(event) => {setPlaylistName(event.target.value)}}/>
-                <br></br>
-                <button onClick={postPlaylistSubmit}>Create</button>
-            </forms>
-
-            {userPlaylists.map(playlist=>(
+            {userPlaylists.map(playlist => (
                 <div className="user-playlist" key={playlist.PlaylistID}>
                     <h2>{playlist.PlaylistName}</h2>
-                    <button onClick={()=> navigate(`/userPlaylists/${playlist.PlaylistID}/viewing/${currentUserID}/user`)}> View Playlist </button>
-                    <button onClick={()=>{deletePlaylist(playlist.PlaylistID)}}>delete</button>
-                    <button onClick={()=>toggleModal(playlist.PlaylistID)} className="btn-Modal">Edit Name</button>
+                    <button onClick={() => navigate(`/userPlaylists/${playlist.PlaylistID}/viewing/${currentUserID}/user`)} className="btn btn-primary"> View Playlist </button>
+                    <button onClick={() => toggleModal(playlist.PlaylistID)} className="btn btn-primary">Edit Name</button>
+                    <button onClick={() => { deletePlaylist(playlist.PlaylistID)}} className="btn btn-danger">Delete</button>
                 </div>
             ))}
             {modal && (
@@ -143,8 +143,8 @@ export const UserPlaylistComponent = ()=>{
                     <div onClick={toggleModal} className="overlay"></div>
                     <div className="modal-content">
                         <div className="edit-playlist">
-                        <label> Playlist Name</label>
-                            <input type="name" value={editName} onChange= {(event) => {setEditName(event.target.value)}}/>
+                            <label>Playlist Name</label>
+                            <input type="name" value={editName} onChange={(event) => { setEditName(event.target.value) }} />
                             <br></br>
                             <button onClick={editPlaylistSubmit}>Edit</button>
                         </div>
@@ -152,6 +152,6 @@ export const UserPlaylistComponent = ()=>{
                     </div>
                 </div>
             )}
-    </div>
+        </div>
     )
-} 
+}

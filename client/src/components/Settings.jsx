@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from "react-router-dom";
 import { axiosRequest } from "../utils/utils";
+import NavigationComponent from "./Navigation";
+
 const SettingsComponent = ()=>{
     const hostname= "http://localhost:3001";
     const [username, setUsername]= React.useState(null);
@@ -235,6 +237,7 @@ const SettingsComponent = ()=>{
     }
     return (
         <React.Fragment>
+            <NavigationComponent />
             {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)? 
                 (<>
                     <div>Your Current Settings</div>
