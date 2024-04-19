@@ -1,15 +1,19 @@
-#single-forum-comment .single-comment{
+.single-comment{
     margin-top: 20px;
 }
 
-#single-forum-comment .view-all-comments-button{
+.view-all-comments-button{
     background-color: #4CAF50;
     color: white;
     margin-top: 10px;
+    border: none;
+    border-radius: 25px;
 }
 
-#single-forum-comment .view-parent-button{
+ .view-parent-button{
     background-color: #3B9EBF; 
     color: white;
     margin-top: 10px;
+    border: none;
+    border-radius: 25px;
 }

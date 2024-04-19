@@ -1,0 +1,10 @@
+.deleted-comment{
+    font-weight: bold;
+}
+
+.reply-option-button{
+    background-color:#3B9EBF;
+    color: #fff;
+    border: "none";
+    border-radius: 25px;
+}

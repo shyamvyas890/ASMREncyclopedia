@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import axios from '../utils/AxiosWithCredentials';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import "../css/addvideopost.css"
+import AddVideoPostCSS from"../css/addvideopost.module.css"
 
 const AddVideoPostComponent = (props)=>{
     const hostname= "http://localhost:3001";
@@ -90,43 +90,28 @@ const AddVideoPostComponent = (props)=>{
     }
     return (
       <div>
-        <h3> Add a new video! </h3>
         <form onSubmit={handleSubmit}>
-            <style>
-                {`
-                   .tag {
-                    display: inline-block;
-                    background-color: yellow;
-                    color: black; 
-                    padding: 5px;
-                    margin: 5px;
-                    border-radius: 5px;
-                  }
-                  
-                 
-                `}
-            </style>
           
-            <input ref={titleRef} type="text" placeholder="Post Title" />
+            <input className={AddVideoPostCSS['video-title']}    ref={titleRef} type="text" placeholder="Title" />
           
             <br />
          
-            <input ref={linkRef} type="text" placeholder="YouTube Video Link"/>
+            <input className={AddVideoPostCSS['video-link']} ref={linkRef} type="text" placeholder="Link to Video"/>
             
             <br />
             
                 
-            <input className="tag-container" ref={tagRef} onKeyDown={handleOnKeyDown} placeholder="Press 'Enter' to add tag(s)" />
+            <input className={AddVideoPostCSS['video-post-add-tag']} ref={tagRef} onKeyDown={handleOnKeyDown} placeholder="Press 'Enter' to add tag(s)" />
             
             <br />
             {videoTags.map((tag, index)=>(
-                    <div key={index} className="tag">
+                    <div key={index}>
                         {tag}
-                        <button onClick={(e)=>{handleRemovalOfTag(e,tag)}}>&times;</button>
+                        <button className={AddVideoPostCSS['tag-button']} onClick={(e)=>{handleRemovalOfTag(e,tag)}}> x </button>
                     </div>
                 ))}
             <div style={{color:"red"}}>{errorMessage}</div>
-            <button type="submit" className="btn btn-primary"> Post </button>
+            <button  type="submit" className={AddVideoPostCSS['video-post-button']}> Post </button>
         </form>
     </div>
     )

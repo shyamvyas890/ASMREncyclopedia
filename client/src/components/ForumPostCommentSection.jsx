@@ -3,7 +3,7 @@ import axios from '../utils/AxiosWithCredentials';
 import { ForumPostComment } from "./ForumPostComment"
 import { useParams } from "react-router-dom"
 import {LikeDislikeComponent} from "./LikeDislikeComponent"
-import "../css/forumpostcomentsection.css"
+import ForumPostCommentSectionCSS from "../css/forumpostcomentsection.module.css"
 //props contains ID of forum post and current username
 export const FourmPostCommentSection = (props) => {
    const {postID} = useParams()
@@ -138,9 +138,9 @@ export const FourmPostCommentSection = (props) => {
     //for each parent comment, render a ForumPostComment 
    return (
 
-   <div className="comment-section-container">
+   <div className={ForumPostCommentSectionCSS["comment-section-container"]}>
      
-       <form className="sort-form" onSubmit={sortForumPostComments}>
+       <form className={ForumPostCommentSectionCSS["sort-form"]} onSubmit={sortForumPostComments}>
          <select onChange={(e) => setSortType(e.target.value)}>
            <option value="none">Sort By...</option>
            <option value="1">Oldest to Newest (Default)</option>
@@ -153,7 +153,7 @@ export const FourmPostCommentSection = (props) => {
      
    
      {parentCommentsObject && parentCommentsObject.map((parentComment) => (
-       <div className="comment" key={parentComment.id}>
+       <div className={ForumPostCommentSectionCSS["comment"]} key={parentComment.id}>
          <ForumPostComment
            id={parentComment.id}
            postID={parentComment.forumPostID}
@@ -166,7 +166,7 @@ export const FourmPostCommentSection = (props) => {
        </div>
      ))}
    
-     <div className="comment">
+     <div className={ForumPostCommentSectionCSS["comment"]}>
        <textarea
          type="text"
          value={commentText}
@@ -176,7 +176,7 @@ export const FourmPostCommentSection = (props) => {
            setCommentText(event.target.value);
          }}
        />
-       <button className='comment-button' onClick={addParentComment}> Comment </button>
+       <button className={ForumPostCommentSectionCSS['comment-button']} onClick={addParentComment}> Comment </button>
      </div>
    </div>
    )

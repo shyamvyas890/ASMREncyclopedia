@@ -1,0 +1,51 @@
+.forum-post-comment-show .show-replies-button{
+    border-radius: 10px;
+}
+
+.deleted-comment{
+    font-weight: bold;
+}
+  
+ .show-replies-button{
+    border-radius: 25px;
+    color: #fff;
+    background-color:#3B9EBF;
+    margin-left: 5px;
+}
+
+.reply-option-button{
+    background-color:#3B9EBF;
+    color: #fff;
+    border: "none";
+    border-radius: 25px;
+}
+
+.confirm-reply-button{
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 16px;
+}
+
+.cancel-reply-button{
+    background-color: red;
+    color: white;
+    padding: 8px 16px;
+}
+
+.edit-button{
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.delete-button{
+    padding: 8px 16px;
+    background-color: red;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    margin-right: 10px;
+}

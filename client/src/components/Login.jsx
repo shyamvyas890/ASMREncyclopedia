@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from '../utils/AxiosWithCredentials';
-import "../css/login.css"
+import LoginCSS from "../css/login.module.css"
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const LoginComponent = (props) => {
@@ -53,24 +53,23 @@ const LoginComponent = (props) => {
   return (
     <div>
         {props.isLoggedIn?(
-            <div>
-             <h3>Welcome, {props.username}!</h3>
-             <button onClick={handleLogout}>Logout</button>
-            </div>
-
+          <div className="login-info">
+          <h3>Welcome, {props.username}!</h3>
+          <button onClick={handleLogout}>Logout</button>
+         </div>
         ) :props.isLoggedIn===false? (
 
 
-          <div className='login-container'>
-          <div className='login-form-container'>
-            <div className='websiteTitle'> ASMR Encyclopedia </div>
-            <form onSubmit={handleLogin}>
-              <input type="text" placeholder="Username" value={props.username} onChange={(e) => props.setUsername(e.target.value)} />
-              <input type="password" placeholder='Password' name="passwordInput"/>
-              <button type="submit">Login</button>
+          <div className={LoginCSS['login-container']}>
+          <div className={LoginCSS['login-form-container']}>
+            <div className={LoginCSS['websiteTitle']}> ASMR Encyclopedia </div>
+            <form className={LoginCSS['login-form']} onSubmit={handleLogin}>
+              <input className={LoginCSS['login-form-username']} type="text" placeholder="Username" value={props.username} onChange={(e) => props.setUsername(e.target.value)} />
+              <input className={LoginCSS['login-form-password']} type="password" placeholder='Password' name="passwordInput"/>
+              <button className={LoginCSS['login-form-button']} type="submit">Login</button>
             </form>
           </div>
-          <div className='link-container'>
+          <div className={LoginCSS['link-container']}>
             <p>Don't have an account? <Link to="/register">Register Here!</Link></p>
           </div>
           {feedback && feedback ==="Login Successful" && <p className='feedback-message' style={{color:'green'}}>{feedback}</p>}

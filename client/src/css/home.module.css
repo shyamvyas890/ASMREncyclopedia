@@ -10,14 +10,33 @@ body{
   position: relative;
 }
 
-.add-video {
-  border-bottom: 1px solid #657786;
-  border-right: 1px solid #657786;
-  width: 25vw;
-  border-top: 1px solid #657786;
-  margin-top: 50px;
+.container {
+  width: 50%;
+  margin: 0 auto;
+  padding: 20px;
+  height: 100%; /* Set a minimum height of 100% of the viewport height */
 }
 
+.video-post-sort-form{
+  margin-bottom: 20px;
+}
+
+.video-post-sort-form-select {
+  padding: 8px;
+  background-color: #333;
+  border: none;
+  color: #fff;
+}
+
+.video-post-sort-button{
+
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    margin-left: 10px;
+}
 .video-post-feed{
   margin-top: 10px;
 }
@@ -26,7 +45,12 @@ body{
     height: 50px;
   }
   
-
+  .feed-posts {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+  }
+  
   /* Media query for responsiveness */
   @media (max-width: 768px) {
     .navbar {

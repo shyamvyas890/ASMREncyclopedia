@@ -1,41 +1,25 @@
 body {
     background-color: #1e1e1e;
     color: #fff;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-family: Arial, sans-serif;
   }
   
   .container {
-    width: 50%;
-    margin: 0 auto;
+    width: 80%;
     padding: 20px;
     height: 100%; /* Set a minimum height of 100% of the viewport height */
   }
-    
-  .tag-container{
-     display: flex;  
-  }
   
-  .tag{
-    width: 50px;
-    height: 50px;
-  }
-
-  #tag-button{
-    width: 40px;
-    height: 40px;
-    border-radius: 15px;
-    background-color: red;
-  }
-  .container form {
+  
+  .form {
     margin-bottom: 20px;
-    
   }
   
-  .forum-post-container form label {
-    color: green;
+  .form label {
+    color: #bbb;
   }
   
-  .forum-post-form input[type="text"] {
+  .form input[type="text"] {
     width: 100%;
     padding: 8px;
     margin: 5px 0;
@@ -44,41 +28,25 @@ body {
     color: #fff;
   }
   
-  .forum-post-form textarea{
-    margin: 5px 0;
-    background-color: #333;
-    width: 100%;
-    color: #fff;
-  }
-
-  .forum-post-form input[type="text"]:focus {
+  .form input[type="text"]:focus {
     outline: none;
   }
   
-  .forum-post-form select {
+  .form select {
     padding: 8px;
     background-color: #333;
     border: none;
     color: #fff;
   }
   
-  .forum-post-form button {
+  .form button {
     padding: 8px 16px;
     background-color: #4CAF50;
     border: none;
     color: #fff;
     cursor: pointer;
-    
   }
   
-  .sort-button{
-    padding: 8px 16px;
-    background-color: #4CAF50;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    margin-left: 10px;
-  }
   .form button:hover {
     background-color: #45a049;
   }
@@ -86,43 +54,46 @@ body {
   .feed-posts {
     display: flex;
     flex-direction: column;
-    margin: 0 auto;
   }
   
-  .user-posts {
+  .user-posts-view {
+    margin-top: 20px;
     background-color: #333;
     padding: 20px;
     margin-bottom: 20px;
+    width: 50vw;
   }
   
-  .user-posts h2 {
+  .user-posts-view h2 {
     margin-bottom: 10px;
   }
   
-  .user-posts p {
+  .user-posts-view p {
     margin-bottom: 15px;
   }
   
-  .user-posts a {
+  .user-posts-view a {
     color: #4CAF50;
   }
   
-  .user-posts a:hover {
+  .user-posts-view a:hover {
     text-decoration: underline;
   }
   
-  .user-posts button {
+  .user-posts-view button {
     padding: 8px 16px;
     margin-right: 10px;
+    
     border: none;
     color: #fff;
     cursor: pointer;
   }
   
-  .user-posts button:hover {
+  .user-posts-view button:hover {
     background-color: #45a049;
   }
   
+
   .like.liked,
   .dislike.disliked {
     background-color: #ff4500;
@@ -142,6 +113,36 @@ body {
   .dislike:hover {
     background-color: #4CAF50;
   }
-  
-  
 
+  .recommended-posts{
+    background-color: #222;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin-left: 20px;
+    text-align: left; 
+    width: 50%;
+    overflow-y: auto;
+  }
+
+  .recommended-post{
+    margin-top: 20px;
+  }
+  
+  .edit-button{
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+
+  .delete-button{
+    padding: 8px 16px;
+    background-color: red;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }

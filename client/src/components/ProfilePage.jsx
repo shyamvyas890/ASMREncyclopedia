@@ -11,6 +11,7 @@ const ProfilePageComponent = ()=>{
     const [profileUsername, setProfileUsername]= React.useState(null);
     const [friendStatus, setFriendStatus]= React.useState(null);
     const theirUsername= useParams().ProfileUsername;
+    console.log("THEIR NAME IS: " +theirUsername)
     const navigate= useNavigate();
     const tokenVerify= async () => {
         try{
@@ -19,7 +20,6 @@ const ProfilePageComponent = ()=>{
                 const userIdOfProfileUser = (await axios.get(`${hostname}/users/id`, {params:{username:theirUsername}}));
                 setUsername({userIdOfCurrentUser, username:response.data.username});
                 setProfileUsername({userIdOfProfileUser:userIdOfProfileUser.data.id, username:theirUsername})               
-
         }
         catch(error){
             navigate("/")
@@ -91,15 +91,15 @@ const ProfilePageComponent = ()=>{
             <NavigationComponent />
             {username !== null && profileUsername !== null && (
                 <>
-                    <div>{theirUsername}</div>
+                    <div style={{fontWeight: "bold", fontSize: "40px"}}>{theirUsername}'s Profile </div>
                     {friendStatus !== null && friendStatus !== 4 && (
                         <>
                             {friendStatus === 0 ? (
-                                <button onClick={handleAddFriend}>Add Friend</button>
+                                <button style={{padding: "8px 16px", backgroundColor: "#4CAF50",  border: "none",color: "#fff",cursor: "pointer"}} onClick={handleAddFriend}>Add Friend</button>
                             ) : friendStatus === 1 ? (
                                 <button onClick={handleUnfriend}>Unfriend</button>
                             ) : friendStatus === 2 ? (
-                                <button onClick={handleCancelFriendRequest}>Cancel Friend Request</button>
+                                <button style={{padding: "8px 16px", backgroundColor: "red",  border: "none",color: "#fff",cursor: "pointer"}} onClick={handleCancelFriendRequest}>Cancel Friend Request</button>
                             ) : (
                                 <div>
                                     <button onClick={handleAcceptFriendRequest}>✅</button>

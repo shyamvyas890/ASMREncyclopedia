@@ -4,12 +4,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import { VideoCommentContainerComponent } from './VideoCommentContainer';
 import { Link } from 'react-router-dom';
 import { axiosRequest, hostname } from '../utils/utils';
+import VideoPostWithCommentsCSS from "../css/videopostwithcomments.module.css"
+
+import NavigationComponent from './Navigation';
 const VideoPostWithCommentsComponent = (props)=>{
     const navigate= useNavigate();
     const routerVideoPostId=useParams().VideoPostId;
     const propsVideoPostId = props.VideoPostId;
     const VideoPostId = routerVideoPostId || propsVideoPostId;
-    const [username, setUsername]= React.useState(null);
+    const [username, setUsername]= useState();
+    const [userID, setUserID] = useState()
     const [allTheVideoPostInformation, setAllTheVideoPostInformation]= useState(null);
     const [modal, setModal] = useState(false)
     const [userPlaylists, setUserPlaylists] = useState([])
@@ -78,7 +82,9 @@ const VideoPostWithCommentsComponent = (props)=>{
         try{
             const response= await axios.get(`${hostname}/verify-token`)
             const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-            setUsername({userIdOfCurrentUser, username:response.data.username})
+            console.log("THE ID IS: " + userIdOfCurrentUser)
+            setUserID(userIdOfCurrentUser)
+            setUsername(response.data.username)
         }
         catch(error){
             navigate("/");
@@ -203,10 +209,24 @@ const VideoPostWithCommentsComponent = (props)=>{
     };
 
     return (
-        allTheVideoPostInformation!==null && (<div>
-            <h5><Link to={`/username/${allTheVideoPostInformation.username}`}>{allTheVideoPostInformation.username}</Link></h5>
-            <h6>{allTheVideoPostInformation.Title}</h6>
-            <div>{allTheVideoPostInformation.VideoLinkId}</div>
+        allTheVideoPostInformation!==null && (
+        <div>
+          <NavigationComponent />
+
+          <div className={VideoPostWithCommentsCSS['user-posts']}>
+          <h2> <a 
+              style={{textDecoration: 'none'}}
+              onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+              onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+               onClick={() => {navigate(`/username/${allTheVideoPostInformation.username}`)}}
+                 >
+              {allTheVideoPostInformation.username}
+             </a> 
+             ◦ {new Date(allTheVideoPostInformation.PostedAt).toLocaleString()}</h2>
+             <h4 style={{fontWeight: "bold"}}> {allTheVideoPostInformation.Title} </h4>
+             { <iframe width="420" height="315" title= "Title" allow="fullscreen;"
+                src={`https://www.youtube.com/embed/${allTheVideoPostInformation.VideoLinkId}`}>
+            </iframe>}
             <h4>Tags</h4>
             {allTheVideoPostInformation.genres.map((genre, index)=>(
               <React.Fragment key={index}>
@@ -236,12 +256,20 @@ const VideoPostWithCommentsComponent = (props)=>{
               </div>
             </div>
             )}
+          </div>
+
+          
+          <div className={VideoPostWithCommentsCSS['video-post-comments-section']}>
             {routerVideoPostId && <VideoCommentContainerComponent
                 VideoPostId= {allTheVideoPostInformation.VideoPostId}
-                userIdOfCurrentUser= {username.userIdOfCurrentUser}
-                usernameOfCurrentUser= {username.username}
+                userIdOfCurrentUser= {userID}
+                usernameOfCurrentUser= {username}
             />}
-        </div>)
+          </div>
+          
+        </div>
+
+            )
     )
 
 

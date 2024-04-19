@@ -3,7 +3,7 @@ import axios from '../utils/AxiosWithCredentials';
 import { useParams } from "react-router-dom"
 import LikeDislikeComponent from "./LikeDislikeComponent"
 import { useNavigate } from "react-router-dom"
-import "../css/forumpostcomment.css"
+import ForumPostCommentCSS from "../css/forumpostcomment.module.css"
 export const ForumPostComment = (props) => {
 
     const {postID} = useParams() //ID of the forum post
@@ -179,13 +179,13 @@ export const ForumPostComment = (props) => {
 
     return(
         <div id='forum-post-comment'>
-           {props.deleted || isDeleted ? <div> <div className="deleted-comment"> [Deleted Comment] </div> <div style={replyStyle}>
+           {props.deleted || isDeleted ? <div> <div className={ForumPostCommentCSS["deleted-comment"]}> [Deleted Comment] </div> <div style={replyStyle}>
              {replies && replies.map && showReplies === true && replies.map( (reply) => (
                <ForumPostComment id = {reply.id} postID = {reply.forum_post_id} username = {reply.username} timestamp = {reply.comment_timestamp} body = {reply.body} userID = {props.userID} deleted={reply.deleted}/>
             ))}
             </div> </div>: 
 
-        <div clasName='forum-post-comment-show'>
+        <div className={ForumPostCommentCSS['forum-post-comment-show']}>
           
           <a 
           style={{textDecoration: 'none'}}
@@ -198,21 +198,25 @@ export const ForumPostComment = (props) => {
 
          {isEditing ? (<div> <textarea value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button style={{border: "none"}} onClick={handleEditCancel}> Cancel Edit </button> <button style={{border: "none"}} onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
 
-            {showReplyOption !== false && (<button style={{border: "none"}} className='reply-option-button' onClick={() => handleReply(props.id)}> Reply to {props.username} </button>) }
+            {showReplyOption !== false && (<button style={{border: "none"}} className={ForumPostCommentCSS['reply-option-button']} onClick={() => handleReply(props.id)}> Reply to {props.username} </button>) }
             
-            <button className='show-replies-button' onClick={showReplyStatus}> {showRepliesText} </button>
+            <button className={ForumPostCommentCSS['show-replies-button']} onClick={showReplyStatus}> {showRepliesText} </button>
             <button 
                 className={`like ${userLikedComments ? "liked" : ""}`} 
+                style={{ padding: "8px 16px", marginRight: "10px", backgroundColor: "#333", border: "none", color: "#fff", cursor: "pointer", marginLeft: "10px"}}
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 1)}>
                 {commentLikes} Likes
             </button>
             <button
                 className={`dislike ${userDislikedComments ? "disliked" : ""}`} 
+                style={{ padding: "8px 16px", marginRight: "10px", backgroundColor: "#333", border: "none", color: "#fff", cursor: "pointer", marginLeft: "10px"}}
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 0)}>
                 {commentDislikes} Dislikes
             </button>
+
             {currentUsername === commenterUsername && !singleView? (<div>
-              <button style={{border: "none"}} onClick={setIsEditing}> Edit </button> <button style={{border: "none"}} onClick={handleDeleteComment}> Delete </button> </div>
+              <button className={ForumPostCommentCSS['edit-button']} onClick={setIsEditing}> Edit </button> 
+              <button className={ForumPostCommentCSS['delete-button']} onClick={handleDeleteComment}> Delete </button> </div>
             ) : <div></div>}
             
             

@@ -42,7 +42,7 @@ app.use(cors({
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '#jySJSU2024',
+    password: 'password',
     database: 'ASMR_DB',
   });
 db.connect((err) => {
@@ -655,6 +655,17 @@ app.get("/forums", (req,res)=>{
     db.query(query,(err,data)=>{
         if(err){
             res.send(err)
+        }
+        return res.json(data)
+    })
+})
+
+app.get("/forumPostByUsername", verifyJWTMiddleware, (req, res) =>{
+    const username = req.query.username
+    console.log("HI USER " + username)
+    db.query("SELECT * from forumpost WHERE username=?", [username], (err, data) =>{
+        if(err){
+            console.log(err)
         }
         return res.json(data)
     })
@@ -1790,7 +1801,7 @@ app.post("/videoCommentRating", verifyJWTMiddleware, (req, res)=>{
     })
 })
 
-app.get("/videoCommentRating", verifyJWTMiddleware, async (req, res)=>{
+app.get("/videoCommentRatings", verifyJWTMiddleware, async (req, res)=>{
     const {VideoPostCommentId, UserId} = req.query;
     if(req.decodedToken.UserId!==parseInt(UserId)){
         return res.status(403).send("You do not have permission to do that");

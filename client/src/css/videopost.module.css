@@ -1,0 +1,32 @@
+.user-posts {
+    background-color: #333;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    width: 50vw;
+  }
+
+  .user-posts h2 {
+    color: #fff;
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+  
+  .user-posts p {
+    color: #fff;
+    font-size: 18px;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+
+  .user-posts button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px;
+    background-color: #4CAF50;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: auto;
+  }

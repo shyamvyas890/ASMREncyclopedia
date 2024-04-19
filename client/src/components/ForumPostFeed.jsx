@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { redirectDocument, useNavigate } from "react-router-dom";
 import LikeDislikeComponent from "./LikeDislikeComponent"
 import * as yup from "yup"
-import "../css/forumpostfeed.css"
+import ForumPostFeedCSS from "../css/forumpostfeed.module.css"
 import '../index.css';
 import NavigationComponent from './Navigation';
 
@@ -283,42 +283,42 @@ const handleInputKeyDown = (e) =>{
 
   <div>
     <NavigationComponent />
-    <div className="container"> 
-      <form className='forum-post-form'>
-        <input id="forum-post-title" type="text" placeholder="Title" value={title} onChange={(event) => {setTitle(event.target.value)}} name="title"/>
+    <div className={ForumPostFeedCSS['container']}> 
+      <form className={ForumPostFeedCSS['forum-post-form']}>
+        <input className={ForumPostFeedCSS['forum-post-form-title']} id="forum-post-title" type="text" placeholder="Title" value={title} onChange={(event) => {setTitle(event.target.value)}} name="title"/>
         <br />
-        <textarea type="text" value={body} placeholder="Body" onChange={(event) => {setBody(event.target.value)}} name="body"/>
+        <textarea className={ForumPostFeedCSS['forum-post-form-body']} type="text" value={body} placeholder="Body" onChange={(event) => {setBody(event.target.value)}} name="body"/>
         <br />
-        <input placeholder="Press 'Enter' to create tag(s)" type="text" value={tagInput} onChange={(event) => {setTagInput(event.target.value)}} onKeyDown={handleInputKeyDown}/>
-         <div className="tag-container">
+        <input className={ForumPostFeedCSS['forum-post-form-tag']} placeholder="Press 'Enter' to create tag(s)" type="text" value={tagInput} onChange={(event) => {setTagInput(event.target.value)}} onKeyDown={handleInputKeyDown}/>
+         <div className={ForumPostFeedCSS["tag-container"]}>
           {tagOptions.map((tag) => (
             <div key={tag}>
               {tag}
-              <button id="tag-button" onClick={() => handleTagDelete(tag)}> x </button>
+              <button className={ForumPostFeedCSS["tag-button"]} onClick={() => handleTagDelete(tag)}> x </button>
             </div>
           ))}
          </div>
 
-        <button onClick={onSubmit}> Post </button>
+        <button className={ForumPostFeedCSS["forum-post-button"]} onClick={onSubmit}> Post </button>
       </form>
     </div>
     
 
-  <form className="form" onSubmit={sortForumPosts}>
-    <select onChange={(e) => setSortType(e.target.value)}>
+  <form className={ForumPostFeedCSS["forum-post-sort-form"]} onSubmit={sortForumPosts}>
+    <select className={ForumPostFeedCSS['forum-post-form-select']} onChange ={(e) => setSortType(e.target.value)}>
       <option value="none"> Sort by... </option>
       <option value="1"> Newest to Oldest (default) </option>
       <option value="2"> Oldest To Newest </option>
       <option value="3"> Most Liked to Least Liked </option>
       <option value="4"> Least Liked to Most Liked </option>
     </select>
-    <button className="sort-button"> Sort </button>
+    <button className={ForumPostFeedCSS["forum-post-sort-button"]}> Sort </button>
   </form>
 
 
-  <div className="feed-posts">
+  <div className={ForumPostFeedCSS["feed-posts"]}>
     {allPosts.map(post=>(
-      <div className="user-posts" key={post.id}>
+      <div className={ForumPostFeedCSS["user-posts"]} key={post.id}>
         <h2> <a 
           style={{textDecoration: 'none'}}
           onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
@@ -338,7 +338,7 @@ const handleInputKeyDown = (e) =>{
             </div>
           ))}
         </div>
-        <button onClick={() => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)} style={{backgroundColor: "#3B9EBF"}}> View Post </button>
+        <button onClick={() => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)} style={{backgroundColor: "#3B9EBF", marginRight: "5px"}}> View Post </button>
         <button className={`like ${userLikedPosts.includes(post.id) ? "liked" : ""}`} onClick={() => handlePostLikeDislike(post.id, currentUserID, 1)}>
           {allPostLikes.get(post.id)} Likes
         </button>

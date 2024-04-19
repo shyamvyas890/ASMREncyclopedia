@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { FourmPostCommentSection } from "./ForumPostCommentSection"
 import LikeDislikeComponent from "./LikeDislikeComponent"
 import '../index.css';
-import '../css/viewforumpost.css'
+import ViewForumPostCSS from '../css/viewforumpost.module.css'
 import NavigationComponent from './Navigation';
 export const ViewForumPostComponent = () =>{
    const location = useLocation()
@@ -133,7 +133,7 @@ export const ViewForumPostComponent = () =>{
         (postObject ?
         <div>
           <NavigationComponent />
-          <div className="user-posts-view">
+          <div className={ViewForumPostCSS['container']}>
             <h2> <a 
             style={{textDecoration: 'none'}}
             onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
@@ -156,22 +156,25 @@ export const ViewForumPostComponent = () =>{
           </div>
 
         <div style={{display: "flex"}}>
-          <button onClick = {setIsEditing} style={{backgroundColor: "#4CAF50", border: "none"}}> Edit </button>
-          <button onClick={handleDeletePost} style={{backgroundColor: "red", border: "none"}}> Delete </button> 
-          
+        {currentUsername === postObject[0].username && (
+         
+         <>
+            <button className={ViewForumPostCSS['edit-button']} onClick={setIsEditing} style={{backgroundColor: "#4CAF50", border: "none"}}>
+              Edit
+            </button>
+            <button className={ViewForumPostCSS['delete-button']}onClick={handleDeletePost} style={{backgroundColor: "red", border: "none"}}>
+              Delete
+            </button>
+         </>)}
 
-          <button 
+          <button style={{ padding: "8px 16px", marginRight: "10px", backgroundColor: "#333", border: "none", color: "#fff", cursor: "pointer", marginLeft: "10px"}}
             className={`like ${userLikedPosts.includes(postObject[0].id) ? "liked" : ""}`}
             onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 1)}>
             {postLikes.get(postObject[0].id)} Likes</button>
-          <button 
+          <button style={{ padding: "8px 16px", marginRight: "10px", backgroundColor: "#333", border: "none", color: "#fff", cursor: "pointer"}}
             className={`dislike ${userDislikedPosts.includes(postObject[0].id) ? "disliked" : ""}`}
             onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 0)}>
             {postDislikes.get(postObject[0].id)} Dislikes</button>
-
-            {currentUsername === postObject[0].username ? <div>
-          
-        </div> : <div> </div>}
         </div>
         
 
@@ -179,12 +182,12 @@ export const ViewForumPostComponent = () =>{
 
       <div style={{ display: 'flex' }}>
         <FourmPostCommentSection />
-        <div className="recommended-posts">
+        <div className={ViewForumPostCSS["recommended-posts"]}>
           
           {recommendedPosts.length > 0 ? <div>
             <h2 style={{color: "white"}}> You might also like... </h2>
            {recommendedPosts.map( (post) => (
-            <div className="recommended-post">
+            <div className={ViewForumPostCSS["recommended-post"]}>
               <h4> <a 
           style={{textDecoration: 'none'}}
           onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
@@ -195,7 +198,7 @@ export const ViewForumPostComponent = () =>{
          </a>  ◦ {new Date(post.post_timestamp).toLocaleString()} </h4>
 
              <h5 style={{fontWeight: "bold"}}> {post.title}</h5>
-              <button style={{backgroundColor: "#3B9EBF", color: "#FFF", border: "none"}} onClick={ () => {
+              <button style={{backgroundColor: "#3B9EBF", color: "#FFF", border: "none", borderRadius: "25px", padding: "8px 16px;"}} onClick={ () => {
                  navigate(`/forumPost/${post.id}/viewing/${userID}/user`)
                  window.location.reload()
               }}> View Post </button>

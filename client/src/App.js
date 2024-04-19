@@ -43,8 +43,6 @@ function App() {
             <Route path="/random" element={<RandomVideoComponent />}/>
             <Route path= "/SingleVideoComment/:VideoPostCommentId" element={<SingleVideoCommentComponent />} />
             <Route path= "/singleForumComment/:forumPostCommentID" element={<SingleForumCommentComponent />} />
-            <Route path="/userHistory/:username" element={<UserProfileComponent />} />
-            <Route path="/username/:username" element={<ProfilePageComponent />} />
             <Route path="/userPlaylists/" element={<UserPlaylistComponent />}/>
             <Route path="/userPlaylists/:playlistID/viewing/:userID/user" element={<ViewUserPlaylistComponent/>}/>
             <Route path="/notifications" element={<NotificationsComponent AllNotificationsPage = {true}/>} />

@@ -1,13 +1,17 @@
 import React, { useState, useRef } from "react"
 import { TreeNode } from "./VideoCommentContainer";
 import axios from '../utils/AxiosWithCredentials';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import VideoCommentNodeCSS from "../css/videopostcomment.module.css"
+import { Navigate } from "react-router-dom";
 const VideoCommentNodeComponent = (props) =>{
+    console.log("USERNAME HERE: " + props.usernameOfCurrentUser)
     const [showReplyBox, setShowReplyBox]= useState(false);
     const [showEditBox, setShowEditBox] = useState(false);
-    const [collapsed, setCollapsed]= useState(false);
+    const [collapsed, setCollapsed]= useState(true);
     const commentRef= useRef("");
     const editRef= useRef("");
+    const navigate = useNavigate()
     const handleReplyButton =(e)=>{
         e.preventDefault();
         setShowEditBox(false);
@@ -150,12 +154,20 @@ const VideoCommentNodeComponent = (props) =>{
     }
 
     return (
-        <div style={{marginLeft:"50px"}}>
-            {props.tn.data.DELETED===1 && <p><strong>{`Deleted Comment`}</strong></p>}
-            {props.tn.data.DELETED===0 && <p><strong>{<Link to={`/username/${props.tn.data.username}`}>{`${props.tn.data.username}: `}</Link>}</strong>{props.tn.data.Comment}</p>}
-            {props.tn.data.DELETED===0 && <><button onClick={handleLike} style={highlightLikeButtonRating}>Like comment</button>
-            <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike comment</button></>}
-            {props.tn.children.length>0 && <button onClick={collapseAndExpand}>{collapsed? "Expand":"Collapse"}</button>}
+        <div style={{marginLeft:"20px", marginTop: "20px"}}>
+            {props.tn.data.DELETED===1 && <div> <div className={VideoCommentNodeCSS['deleted-comment']}> [Deleted Comment] </div> </div>}
+            {props.tn.data.DELETED===0 && <div> <a 
+              style={{textDecoration: 'none'}}
+              onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+              onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+              onClick={() => {navigate(`/username/${props.tn.data.username}`)}}
+              >
+              {props.tn.data.username}
+              </a> ◦ {new Date(props.tn.data.CommentedAt).toLocaleString()} <br></br> {props.tn.data.Comment} </div>}
+
+            {props.tn.data.DELETED===0 && <><button onClick={handleLike} style={highlightLikeButtonRating}> Like </button>
+            <button onClick={handleDislike} style={highlightDislikeButtonRating}> Dislike </button></>}
+            {props.tn.children.length>0 && <button onClick={collapseAndExpand}>{collapsed? "+":"-"}</button>}
             {props.tn.data.UserId === props.userIdOfCurrentUser && props.tn.data.DELETED===0 && <button onClick={handleDelete}>Delete</button>}
             {props.tn.data.UserId === props.userIdOfCurrentUser && !showEditBox && !showReplyBox && props.tn.data.DELETED===0 && <button onClick={handleEditButton}>Edit</button>}
             {props.tn.data.UserId === props.userIdOfCurrentUser && showEditBox && props.tn.data.DELETED===0 && <><button onClick={handleEditButton}>Discard Edit</button>
@@ -165,7 +177,7 @@ const VideoCommentNodeComponent = (props) =>{
             </form>
             
             </>}
-            {!showReplyBox && !showEditBox && props.tn.data.DELETED===0 && <button onClick={handleReplyButton}>Reply</button>}
+            {!showReplyBox && !showEditBox && props.tn.data.DELETED===0 && <button onClick={handleReplyButton}> Reply</button>}
             {showReplyBox && props.tn.data.DELETED===0 && <><button onClick={handleReplyButton}>Discard Comment</button>
             <form onSubmit={handleTheReply}>
                     <textarea ref={commentRef} rows="5" cols="50"/>

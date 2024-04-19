@@ -6,7 +6,7 @@ import AddVideoPostComponent from './AddVideoPost';
 import {axiosRequest} from "../utils/utils.js";
 import { useNavigate } from 'react-router-dom';
 import NavigationComponent from './Navigation.jsx';
-import "../css/home.css"
+import HomeCSS from "../css/home.module.css"
 
 const HomeComponent= () => {
     const [username, setUsername] = useState('');
@@ -212,38 +212,34 @@ const HomeComponent= () => {
             setIsLoggedIn={setIsLoggedIn}
             />
 
-            {(isLoggedIn && videoPostsAndRatings && sortedVideos && userIdOfCurrentUser) ? (
-                
-                
+            {(isLoggedIn && videoPostsAndRatings && sortedVideos && userIdOfCurrentUser) ? (                
                     <>
                    <div>
                         <NavigationComponent />
+                        <div className={HomeCSS['container']}>
+                          <div>
+                           <AddVideoPostComponent 
+                           userIdOfCurrentUser={userIdOfCurrentUser}
+                           fetchVideoPosts={fetchVideoPosts}    
+                           />
+                          </div>
+                        </div> 
+
+
+                        <form className={HomeCSS['video-post-sort-form']}>
+                          <select className={HomeCSS['video-post-sort-form-select']} value={sortOption} onChange={handleSort}>
+                            <option value="none"> Sort by...</option>
+                            <option value="latest"> Newest to Oldest (default) </option>
+                            <option value="oldest"> Oldest to Newest </option>
+                            <option value="best"> Most Liked to Least Liked </option>
+                            <option value="worst"> Least Liked to Most Liked </option>
+                          </select>
+                        </form>
+                       
                     </div>
-             
-                  
-                   
 
-
-                  <div className='add-video'>
-                    <div>
-                      <AddVideoPostComponent 
-                       userIdOfCurrentUser={userIdOfCurrentUser}
-                       fetchVideoPosts={fetchVideoPosts}    
-                      />
-                    </div>
-                  </div> 
-
-                    <div className='video-post-feed'>
-                        <select value={sortOption} onChange={handleSort}>
-                            <option value="none"> Sort videos by...</option>
-                            <option value="latest">Latest</option>
-                            <option value="oldest">Oldest</option>
-                            <option value="best">Best</option>
-                            <option value="worst">Worst</option>
-                        </select>
-
-                        <div>
-                    {sortedVideos.map((post, index)=>(
+                    <div className={HomeCSS['feed-posts']}>
+                      {sortedVideos.map((post, index)=>(
                         <div key={index+sortedVideos.length} >
                             <PostComponent 
                                 key={index}
@@ -261,9 +257,9 @@ const HomeComponent= () => {
                                 totalDislikes={sortedVideos[index].totalDislikes}
                             />    
                         </div>
-                    ))}
+                      ))}
                     </div>
-                    </div>
+                        
 
                     
 

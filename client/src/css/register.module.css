@@ -27,37 +27,43 @@ body {
     margin-bottom: 20px;
   }
 
-  .login-form-container form {
+  .login-form {
     display: flex;
     flex-direction: column;
   }
 
-  .login-form-container input[type="text"],
-  .login-form-container input[type="password"],
-  .login-form-container button {
+  .login-form-username{
     margin-bottom: 20px;
     padding: 15px;
     border: none;
     border-radius: 8px;
     font-size: 18px;
-  }
-
-  .login-form-container input[type="text"],
-  .login-form-container input[type="password"] {
     background-color: rgba(255, 255, 255, 0.2); 
     color: #fff;
   }
 
-  .login-form-container button {
+  .login-form-password{
+    margin-bottom: 20px;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    background-color: rgba(255, 255, 255, 0.2); 
+    color: #fff;
+  }
+
+  .login-form-button {
     background-color: #4caf50; 
     color: #fff; 
     cursor: pointer;
     transition: background-color 0.3s ease;
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    font-size: 18px;
   }
 
-  .login-form-container button:hover {
-    background-color: #45a049;
-  }
 
   .link-container {
     margin-top: 20px;
@@ -69,4 +75,4 @@ body {
     font-size: 18px;
     text-align: center;
   }
-  
+

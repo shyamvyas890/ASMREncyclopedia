@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import axios from '../utils/AxiosWithCredentials';
 import { Link } from 'react-router-dom';
-import "../css/register.css"
 import 'bootstrap/dist/css/bootstrap.min.css';
+import RegisterCSS from "../css/register.module.css"
+
 
 const RegistrationComponent = () => {
   const [feedback, setFeedback] = useState('');
@@ -19,6 +20,7 @@ const RegistrationComponent = () => {
       e.target.elements.usernameInput.value="";
       e.target.elements.passwordInput.value="";
       setFeedback(response.data);
+      
     } catch (error) {
         if(error.response.data==="This username is already taken. Please choose a different username."){
             e.target.elements.usernameInput.value="";
@@ -29,25 +31,20 @@ const RegistrationComponent = () => {
     }
   };
   return (
-    <div style={{ textAlign: 'center', margin: '50px auto', maxWidth: '400px', padding: '20px', backgroundColor: '#333', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
-  <h2 style={{ marginBottom: '20px', color: '#fff' }}>Registration</h2>
-  <form onSubmit={handleRegister}>
-    <div style={{ marginBottom: '20px' }}>
-      <label style={{ display: 'block', marginBottom: '5px', color: '#fff' }}>Username:</label>
-      <input style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none' }} type="text" name='usernameInput' />
-    </div>
-    <div style={{ marginBottom: '20px' }}>
-      <label style={{ display: 'block', marginBottom: '5px', color: '#fff' }}>Password:</label>
-      <input style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none' }} type="password" name='passwordInput' />
-    </div>
-    <button style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none', backgroundColor: '#4CAF50', color: '#fff', cursor: 'pointer' }} type="submit">Register</button>
-  </form>
-  <div style={{ marginTop: '20px', color: '#fff' }}>Already have an account? <Link to="/" style={{ color: '#4CAF50', textDecoration: 'underline' }}>Login here!</Link></div>
-  {feedback && (
-    <p style={{ marginTop: '20px', color: feedback === "This username is already taken. Please choose a different username." ? 'red' : 'green' }}>{feedback}</p>
-  )}
-</div>
-
+    <div className={RegisterCSS['login-container']}>
+          <div className={RegisterCSS['login-form-container']}>
+            <div className={RegisterCSS['websiteTitle']}> Registration </div>
+            <form className={RegisterCSS['login-form']} onSubmit={handleRegister}>
+              <input className={RegisterCSS['login-form-username']} type="text" placeholder="Username" name="usernameInput"/>
+              <input className={RegisterCSS['login-form-password']} type="password" placeholder='Password' name="passwordInput"/>
+              <button className={RegisterCSS['login-form-button']} type="submit">Login</button>
+            </form>
+          </div>
+          <div className={RegisterCSS['link-container']}>
+            <p> Already have an account? <Link to="/"> Login Here!</Link></p>
+          </div>
+          {feedback && feedback ==="Login Successful" && <p className='feedback-message' style={{color:'green'}}>{feedback}</p>}
+        </div>
   );
 };
 

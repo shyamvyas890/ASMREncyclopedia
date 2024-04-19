@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from 'react-router-dom';
 import {Link} from "react-router-dom";
+import VideoPostCSS from "../css/videopost.module.css"
 
 const PostComponent = (props) =>{
     const hostname= "http://localhost:3001";
@@ -88,7 +89,8 @@ const PostComponent = (props) =>{
 
     React.useEffect(()=>{
       getGenres();
-    },[])
+    },[props.VideoPostId])
+
     const handleDislike= async (e)=>{
         e.preventDefault();
         if(props.rating===0){
@@ -186,25 +188,29 @@ const PostComponent = (props) =>{
   }, [userPlaylists])
 
     return (
-        <div>
-            <h5><Link to={`/username/${props.username}`}>{props.username}</Link></h5>
-            <h6>{props.title}</h6>
-            {/* <iframe width="420" height="315" title= "Title" allow="fullscreen;"
+        <div className={VideoPostCSS['user-posts']}>
+            <h2> <a 
+              style={{textDecoration: 'none'}}
+              onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+              onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+               onClick={() => {navigate(`/username/${props.username}`)}}
+                 >
+              {props.username}
+             </a> 
+             ◦ {new Date(props.timestamp).toLocaleString()}</h2>
+             <h4 style={{fontWeight: "bold"}}> {props.title} </h4>
+            { <iframe width="420" height="315" title= "Title" allow="fullscreen;"
                 src={`https://www.youtube.com/embed/${props.VideoLinkId}`}>
-            </iframe> */}
-            <h6>Posted At: {new Date(props.timestamp).toString()}</h6>
-            <div>{props.VideoLinkId}</div>
-            <h4>Tags</h4>
+            </iframe>}
+            <h4>Tag(s)</h4>
             {theGenres && theGenres.map((genre, index)=>(
               <React.Fragment key={index}>
                 <div>{genre.GenreName}</div>
               </React.Fragment>
             ))}
-            {props.totalLikes >= 0? <button onClick={handleLike} style={highlightLikeButtonRating}>Like ({props.totalLikes}) </button> : <div> </div>}
-            {props.totaDislikes >= 0? <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike ({props.totalDislikes})</button> : <div> </div>}
-            {props.username === props.usernameOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
-            <button onClick={()=>navigate(`/video/${props.VideoPostId}`)}>Comments</button>
-            <button onClick={toggleModal} className="btn-Modal"> Add to Playlist</button>
+            <button style={{backgroundColor: "#3B9EBF", marginRight: "5px"}} onClick={()=>navigate(`/video/${props.VideoPostId}`)}> View Post </button>
+            {props.totalLikes !== null? <button onClick={handleLike} style={{highlightLikeButtonRating, backgroundColor: "#3B9EBF", marginRight: "5px"}}>Like ({props.totalLikes}) </button> : <div> </div>}
+            {props.totaDislikes !== null? <button onClick={handleDislike} style={{highlightDislikeButtonRating, backgroundColor: "#3B9EBF", marginRight: "5px"}}>Dislike ({props.totalDislikes})</button> : <div> </div>}
             {modal && (
               <div className="modal">
                 <div onClick={toggleModal} className="overlay"></div>

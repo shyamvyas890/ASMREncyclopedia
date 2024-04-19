@@ -1,0 +1,63 @@
+.container {
+    width: 50%;
+    margin: 0 auto;
+    padding: 20px;
+    height: 100%; /* Set a minimum height of 100% of the viewport height */
+  }
+
+.video-title{
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #333;
+    border: none;
+    color: #fff;
+}
+
+.video-link{
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #333;
+    border: none;
+    color: #fff;
+}
+
+.video-post-add-tag{
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #333;
+    border: none;
+    color: #fff;
+  }
+
+.tag-container{
+    display: flex;
+}
+
+.btn.btn-primary{
+    margin-bottom: 10px;
+}
+
+.tag{
+    width: 50px;
+    height: 50px;
+  }
+
+.tag-button{
+    width: 40px;
+    height: 40px;
+    border-radius: 15px;
+    background-color: red;
+    border: none;
+    color: white;
+  }
+
+  .video-post-button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
