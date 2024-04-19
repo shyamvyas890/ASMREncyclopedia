@@ -1,0 +1,34 @@
+.formContainer {
+    max-width: 400px;
+}
+
+.formContainer label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.formContainer input[type="password"] {
+  width: calc(100% - 100px);
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.formContainer button[type="button"],
+.formContainer button[type="submit"] {
+  background-color: #f44336;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.formContainer button[type="button"]:hover,
+.formContainer button[type="submit"]:hover {
+  background-color: #da190b;
+}
+
+.errorMessage {
+  color: red;
+}
