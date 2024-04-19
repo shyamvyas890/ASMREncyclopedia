@@ -97,10 +97,11 @@ app.post("/register", async (req,res)=>{
 });
 
 const authenticateUser = (socket, next)=>{
-    const token= socket.handshake.headers.cookie.split("=")[1];
+    let token= socket.handshake.headers.cookie
     if (!token) {
         return next(new Error('Authentication error: Token missing'));
     }
+    token=token.split("=")[1];
     jwt.verify(token, secretKey, (err, value)=>{
         if(err){
             return next(new Error('Authentication error: Invalid token'));

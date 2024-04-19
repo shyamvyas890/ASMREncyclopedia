@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import {useNavigate } from "react-router-dom";
 import * as yup from "yup"
 import axios from '../utils/AxiosWithCredentials';
+import NavigationComponent from "./Navigation";
+import PlaylistCSS from "../css/playlist.module.css"
 
 export const UserPlaylistComponent = ()=>{
     const [currentUsername, setCurrentUsername] = useState()
@@ -113,45 +115,44 @@ export const UserPlaylistComponent = ()=>{
             })
         } catch (error){
             console.log(error)
-
         }
         fetchAllUserPlaylist()
     }
 
     return (
         <div>
+            <NavigationComponent />
+            <div className={PlaylistCSS.createPlaylistContainer}>
+                <h2>Create New Playlist</h2>
+                <form className={PlaylistCSS.userPlaylistForm}>
+                    <input type="name" placeholder="Playlist Name" value={playlistName} onChange={(event) => { setPlaylistName(event.target.value) }} />
+                    <button className="btn btn-primary" onClick={postPlaylistSubmit}>Create</button>
+                </form>
+            </div>
             <h1>Playlists</h1>
-
-            <h2>Create Playlist</h2>
-            <forms>
-                <label> Playlist Name</label>
-                <input type="name" value={playlistName} onChange= {(event) => {setPlaylistName(event.target.value)}}/>
-                <br></br>
-                <button onClick={postPlaylistSubmit}>Create</button>
-            </forms>
-
-            {userPlaylists.map(playlist=>(
-                <div className="user-playlist" key={playlist.PlaylistID}>
+            {userPlaylists.map(playlist => (
+                <div className={PlaylistCSS.userPlaylist} key={playlist.PlaylistID}>
                     <h2>{playlist.PlaylistName}</h2>
-                    <button onClick={()=> navigate(`/userPlaylists/${playlist.PlaylistID}/viewing/${currentUserID}/user`)}> View Playlist </button>
-                    <button onClick={()=>{deletePlaylist(playlist.PlaylistID)}}>delete</button>
-                    <button onClick={()=>toggleModal(playlist.PlaylistID)} className="btn-Modal">Edit Name</button>
+                    <button onClick={() => navigate(`/userPlaylists/${playlist.PlaylistID}/viewing/${currentUserID}/user`)} className="btn btn-primary"> View Playlist </button>
+                    <button onClick={() => toggleModal(playlist.PlaylistID)} className="btn btn-primary">Edit Name</button>
+                    <button onClick={() => {deletePlaylist(playlist.PlaylistID)}} className="btn btn-danger">Delete</button>
                 </div>
             ))}
             {modal && (
-                <div className="modal">
-                    <div onClick={toggleModal} className="overlay"></div>
-                    <div className="modal-content">
-                        <div className="edit-playlist">
-                        <label> Playlist Name</label>
-                            <input type="name" value={editName} onChange= {(event) => {setEditName(event.target.value)}}/>
-                            <br></br>
-                            <button onClick={editPlaylistSubmit}>Edit</button>
+                <div className={PlaylistCSS.modal}>
+                    <div onClick={toggleModal} className={PlaylistCSS.overlay}></div>
+                        <div className={PlaylistCSS.modalContentContainer}>
+                            <div className={PlaylistCSS.modalContent}>
+                                <div className={PlaylistCSS.editPlaylistForm}>
+                                    <h2>Edit Playlist Name</h2>
+                                    <input type="name" value={editName} placeholder="New Playlist Name" onChange={(event) => {setEditName(event.target.value)}}/>
+                                    <button className="btn btn-primary" onClick={editPlaylistSubmit}>Edit</button>
+                                    <button className="btn btn-secondary" onClick={toggleModal}>Close</button>
+                            </div>
                         </div>
-                        <button className="close-modal" onClick={toggleModal}>Close</button>
                     </div>
                 </div>
             )}
-    </div>
+        </div>
     )
-} 
+}

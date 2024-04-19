@@ -16,7 +16,10 @@ Welcome to the ASMR Encyclopedia, a meticulously crafted social media platform f
   - [Sorting Options](#sorting-options)
   - [Account Settings](#account-settings)
   - [Random Video Option](#random-video)
-- [Upcoming Features](#upcoming-features)
+  - [Real Time Notification System](#notifications)
+  - [Playlists](#playlists)
+  - [Profile Page](#profile-page)
+  - [About Us](#about-us-page)
 
 ## Features
 
@@ -28,9 +31,10 @@ Engage in forum discussions by [posting topics](#forum-posts) with titles, bodie
 
 ### User Authentication
 - **Register and Login:** Secure [user registration and login](#user-authentication) system.
+- **REST API** Secure REST API which requires JWT authentication to access any protected routes
 
 ### Likes and Dislikes
-Users can express their appreciation or disapproval by [liking and disliking](#likes-and-dislikes) videos and comments.
+Users can express their appreciation or disapproval by [liking and disliking](#likes-and-dislikes) posts and comments.
 
 ### Comments
 Engage in discussions with [comments](#comments), fostering rich conversations.
@@ -43,31 +47,31 @@ Engage in discussions with [comments](#comments), fostering rich conversations.
 A dedicated [chat](#chat-with-friends) feature allows users to communicate privately with their friends on the site.
 
 ### Search Functionality
-Efficiently find desired videos using a robust [search bar](#search-functionality).
+Efficiently find desired videos and forum discussions using a robust [search bar](#search-functionality).
 
 ### Video Feed
 Tailor your video and forum feed by [subscribing to specific tags](#video-feed) and customizing preferences.
 
 ### Sorting Options
-Sort videos based on criteria like [oldest, latest, best, and worst](#sorting-options).
+Sort videos, forum discussions, and comments based on criteria like [oldest, latest, best, and worst](#sorting-options).
 
 ### Account Settings
-Users can manage their [account settings](#account-settings), including changing their email, password, and video and forum post subscription preferences.
+Users can manage their [account settings](#account-settings), including changing their email, password, video and forum post subscription preferences, or deleting their account.
 
 ### Random Video Option
 Discover something new with a [random video](#random-video) option, which displays a random video from a vast collection of ASMR videos.
 
-## Upcoming Features
-- **Forum Post Features Completion:** We're actively working on finalizing the remaining forum post features, ensuring a comprehensive and seamless experience for our users.
-- **Real-Time Notification System:** Stay updated with [real-time notifications](#upcoming-features) for likes, comments, and friend requests.
-- **Playlists Feature:** Create and curate [playlists](#upcoming-features) for a personalized viewing experience.
-- **Profile Page:** Explore [user profiles](#upcoming-features) with post and comment history.
-- **About Us Page:** Learn more about the platform and its creators in the [About Us](#upcoming-features) page.
-- **Styling Enhancement:** Implementing heavy styling to enhance the visual appeal of ASMR Encyclopedia.
+### Real-Time Notification System
+Stay updated with [real-time notifications](#notifications) for likes, comments, and friend requests.
 
+### Playlists Feature 
+Save your favorite videos into organized [playlists](#playlists) for a personalized viewing experience.
 
+### Profile Page 
+Explore [user profiles](#profile-page) with post and comment history.
 
-Please note that these upcoming features are not an exhaustive list; we will continuously add more enhancements to create an even more immersive ASMR experience.
+### About Us Page 
+Learn more about the platform and its creators in the [About Us](#about-us) page.
 
 ## Technologies Used
 
@@ -76,7 +80,16 @@ ASMR Encyclopedia is built using the following technologies:
 - HTML
 - CSS
 - JavaScript
-- MySQL
+- MySQL2
+- Bootstrap
+- Yup
+- React-tabs
+- Cookie-parser
+- CORS
+- Natural
+- Typescript
+- Stopword
+- Nodemon
 - Express.js
 - Node.js
 - React.js

@@ -1,0 +1,36 @@
+.container {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.settingsItem {
+  margin-bottom: 20px;
+}
+
+.settingsItem > div {
+  margin-bottom: 10px;
+}
+
+.button {
+  background-color: #4CAF50;
+  margin:0.5rem;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #45a049;
+}
+
+.redButton {
+  background-color: #f44336;
+}
+
+.redButton:hover {
+  background-color: #da190b;
+}

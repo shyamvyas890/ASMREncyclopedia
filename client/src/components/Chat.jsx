@@ -3,6 +3,8 @@ import axios from '../utils/AxiosWithCredentials';
 import io from 'socket.io-client';
 import { useNavigate } from "react-router-dom";
 import { axiosRequest, hostname } from '../utils/utils';
+import NavigationComponent from "./Navigation";
+
 const ChatComponent =()=>{
     const [username, setUsername]= useState(null);
     const [socket,setSocket]= useState(null);
@@ -128,6 +130,7 @@ const ChatComponent =()=>{
     return (
         friends && username && 
         <div style={{ display: 'flex', height: '100vh' }}>
+            <NavigationComponent />
             <div style={{ width: '200px', backgroundColor: 'black' }}>
                 {friends.map((friend, index) => {
                     return <div key={index} onClick={(e)=>{handleSelectChat(e,friend.username)}} style={{ cursor: 'pointer', padding: '10px' }}>
@@ -135,6 +138,7 @@ const ChatComponent =()=>{
                     </div>
                 })}
             </div>
+            
             <div style={{ flex: 1, padding: '20px' }}>
                 {!selectedChat && <h2>Select a user to chat</h2>}
                 {selectedChat && selectedChat.messages.map((message, index)=>{
@@ -146,23 +150,9 @@ const ChatComponent =()=>{
                     }
                 })}
                 {selectedChat && <input type="text" placeholder="Send a message..." onKeyDown={handleOnKeyDown}/>}
-                
             </div>
-            
-            
-
-
-
-
         </div>
-
     )
-
-    
-    
-
-
 }
-
 
 export default ChatComponent
