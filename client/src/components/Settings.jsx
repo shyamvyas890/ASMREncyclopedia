@@ -380,12 +380,13 @@ const SettingsComponent = ()=>{
                     </form>
                 ):
                 (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && edit.accountDeletion)?
-                (<form onSubmit={tryDeletion} className={settingsAccountDeletion.formContainer}>
+                (<form onSubmit={tryDeletion} className={settingsAccountDeletion.formContainer} style={{marginLeft:"1rem", marginTop:"1rem"}}>
                     <div style={{ color: "red" }}>Are you sure you want to do this? This action cannot be undone. If you are sure, enter your password below to confirm this action.</div>
                     <label>
                       Enter your current password.
-                      <input name="currentPassword" type="password" />
-                      <button type="button" className={settingsAccountDeletion.button} onClick={() => { setEdit(prevEdit => { setErrorMessageForChangingPasswordAndDeletingAccount(""); return { ...prevEdit, accountDeletion: !prevEdit.accountDeletion }; }) }}>Cancel</button>
+                      <input name="currentPassword" type="password" style={{marginBottom:"0.5rem"}}/>
+                      <br/>
+                      <button type="button" className={settingsAccountDeletion.button} style={{marginRight:"0.5rem"}} onClick={() => { setEdit(prevEdit => { setErrorMessageForChangingPasswordAndDeletingAccount(""); return { ...prevEdit, accountDeletion: !prevEdit.accountDeletion }; }) }}>Cancel</button>
                       <button type="submit" className={settingsAccountDeletion.button}>Delete</button>
                       <div className={settingsAccountDeletion.errorMessage}>{errorMessageForChangingPasswordAndDeletingAccount}</div>
                     </label>
