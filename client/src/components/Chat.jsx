@@ -4,6 +4,7 @@ import io from 'socket.io-client';
 import { useNavigate } from "react-router-dom";
 import { axiosRequest, hostname } from '../utils/utils';
 import NavigationComponent from "./Navigation";
+import ChatCSS from "../css/chat.module.css"
 
 const ChatComponent =()=>{
     const [username, setUsername]= useState(null);
@@ -128,31 +129,45 @@ const ChatComponent =()=>{
     }
 
     return (
-        friends && username && 
-        <div style={{ display: 'flex', height: '100vh' }}>
-            <NavigationComponent />
-            <div style={{ width: '200px', backgroundColor: 'black' }}>
-                {friends.map((friend, index) => {
-                    return <div key={index} onClick={(e)=>{handleSelectChat(e,friend.username)}} style={{ cursor: 'pointer', padding: '10px' }}>
+        <div>
+            <NavigationComponent/>
+            <div className={ChatCSS.container}>
+                <div className={ChatCSS.friendsContainer}>
+                <h2>Chat with a Friend!</h2>
+                {friends && username && friends.map((friend, index) => (
+                    <div 
+                        className={`${ChatCSS.friends} ${selectedChat && selectedChat.UserId === friend.UserId ? ChatCSS.selectedFriend : ''}`} 
+                        key={index} 
+                        onClick={(e) => handleSelectChat(e, friend.username)}
+                    >
                         {friend.username}
                     </div>
-                })}
-            </div>
-            
-            <div style={{ flex: 1, padding: '20px' }}>
-                {!selectedChat && <h2>Select a user to chat</h2>}
-                {selectedChat && selectedChat.messages.map((message, index)=>{
-                    if(message.SenderUserId===username.userIdOfCurrentUser){
-                        return <div key={index}>{`${username.username}: ${message.Message}`}</div>
-                    }
-                    else {
-                        return <div key={index}>{`${selectedChat.username}: ${message.Message}`}</div>
-                    }
-                })}
-                {selectedChat && <input type="text" placeholder="Send a message..." onKeyDown={handleOnKeyDown}/>}
+                ))}
+                </div>
+                <div className={ChatCSS.chatContainer}>
+                    {selectedChat ? (selectedChat.messages.map((message, index) => (
+                        <div key={message.ChatMessageId}>
+                            {message.SenderUserId === username.userIdOfCurrentUser ? (
+                                <div className={ChatCSS.currentUserMessage}>
+                                    {`You: ${message.Message}`}
+                                </div>
+                            ) : (
+                                <div className={ChatCSS.otherUserMessage}>
+                                    {`${selectedChat.username}: ${message.Message}`}
+                                </div>
+                            )}
+                        </div>
+                        ))
+                    ) : (
+                        <h2>Please select a friend to start chatting.</h2>
+                    )}
+                    <div>
+                        {selectedChat && <input className={ChatCSS.sendMessage} type="text" placeholder="Send a message..." onKeyDown={handleOnKeyDown} />}
+                    </div>
+                </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default ChatComponent
