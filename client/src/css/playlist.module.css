@@ -80,7 +80,7 @@ h1 {
 .editPlaylistForm input[type="name"] {
     width: 100%;
     padding: 8px;
-    margin: 10px;
+    margin-bottom: 10px;
     background-color: #333;
     border: none;
     color: #fff;
