@@ -33,7 +33,6 @@ export const ForumPostFeedComponent = (props) =>{
               const response = await axios.get(`http://localhost:3001/verify-token`);
               setCurrentUsername(response.data.username);
             } catch (error) {
-              //window.alert("You must be logged in")
               navigate("/")
             }
           };
@@ -269,10 +268,8 @@ const handleInputKeyDown = (e) =>{
       //trying to submit a duplicate tag
       else{
         e.preventDefault()
-        console.log("TAGS: " + tagOptions)
         alert(`You already included the tag '${tagInput}'`)
         setTagInput('')
-        console.log("TAGS: " + tagOptions)
       }
   }
 }

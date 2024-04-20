@@ -5,6 +5,7 @@ import {hostname, axiosRequest } from "../utils/utils";
 import io from 'socket.io-client';
 import "../index.css";
 import "../css/notifications.css"
+import NavigationComponent from "./Navigation";
 const NotificationsComponent = (props)=>{
     const [username, setUsername]= React.useState(null);
     const [socket,setSocket]= React.useState(null);
@@ -210,14 +211,20 @@ const NotificationsComponent = (props)=>{
                 }
             
         </div>): (
-            <div style={{position:"absolute", width:"50%"}}>
-                <div>All Notifications</div>
+            <div style={{position:"absolute", width:"100%"}}>
+                <div>
+                    <NavigationComponent />
+                </div>
+                <div style={{fontWeight: "bold", fontSize: "30px", marginTop: "10px"}} >All Notifications</div>
                 {notificationsElements && notificationsElements.length > 0 ? (
                         <>
+                            <div style={{width: "30%", marginTop: "10px"}}>
                             {notificationsElements}
+                            </div>
+                            
                         </>
                 ): notificationsElements && notificationsElements.length===0 ? (
-                    <div>No Notifications</div>
+                    <div style={{fontWeight: "bold", fontSize: "30px", marginTop: "10px"}} >No Notifications</div>
                 ): (
                     <div></div>
                 )}

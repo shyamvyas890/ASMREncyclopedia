@@ -19,12 +19,9 @@ export const SingleForumCommentComponent = () => {
     const getParentComment = async () => {
         try {
             const response = await axios.get(`http://localhost:3001/getForumPostCommentByID/${parentCommentID}`, {withCredentials: true})
-            console.log("RESPONSE: " + response.data[0])
-            console.log("BODY: " + response.data[0].body)
             setForumPostComment(response.data[0])
             setForumPostCommentBody(response.data[0].body)
             if(response.data[0].parent_comment_id){
-                console.log("COMMENT ID: " + response.data[0].parent_comment_id)
                 setHasParentComment(true)
                 setEnableViewParent(true)
                 setParentCommentID(response.data[0].parent_comment_id)
@@ -41,15 +38,11 @@ export const SingleForumCommentComponent = () => {
         const getComment = async () => {
             try {
                 const response = await axios.get(`http://localhost:3001/getForumPostCommentByID/${forumPostCommentID}`, {withCredentials: true})
-                console.log("RESPONSE: " + response.data[0])
-                //setForumPostComment(response.data[0])
-                //setForumPostCommentBody(response.data[0].body)
                 if(response.data[0].parent_comment_id){
                     const response2 = await axios.get(`http://localhost:3001/getForumPostCommentByID/${response.data[0].parent_comment_id}`, {withCredentials: true})
                     setForumPostComment(response2.data[0])
                     setForumPostCommentBody(response2.data[0].body)
                     if(response2.data[0].parent_comment_id){
-                        console.log("OMG")
                         setHasParentComment(true)
                         setEnableViewParent(true)
                         setParentCommentID(response2.data[0].parent_comment_id)

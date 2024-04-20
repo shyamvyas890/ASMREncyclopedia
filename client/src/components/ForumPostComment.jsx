@@ -39,7 +39,6 @@ export const ForumPostComment = (props) => {
         const getComment = async () => {
             try {
                 const response = await axios.get(`http://localhost:3001/getForumPostCommentByID/${props.id}`)
-                console.log("RESPONSE: " + response.data[0])
                 setCurrentComment(response.data[0])
                 setCommentBody(response.data[0].body)
                 if(response.data[0].parent_comment_id){
@@ -59,7 +58,6 @@ export const ForumPostComment = (props) => {
                const response = await axios.get(`http://localhost:3001/forumPostParentGetReplies/${postID}/${props.id}`)
                let replies = response.data
                if(singleViewID){
-                console.log("HELLOOOOOOOO" + singleViewID)
                 const singleCommentIndex = replies.findIndex(comment => comment.id === singleViewID);
                 if(singleCommentIndex !== -1){
                     const singleComment = replies.splice(singleCommentIndex, 1)[0];

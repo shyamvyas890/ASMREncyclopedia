@@ -134,7 +134,6 @@ export const FourmPostCommentSection = (props) => {
     }
 
 
-    //console.log(parentCommentsObject)
     //for each parent comment, render a ForumPostComment 
    return (
 

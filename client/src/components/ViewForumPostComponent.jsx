@@ -127,8 +127,6 @@ export const ViewForumPostComponent = () =>{
        }
     }
 
-    console.log("Recommendations: " + recommendedPosts)
-
     return (
         (postObject ?
         <div>

@@ -1461,7 +1461,19 @@ app.get("/forumPostParentGetReplies/:id/:commentID", verifyJWTMiddleware, (req, 
 
 app.get("/forumPostSearch/:searchTitle", verifyJWTMiddleware, (req, res) => {
     const searchTitle = req.params.searchTitle
-    db.query("SELECT * FROM forumpost WHERE title LIKE ?",['%' + searchTitle + '%'], function (err, data){
+    db.query("SELECT * FROM forumpost WHERE title LIKE ? OR title LIKE ?",['% ' + searchTitle + ' %', '%' + searchTitle +'%'], function (err, data){
+        if(err){
+            console.log(err)
+        }
+        else{
+            return res.json(data)
+        }
+    })
+})
+
+app.get("/videoPostSearch/:searchTitle", verifyJWTMiddleware, (req, res) => {
+    const searchTitle = req.params.searchTitle
+    db.query("SELECT * FROM videopost WHERE Title LIKE ? OR Title LIKE ?",['% ' + searchTitle + ' %', '%' + searchTitle +'%'], function (err, data){
         if(err){
             console.log(err)
         }

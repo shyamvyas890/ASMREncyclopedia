@@ -53,10 +53,7 @@ const LoginComponent = (props) => {
   return (
     <div>
         {props.isLoggedIn?(
-          <div className="login-info">
-          <h3>Welcome, {props.username}!</h3>
-          <button onClick={handleLogout}>Logout</button>
-         </div>
+          <div></div>
         ) :props.isLoggedIn===false? (
 
 

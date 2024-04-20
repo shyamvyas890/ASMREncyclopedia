@@ -34,17 +34,14 @@ export const ForumCommentSingleComponent = (props) =>{
                let replies = response.data
                
                if(singleCommentID){
-                console.log("SINGLE COMMENT ID FROM PROPS: " + singleCommentID)
                 //find the "notification comment" by the singleCommentID
                 const singleCommentIndex = replies.findIndex(comment => comment.id == singleCommentID);
                 if (singleCommentIndex !== -1) {
-                    console.log("COMMENT HAS BEEN FOUND")
                     //remove the comment from its original position
                     const singleComment = replies.splice(singleCommentIndex, 1)[0];
                     //place it at the beginning of the replies
                     replies.unshift(singleComment);
                     setCurrentCommentReplies(replies)
-                    console.log("REPLIES HAVE BEEN SET")
                 }
                }
                else{

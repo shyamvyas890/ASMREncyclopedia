@@ -247,14 +247,14 @@ const SettingsComponent = ()=>{
                 (<>
                     <div className={settingsHome.container}>
                       <div className={settingsHome.settingsItem}>
-                        <h1>Your Current Settings</h1>
-                        <h2>Email</h2>
+                        <h1 style={{fontWeight: "bold", fontSize: "30px", marginTop: "10px", margin: "auto"}} > Settings </h1>
+                        <h2 style={{fontWeight: "bold", fontSize: "30px", marginTop: "20px", margin: "auto"}} >Email</h2>
                         <h3>{emailAndSubscriptionPreferences.email === null ? "No email provided" : emailAndSubscriptionPreferences.email}</h3>
                         <button className={settingsHome.button} onClick={changeEditEmail}>{emailAndSubscriptionPreferences.email === null ? "Add email" : "Change email"}</button>
                       </div>
                   
                       <div className={settingsHome.settingsItem}>
-                        <h2>Video Subscription Preferences</h2>
+                        <h2 style={{fontWeight: "bold", fontSize: "30px", marginTop: "20px", margin: "auto"}} >Video Subscription Preferences</h2>
                         <h3>{emailAndSubscriptionPreferences.videoSubscriptionOnly.length === 0 ? "All Genres" : emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only === 1 ? "Only These Genres" : "All Genres Except These:"}</h3>
                         {emailAndSubscriptionPreferences.videoSubscriptionOnly.length !== 0 && (emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only === 1 || emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only === 0) &&
                           emailAndSubscriptionPreferences.videoSubscriptions.map((genre, index) => (
@@ -264,7 +264,7 @@ const SettingsComponent = ()=>{
                       </div>
                   
                       <div className={settingsHome.settingsItem}>
-                        <h2>Forum Subscription Preferences</h2>
+                        <h2 style={{fontWeight: "bold", fontSize: "30px", marginTop: "20px", margin: "auto"}} >Forum Subscription Preferences</h2>
                         <h3>{emailAndSubscriptionPreferences.forumSubscriptionOnly.length === 0 ? "All Genres" : emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only === 1 ? "Only These Tags" : "All Genres Except These:"}</h3>
                         {emailAndSubscriptionPreferences.forumSubscriptionOnly.length !== 0 && (emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only === 1 || emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only === 0) &&
                           emailAndSubscriptionPreferences.forumSubscriptions.map((tag, index) => (
@@ -274,7 +274,7 @@ const SettingsComponent = ()=>{
                       </div>
                   
                       <div className={settingsHome.settingsItem}>
-                        <h2>Security</h2>
+                        <h2 style={{fontWeight: "bold", fontSize: "30px", marginTop: "20px", margin: "auto"}} >Security</h2>
                         <button className={`${settingsHome.button} ${settingsHome.redButton}`} onClick={changeEditPassword}>Change Password</button>
                         <button className={`${settingsHome.button} ${settingsHome.redButton}`} onClick={changeEditDeleteAccount}>Delete Account</button>
                       </div>
@@ -285,8 +285,7 @@ const SettingsComponent = ()=>{
                 (
                     <form onSubmit={editEmail} className={settingsEmail.formContainer}>
                         <label>
-                            Enter the new email.
-                            <input type="email" name="emailInput" />
+                            <input placeholder="Enter the new email" type="email" name="emailInput" />
                         </label>
                         <button type="submit" className={settingsEmail.button}>Save Email</button>
                     </form>
@@ -309,9 +308,9 @@ const SettingsComponent = ()=>{
                         </label>
                         {(forumSubscriptionRadio === "except" || forumSubscriptionRadio === "only") &&
                             <>
-                                <label> Enter the tags, separated by commas (or press enter to add a tag)
+                                <label> 
                                     <br />
-                                    <input className={settingsForumPreferences.tagContainer} onKeyDown={forumHandleOnKeyDown} />
+                                    <input placeholder="Ex: tag1, tag2"className={settingsForumPreferences.tagContainer} onKeyDown={forumHandleOnKeyDown} />
                                 </label>
                                 <br />
                                 {forumTags.map((tag, index) => (
@@ -343,9 +342,9 @@ const SettingsComponent = ()=>{
                         </label>
                         {(subscriptionRadio==="except" || subscriptionRadio==="only") &&
                         <>
-                            <label> Enter the genres, separated by commas (or press enter to add a genre)
+                            <label>
                             <br/>
-                            <input className={settingsForumPreferences.tagContainer} onKeyDown={handleOnKeyDown} />
+                            <input placeholder="Ex: tag1, tag2" className={settingsForumPreferences.tagContainer} onKeyDown={handleOnKeyDown} />
                             </label>
                             <br />
                             {videoTags.map((tag, index)=>(

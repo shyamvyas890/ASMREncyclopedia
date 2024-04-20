@@ -165,7 +165,6 @@ const sortVideoPostComments = (e) =>{
 
    //gets the ID of the current user
    useEffect( () => {
-    console.log("GETTING ID")
     const fetchID = async () => {
         try {
           const response = await axios.get(`http://localhost:3001/users/id?username=${ProfileUsername}`);
@@ -215,7 +214,6 @@ const sortVideoPostComments = (e) =>{
 
    useEffect( () =>{
      const fetchComments = async () =>{
-        console.log("FETCHING COMMENTS")
         try{
             const response = await axios.get("http://localhost:3001/getForumPostComments", {
               params: {username: ProfileUsername}
