@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from "react-router-dom";
 
 const FriendsComponent = (props)=>{
@@ -8,30 +8,15 @@ const FriendsComponent = (props)=>{
     const [isLoggedIn, setIsLoggedIn]= useState(false);
     const [incomingOutgoingFriendRequestsAndFriendships, setIncomingOutgoingFriendRequestsAndFriendships]= useState(null)
     const navigate=useNavigate();
-    const tokenVerify= async (e) => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
-            try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-                if(response.data.username){
-                    setUsername(response.data.username)
-                    setIsLoggedIn(true);
-                }
-                else {
-                    // setIsLoggedIn(false);
-                    navigate("/");
-                   
-                }
-            }
-    
-            catch(error){
-                console.log(error);
-            }
+    const tokenVerify= async () => {
+        try{
+            const response= await axios.get(`http://localhost:3001/verify-token`)
+            setUsername(response.data.username)
+            setIsLoggedIn(true);
         }
-        else{
-            // setIsLoggedIn(false);
+        catch(error){
             navigate("/");
-            
+            console.log(error);
         }
     }
     
@@ -74,8 +59,6 @@ const FriendsComponent = (props)=>{
 
     const acceptFriendRequest = async (e, SenderUserId) =>{
         e.preventDefault();
-        const deleteFriendRequest = await axios.delete(`${hostname}/friendRequests`, {params:{SenderUserId, ReceiverUserId:incomingOutgoingFriendRequestsAndFriendships.userIdOfCurrentUser}});
-        console.log(deleteFriendRequest);
         const addFriendship = await axios.post(`${hostname}/Friendships`, {UserId1:SenderUserId, UserId2:incomingOutgoingFriendRequestsAndFriendships.userIdOfCurrentUser});
         console.log(addFriendship);
         populateFriends();

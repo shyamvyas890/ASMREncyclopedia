@@ -1,38 +1,37 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React from "react";
+import "../css/aboutus.css";
 
 const AboutUsComponent = () => {
   return (
-    <div>
-      <div className="about-section">
-        <h2>About Us</h2>
+    <div className="container">
+      <div className="about-header">
+        <h2>Meet The Team</h2>
         <p>Get to know the braintrust of ASMR Encyclopedia, our foundation, and what we hope to accomplish.</p>
       </div>
-      <h2 style={{ textAlign: 'center', color: '#2c3e50' }}>The Team</h2>
-      <div className="row">
+      <div className="team-grid">
         <TeamMemberCard
           name="Allen Tran"
           title="Founder"
-          description="ADD BRIEF DESCRIPTION HERE"
-          email="ADD EMAIL HERE"
+          description="**Brief Description**"
+          email="allen@gmail.com"
         />
         <TeamMemberCard
           name="Shyam Vyas"
           title="Founder"
-          description="ADD BRIEF DESCRIPTION HERE"
-          email="ADD EMAIL HERE"
+          description="**Brief Description**"
+          email="shyam@gmail.com"
         />
         <TeamMemberCard
           name="Ayaz Azhar"
           title="Founder"
-          description="ADD BRIEF DESCRIPTION HERE"
-          email="ADD EMAIL HERE"
+          description="**Brief Description**"
+          email="ayaz@gmail.com"
         />
         <TeamMemberCard
           name="Justin Yamamoto"
           title="Founder"
-          description="ADD BRIEF DESCRIPTION HERE"
-          email="ADD EMAIL HERE"
+          description="**Brief Description**"
+          email="justin@gmail.com"
         />
       </div>
     </div>
@@ -41,17 +40,11 @@ const AboutUsComponent = () => {
 
 const TeamMemberCard = ({ name, title, description, email }) => {
   return (
-    <div className="column">
-      <div className="card">
-        <img src={`/images/${name.toLowerCase()}picture.jpg`} alt={name} style={{ width: '100%' }} />
-        <div className="container">
-          <h2>{name}</h2>
-          <p className="title">{title}</p>
-          <p>{description}</p>
-          <p>{email}</p>
-          <p><a href="#" className="button">Contact</a></p>
-        </div>
-      </div>
+    <div className="team-member-card">
+      <h3>{name}</h3>
+      <p>{title}</p>
+      <p>{description}</p>
+      <a href={`mailto:${email}`}>{email}</a>
     </div>
   );
 };

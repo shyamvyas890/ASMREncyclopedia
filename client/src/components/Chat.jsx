@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import io from 'socket.io-client';
 import { useNavigate } from "react-router-dom";
 import { axiosRequest, hostname } from '../utils/utils';
@@ -13,40 +13,30 @@ const ChatComponent =()=>{
     const disconnectSocket = () => {
         console.log(`socket is ${socket}`)
         if (socket) {
-            
             socket.disconnect();
         }
     };
 
     const tokenVerify= async () => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
             try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    setUsername({userIdOfCurrentUser, username:response.data.username})
-                    const friendsList = await axios.get(`${hostname}/ListOfFriends/${userIdOfCurrentUser}`);
-                    const theFriendsList=[];
-                    for(const friend of friendsList.data){
-                        const friendId= friend.UserId1===userIdOfCurrentUser?friend.UserId2:friend.UserId1;
-                        const friendUsername = (await axiosRequest(3,2,"users/id", {UserId:friendId})).data.username;
-                        theFriendsList.push({UserId:friendId, username:friendUsername});
-                    }
-                    setFriends(theFriendsList);
-                    setSocket(io(hostname, { transports : ['websocket'], query:{token:localStorage.getItem("token")}}));
+                const response= await axios.get(`http://localhost:3001/verify-token`)
+                const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+                setUsername({userIdOfCurrentUser, username:response.data.username})
+                const friendsList = await axios.get(`${hostname}/ListOfFriends/${userIdOfCurrentUser}`);
+                const theFriendsList=[];
+                for(const friend of friendsList.data){
+                    const friendId= friend.UserId1===userIdOfCurrentUser?friend.UserId2:friend.UserId1;
+                    const friendUsername = (await axiosRequest(3,2,"users/id", {UserId:friendId})).data.username;
+                    theFriendsList.push({UserId:friendId, username:friendUsername});
                 }
-                else {
-                    navigate("/");
-                }
+                setFriends(theFriendsList);
+                setSocket(io(hostname, { transports : ['websocket']}));
+                
             }
             catch(error){
+                navigate("/")
                 console.log(error);
             }
-        }
-        else{
-            navigate("/");
-        }
     }
 
     React.useEffect(()=>{
@@ -68,19 +58,27 @@ const ChatComponent =()=>{
             )
         }   
     }
+    const handleNewNotification = (notification)=>{
+        console.log(notification);
+    }
+    const handleConnect = () => {
+        console.log('Connected to server:', socket.id);
+    };
+    const handleDisconnect = () => {
+        console.log('Disconnected from server');
+    }
 
     React.useEffect( ()=>{
         if(socket){
-            socket.on('connect', () => {
-                console.log('Connected to server:', socket.id);
-            });
-            socket.on('disconnect', () => {
-                console.log('Disconnected from server');
-            });
+            console.log("hey there");
+            socket.on('connect', handleConnect);
             socket.on('newMessage', handleNewMessage);
+            socket.on('newNotification', handleNewNotification);
             return ()=>{
                 console.log("hello world")
                 socket.off('newMessage', handleNewMessage);
+                socket.off('newNotification', handleNewNotification);
+                socket.off("connect", handleConnect);
             }
         }
     },[socket, selectedChat]
@@ -89,8 +87,10 @@ const ChatComponent =()=>{
 
     React.useEffect(()=>{
         if(socket){
+            socket.on('disconnect', handleDisconnect);
             return ()=>{
                 disconnectSocket();
+                socket.off("disconnect", handleDisconnect);
             }
         }
         

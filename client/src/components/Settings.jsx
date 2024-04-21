@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from "react-router-dom";
 import { axiosRequest } from "../utils/utils";
-
-
 const SettingsComponent = ()=>{
     const hostname= "http://localhost:3001";
     const [username, setUsername]= React.useState(null);
@@ -11,32 +9,28 @@ const SettingsComponent = ()=>{
     const [edit, setEdit] = useState({
         email: false,
         subscriptionPreferences:false,
-        password: false
+        forumSubscriptionPreferences: false,
+        password: false,
+        accountDeletion: false
     })
     const [subscriptionRadio, setSubscriptionRadio]= useState(null);
+    const [forumSubscriptionRadio, setForumSubscriptionRadio]= useState(null);
     const [videoTags, setVideoTags]= useState([]);
+    const [forumTags, setForumTags]= useState([]);
+    const [errorMessageForChangingPasswordAndDeletingAccount, setErrorMessageForChangingPasswordAndDeletingAccount] = React.useState("");
+
     const navigate= useNavigate();
     const tokenVerify= async (e) => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
             try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    setUsername({userIdOfCurrentUser, username:response.data.username})
-                }
-                else {
-                    navigate("/");
-                }
+                const response= await axios.get(`http://localhost:3001/verify-token`)
+                const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+                setUsername({userIdOfCurrentUser, username:response.data.username})
             }
-   
             catch(error){
                 console.log(error);
+                navigate("/");
             }
-        }
-        else{
-            navigate("/");
-        }
+        
     }
     React.useEffect(()=>{
         tokenVerify();
@@ -45,14 +39,29 @@ const SettingsComponent = ()=>{
         const email = (await axiosRequest(3, 2, "email", {UserId: username.userIdOfCurrentUser})).data[0].email;
         const videoSubscriptionOnly = (await axiosRequest(3,2,"videoSubscriptionOnly", {UserId: username.userIdOfCurrentUser})).data;
         const videoSubscriptions = (await axiosRequest(3,2,"videoSubscriptions", {UserId: username.userIdOfCurrentUser})).data;
+        const forumSubscriptions = (await axios.get('http://localhost:3001/fetchForumSubscriptions', {
+            params: {userID: username.userIdOfCurrentUser}
+        })).data
+        const forumSubscriptionOnly = (await axios.get('http://localhost:3001/fetchForumSubscriptionOnly', {
+            params: {userID: username.userIdOfCurrentUser}
+        })).data
+
         const newTags=[]
         for(const sub of videoSubscriptions){
             sub.GenreName = (await axiosRequest(3,2,"genreName", {GenreId: sub.GenreId})).data[0].Genre;
             newTags.push(sub.GenreName);
         }
+        const newForumTags=[]
+        for(const sub of forumSubscriptions){
+            const val = sub.ForumTagName.trim()
+            console.log(val)
+            newForumTags.push(val)
+        }
         setVideoTags(newTags);
-       
-        setEmailAndSubscriptionPreferences({email,videoSubscriptionOnly, videoSubscriptions});
+        setForumTags(newForumTags)
+        setEmailAndSubscriptionPreferences({email,videoSubscriptionOnly, videoSubscriptions, forumSubscriptionOnly, forumSubscriptions});
+        console.log("videotags: ", newTags)
+        console.log("forumtags: ", newForumTags)
     }
     React.useEffect(()=>{
         if(username){
@@ -65,8 +74,14 @@ const SettingsComponent = ()=>{
     const changeEditSubscriptionPreferences = ()=>{
         setEdit(prev=>({...prev, subscriptionPreferences:!prev.subscriptionPreferences}));
     }
+    const changeEditForumSubscriptionPreferences = ()=>{
+        setEdit(prev=>({...prev, forumSubscriptionPreferences:!prev.forumSubscriptionPreferences}));
+    }
     const changeEditPassword = ()=>{
         setEdit(prev=>({...prev, password:!prev.password}));
+    }
+    const changeEditDeleteAccount = ()=>{
+        setEdit(prev=>({...prev, accountDeletion:!prev.accountDeletion}));
     }
     const editEmail = async (e)=>{
         e.preventDefault();
@@ -93,6 +108,7 @@ const SettingsComponent = ()=>{
             }
             console.log(addSubOnly);
             for(const tag of videoTags){
+                console.log("videoTag: ", tag)
                 const addSub= await axiosRequest(1,1,"videoSubscriptions", {UserId:username.userIdOfCurrentUser, Genre:tag});
                 console.log(addSub);
             }
@@ -101,23 +117,87 @@ const SettingsComponent = ()=>{
         changeEditSubscriptionPreferences();
         setSubscriptionRadio(null);
     }
+
+    const editForumSubscription = async (e)=>{
+        e.preventDefault();
+        console.log("go: ", emailAndSubscriptionPreferences.forumSubscriptionOnly)
+
+        if(emailAndSubscriptionPreferences.forumSubscriptionOnly){   //If exists delete
+            console.log("delete")
+            await axios.delete("http://localhost:3001/deleteForumSubscriptionOnly/")
+            await axios.delete("http://localhost:3001/deleteForumSubscription/")
+        }
+        if(forumSubscriptionRadio==="except" || forumSubscriptionRadio==="only"){
+            let addSubOnly;
+            if(forumSubscriptionRadio==="except"){
+                await axios.post("http://localhost:3001/createForumSubscriptionOnly/", {}, {
+                    params: { Only: 0 }
+                })
+            }
+            else {
+                await axios.post("http://localhost:3001/createForumSubscriptionOnly/", {}, {
+                    params: { Only: 1 }
+                })            
+            }
+            console.log(addSubOnly);
+            for(const tag of forumTags){ //Insert Ignore
+                console.log("forumTag: ", tag)
+                await axios.post("http://localhost:3001/forumTagCreate/", {}, {
+                    params: { forumTagName: tag }
+                })
+                const tagID = await axios.get("http://localhost:3001/fetchForumTag/", {
+                    params: { forumTagName: tag }
+                })
+                console.log("tagID: ", tagID)
+                await axios.post("http://localhost:3001/createForumSubscription/", {}, {
+                    params: { ForumTagID: tagID.data[0].ForumTagID }
+                })
+            }
+        }
+        getCurrentSettings();
+        changeEditForumSubscriptionPreferences();
+        setForumSubscriptionRadio(null);
+    }
     const editPassword= async (e)=>{
         e.preventDefault();
         if(e.target.elements.newPassword1.value!==e.target.elements.newPassword2.value){
-            console.log("New passwords dont match")
+            e.target.elements.newPassword1.value=""
+            e.target.elements.newPassword2.value=""
+            e.target.elements.currentPassword.value=""
+            setErrorMessageForChangingPasswordAndDeletingAccount("New passwords dont match")
             return;
         }
-  
-        const tryLoggingIn= await axiosRequest(1,1,"login", {username:username.username, password:e.target.elements.currentPassword.value});
-        if(tryLoggingIn.status===200){
-            const blacklistToken= await axios.post(`${hostname}/logout/${tryLoggingIn.data.token}`);
-            const changePassword= await axiosRequest(4,1,"changePassword",{username:username.username, password:e.target.elements.newPassword1.value})
+        try{
+            const changePassword= await axiosRequest(4,1,"changePassword",{username:username.username, oldPassword:e.target.elements.currentPassword.value, newPassword:e.target.elements.newPassword1.value})
+            console.log(changePassword)
+            setErrorMessageForChangingPasswordAndDeletingAccount("")
             changeEditPassword();
         }
-        else{
-            console.log("Current Password is incorrect, try again.")
+        catch(error){
+            e.target.elements.newPassword1.value=""
+            e.target.elements.newPassword2.value=""
+            e.target.elements.currentPassword.value=""
+            setErrorMessageForChangingPasswordAndDeletingAccount(error.response.data);
         }
     }
+    const tryDeletion = async (e)=>{
+        e.preventDefault()
+        console.log(e);
+        try{
+            const accountDeletionAttempt = await axiosRequest(1,1,"accountDeletionRequest", {password: e.target.elements.currentPassword.value});
+            e.target.elements.currentPassword.value="";
+            console.log(accountDeletionAttempt);
+            navigate("/");
+        }
+        catch(error){
+            e.target.elements.currentPassword.value=""
+            setErrorMessageForChangingPasswordAndDeletingAccount(error.response.data);
+        }
+
+
+    }
+
+
     const handleOnKeyDown = (e)=>{
         if(e.key==="Enter" || e.key===","){
             e.preventDefault();
@@ -135,24 +215,27 @@ const SettingsComponent = ()=>{
             setVideoTags(prevTags=>[...prevTags, newTag]);
         }
     }
-
-
-const handleAccountDeletion = async (e) => {
-    const confirmDeletion = window.confirm("DISCLAIMER! Are you sure you want to delete your account? Please Note, This action cannot be undone once completed.");
-    
-    if (confirmDeletion) {
-        const tokenLogout= await axios.post(`http://localhost:3001/logout/${localStorage.getItem("token")}`);
-        console.log(tokenLogout);
-        localStorage.removeItem("token");
-        const response = await axiosRequest(2,2,"deleteAccount", {UserId:username.userIdOfCurrentUser});
-        alert("Your account has been successfully deleted.");  
-        navigate("/register");
+    const forumHandleOnKeyDown = (e)=>{
+        if(e.key==="Enter" || e.key===","){
+            e.preventDefault();
+            const val= e.target.value.trim();
+            console.log(val)
+            addForumTag(val)
+            e.target.value="";
+        }
     }
-}
- 
+    const handleRemovalOfForumTag = (e, removeThis)=>{
+        e.preventDefault();
+        setForumTags(prevTags=>prevTags.filter(theTag=> theTag!==removeThis));
+    }
+    const addForumTag = (newTag)=>{
+        if(newTag && !forumTags.includes(newTag)){
+            setForumTags(prevTags=>[...prevTags, newTag]);
+        }
+    }
     return (
         <React.Fragment>
-            {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password)?
+            {(username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)? 
                 (<>
                     <div>Your Current Settings</div>
                     <div>Email</div>
@@ -163,15 +246,23 @@ const handleAccountDeletion = async (e) => {
                     {emailAndSubscriptionPreferences.videoSubscriptionOnly.length!==0 && (emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only===1 || emailAndSubscriptionPreferences.videoSubscriptionOnly[0].Only===0) &&
                     emailAndSubscriptionPreferences.videoSubscriptions.map((genre, index)=>(
                         <div key={index}>{genre.GenreName}</div>
-                    ))
-                    }
+                    ))}
                     <button onClick={changeEditSubscriptionPreferences}>Update Video Subscription Preferences</button>
+                    
+                    <div>Forum Subscription Preferences</div>
+                     
+                    <div>{emailAndSubscriptionPreferences.forumSubscriptionOnly.length===0? "All Genres": emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===1?"Only These Tags": "All Genres Except These:"}</div>
+                    {emailAndSubscriptionPreferences.forumSubscriptionOnly.length!==0 && (emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===1 || emailAndSubscriptionPreferences.forumSubscriptionOnly[0].Only===0) &&
+                    emailAndSubscriptionPreferences.forumSubscriptions.map((tag, index)=>(
+                        <div key={index}>{tag.ForumTagName}</div>
+                    ))}
+                    <button onClick={changeEditForumSubscriptionPreferences}>Update Forum Post Subscription Preferences</button>
                     <div>Security</div>
                     <button onClick={changeEditPassword}>Change Password</button>
-                    <button onClick={handleAccountDeletion}>Delete Account</button>
+                    <button style={{color:"red"}} onClick={changeEditDeleteAccount}>Delete Account</button>
                 </>
                 ):
-                (username && emailAndSubscriptionPreferences && edit.email && !edit.subscriptionPreferences && !edit.password)?
+                (username && emailAndSubscriptionPreferences && edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)?
                 (
                     <form onSubmit={editEmail}>
                         <label>
@@ -181,7 +272,57 @@ const handleAccountDeletion = async (e) => {
                         <button type="submit">Save Email</button>
                     </form>
                 ):
-                (username && emailAndSubscriptionPreferences && !edit.email && edit.subscriptionPreferences && !edit.password)?
+                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && edit.forumSubscriptionPreferences && !edit.accountDeletion)?
+                (
+                    <form onSubmit={editForumSubscription}>
+                        <style>
+                            {`
+                            .tag {
+                                display: inline-block;
+                                background-color: yellow;
+                                color: black; 
+                                padding: 5px;
+                                margin: 5px;
+                                border-radius: 5px;
+                            }
+                            
+                            .tag-container {
+                                display: inline-block;
+                                padding: 5px;
+                                margin-top: 5px;
+                                border-radius: 5px;
+                            }
+                            `}
+                        </style>
+                        <div>Which ASMR forum tags do you want to subscribe to?</div>
+                        <label>All Tags
+                            <input type="radio" name="forumSubscriptionQuestion" value="all" onChange={()=>{setForumSubscriptionRadio("all")}} checked={forumSubscriptionRadio==="all"}/>
+                        </label>
+                        <label>All Tags Except:
+                        <input type="radio" name="forumSubscriptionQuestion" value="except" onChange={()=>{setForumSubscriptionRadio("except")}} checked={forumSubscriptionRadio==="except"}/>
+                        </label>
+                        <label>Only These Tags:
+                        <input type="radio" name="forumSubscriptionQuestion" value="only" onChange={()=>{setForumSubscriptionRadio("only")}} checked={forumSubscriptionRadio==="only"}/>
+                        </label>
+                        {(forumSubscriptionRadio==="except" || forumSubscriptionRadio==="only") &&
+                        <>
+                            <label> Enter the tags, separated by commas (or press enter to add a tag)
+                            <br/>
+                            <input className="tag-container" onKeyDown={forumHandleOnKeyDown} />
+                            </label>
+                            <br />
+                            {forumTags.map((tag, index)=>(
+                                <div key={index} className="tag">
+                                    {tag}
+                                    <button onClick={(e)=>{handleRemovalOfForumTag(e,tag)}}>&times;</button>
+                                </div>
+                            ))}
+                        </>
+                        }
+                        <button type="submit">Update Subscription Preferences</button>
+                    </form>
+                ):
+                (username && emailAndSubscriptionPreferences && !edit.email && edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)?
                 (
                     <form onSubmit={editSubscription}>
                         <style>
@@ -189,12 +330,12 @@ const handleAccountDeletion = async (e) => {
                             .tag {
                                 display: inline-block;
                                 background-color: yellow;
-                                color: black;
+                                color: black; 
                                 padding: 5px;
                                 margin: 5px;
                                 border-radius: 5px;
                             }
-                           
+                            
                             .tag-container {
                                 display: inline-block;
                                 padding: 5px;
@@ -231,7 +372,7 @@ const handleAccountDeletion = async (e) => {
                         <button type="submit">Update Subscription Preferences</button>
                     </form>
                 ):
-                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && edit.password)?
+                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)?
                 (
                     <form onSubmit={editPassword}>
                         <label>
@@ -246,15 +387,25 @@ const handleAccountDeletion = async (e) => {
                         Enter new password again.
                         <input name="newPassword2" type="password" />
                         </label>
+                        <button onClick={()=>{setEdit(prevEdit=>{setErrorMessageForChangingPasswordAndDeletingAccount(""); return {...prevEdit, password: !prevEdit.password};})}}>Cancel</button>
+                        <div style={{color:"red"}}>{errorMessageForChangingPasswordAndDeletingAccount}</div>
                         <button type="submit"> Change Password</button>
                     </form>
                 ):
+                (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && edit.accountDeletion)?
+                (<form onSubmit={tryDeletion}>
+                    <div style={{color:"red"}}>Are you sure you want to do this? This action cannot be undone. If you are sure, enter your password below to confirm this action.</div>
+                    <label>
+                        Enter your current password.
+                        <input name="currentPassword" type="password" />
+                        <button onClick={()=>{setEdit(prevEdit=>{setErrorMessageForChangingPasswordAndDeletingAccount(""); return {...prevEdit, accountDeletion: !prevEdit.accountDeletion};})}}>Cancel</button>
+                        <button type="submit">Delete</button>
+                        <div style={{color:"red"}}>{errorMessageForChangingPasswordAndDeletingAccount}</div>
+                    </label>
+                </form>):
                 null}
         </React.Fragment>
     )
 }
 
-
 export default SettingsComponent;
-
-

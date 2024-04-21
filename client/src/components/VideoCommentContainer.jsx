@@ -1,27 +1,11 @@
 import React, { useState, useRef } from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import VideoCommentNodeComponent from "./VideoCommentNode";
-class TreeNode {
-    constructor(data){
-        this._data=data;
-        this._children=[]
-    }
-    get data() {
-        return this._data;
-    }
-    get children() {
-        return this._children;
-    }
-    addChild(child) {
-        this._children = [...this._children, child]
-    }
-    set setChildren(childs) {
-        this._children= childs;
-    }
-}
-
+import { TreeNode, axiosRequest } from "../utils/utils";
 const VideoCommentContainerComponent = (props)=>{
     const [roots, setRoots]= useState(null);
+    const [sortedRoots, setSortedRoots] = useState(null);
+    const [sortOption, setSortOption] = useState("latest");
     const commentRef = useRef("");
     const fetchAllCommentsForThisPost = async () => {
         const fetchPosts = await axios.get(`http://localhost:3001/videoComments/${props.VideoPostId}`);
@@ -50,13 +34,22 @@ const VideoCommentContainerComponent = (props)=>{
             }})
             idToCommentMapping[fetchPosts.data[i].VideoPostCommentId].data.rating= fetchRating.data.length===0? 0: fetchRating.data[0].LikeStatus===1? 1:-1;
         }
+        for( const rootNode of rootNodes){
+            const ratingsForRootNode = await axiosRequest(3,2,"videoCommentRatings", {VideoPostCommentId:rootNode.data.VideoPostCommentId});
+            let likes=0;
+            let dislikes= 0;
+            for(const rating of ratingsForRootNode.data){
+                if(rating.LikeStatus===1){
+                    likes++;
+                }
+                else if (rating.LikeStatus===0){
+                    dislikes++;
+                }
+            }
+            rootNode._data= {...rootNode._data, likes, dislikes}
+        }
         setRoots(rootNodes);
     }
-
-
-
-    
-
 
     const handleTheReply = async (e)=>{
         e.preventDefault();
@@ -74,6 +67,9 @@ const VideoCommentContainerComponent = (props)=>{
                 VideoPostCommentId: commentResponse.data.insertId,
                 UserId: props.userIdOfCurrentUser,
                 Comment: theComment,
+                CommentedAt: new Date().toISOString(),
+                NotificationRead:0,
+                rating:0,
                 VideoPostId: props.VideoPostId,
                 ReplyToVideoPostCommentId:null,
                 DELETED: 0,
@@ -86,13 +82,99 @@ const VideoCommentContainerComponent = (props)=>{
     React.useEffect(()=>{
         fetchAllCommentsForThisPost();
     },[props.userIdOfCurrentUser]);
+
+    React.useEffect(()=>{
+        if(roots){
+            let newRootNodes = [...roots]
+            if(sortOption === "latest"){
+                newRootNodes.sort((a,b)=>{
+                    const dateA= new Date(a._data.CommentedAt);
+                    const dateB = new Date(b._data.CommentedAt);
+                    if(dateA.getTime()>dateB.getTime()){
+                        return -1;
+                    }
+                    else if(dateA.getTime()<dateB.getTime()){
+                        return 1;
+                    }
+                    return 0;
+                })
+
+            }
+            else if(sortOption === "oldest"){
+                newRootNodes.sort((a,b)=>{
+                    const dateA= new Date(a._data.CommentedAt);
+                    const dateB = new Date(b._data.CommentedAt);
+                    if(dateA.getTime()>dateB.getTime()){
+                        return 1;
+                    }
+                    else if(dateA.getTime()<dateB.getTime()){
+                        return -1;
+                    }
+                    return 0;
+                })
+                
+            }
+            else if(sortOption === "best"){
+
+                newRootNodes.sort((a,b)=>{
+                    const AScore = a._data.likes-a._data.dislikes;
+                    const BScore = b._data.likes-b._data.dislikes;
+                    if(AScore>BScore){
+                        return -1;
+                    }
+                    else if (BScore>AScore){
+                        return 1;
+                    }
+                    return 0;
+                })
+                
+            }
+            else if(sortOption === "worst"){
+                newRootNodes.sort((a,b)=>{
+                    const AScore = a._data.likes-a._data.dislikes;
+                    const BScore = b._data.likes-b._data.dislikes;
+                    if(AScore>BScore){
+                        return 1;
+                    }
+                    else if (BScore>AScore){
+                        return -1;
+                    }
+                    return 0;
+                })
+            }
+            setSortedRoots(newRootNodes)
+        }
+    }, [roots, sortOption])
+
     
     return (<div>
             <form onSubmit={handleTheReply}>
                     <textarea ref={commentRef} rows="5" cols="50" placeholder="What are your thoughts?"/>
                     <button type="submit">Reply</button>
             </form>
-            {roots && roots.map((rootComment, index)=>(
+            <div>
+                <label>Sort By:</label>
+                <select value={sortOption} onChange={(e)=>{
+                    if(e.target.value==="latest"){
+                        setSortOption("latest")
+                    }
+                    else if(e.target.value==="oldest"){
+                        setSortOption("oldest")
+                    }
+                    else if(e.target.value==="best"){
+                        setSortOption("best")
+                    }
+                    else if(e.target.value==="worst"){
+                        setSortOption("worst")
+                    }
+                }}>
+                    <option value="latest">Latest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="best">Best</option>
+                    <option value="worst">Worst</option>
+                </select>
+            </div>
+            {sortedRoots && sortedRoots.map((rootComment, index)=>(
                 <VideoCommentNodeComponent 
                 tn ={rootComment}
                 key={index}
@@ -101,9 +183,6 @@ const VideoCommentContainerComponent = (props)=>{
                 setRoots={setRoots}
                 />
             ))}
-        
-
-                
             </div>)
 }
 

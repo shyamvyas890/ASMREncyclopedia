@@ -1,8 +1,12 @@
 import React, { useRef, useState } from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import "../css/addvideopost.css"
+
 const AddVideoPostComponent = (props)=>{
     const hostname= "http://localhost:3001";
     const [videoTags, setVideoTags]= useState([]);
+    const [errorMessage, setErrorMessage] = React.useState("");
     const titleRef= useRef(null);
     const linkRef= useRef(null);
     const tagRef= useRef(null);
@@ -55,10 +59,24 @@ const AddVideoPostComponent = (props)=>{
             console.log("You must have at least one tag");
             return;
         }
-        const addPost = await axios.post(`http://localhost:3001/video/${theId}`, {
-            UserId: props.userIdOfCurrentUser,
-            Title:theTitle    
-        })
+        let addPost;
+        try{
+            addPost = await axios.post(`http://localhost:3001/video/${theId}`, {
+                UserId: props.userIdOfCurrentUser,
+                Title:theTitle    
+            })
+        }
+        catch(error){
+
+
+            setErrorMessage(error.response.data)
+            titleRef.current.value="";
+            linkRef.current.value="";
+            tagRef.current.value="";
+            setVideoTags([]);
+            return;
+        }
+            
         for(const videoTag of videoTags){
             const addTag= await axios.post(`${hostname}/video-genre`, {
                 VideoPostId: addPost.data.insertId, Genre:videoTag
@@ -71,6 +89,8 @@ const AddVideoPostComponent = (props)=>{
         setVideoTags([]);
     }
     return (
+      <div>
+        <h3> Add a new video! </h3>
         <form onSubmit={handleSubmit}>
             <style>
                 {`
@@ -83,28 +103,21 @@ const AddVideoPostComponent = (props)=>{
                     border-radius: 5px;
                   }
                   
-                  .tag-container {
-                    display: inline-block;
-                    padding: 5px;
-                    margin-top: 5px;
-                    border-radius: 5px;
-                  }
+                 
                 `}
             </style>
-            <label>
-            Title:
-            <input ref={titleRef} type="text"  />
-            </label>
+          
+            <input ref={titleRef} type="text" placeholder="Post Title" />
+          
             <br />
-            <label>
-            Youtube Video Link:
-            <input ref={linkRef} type="text"/>
-            </label>
+         
+            <input ref={linkRef} type="text" placeholder="YouTube Video Link"/>
+            
             <br />
-            <label> Enter the genres for this ASMR Video, separated by commas (or press enter to add a genre)
-                <br/>
-            <input className="tag-container" ref={tagRef} onKeyDown={handleOnKeyDown} />
-            </label>
+            
+                
+            <input className="tag-container" ref={tagRef} onKeyDown={handleOnKeyDown} placeholder="Press 'Enter' to add tag(s)" />
+            
             <br />
             {videoTags.map((tag, index)=>(
                     <div key={index} className="tag">
@@ -112,8 +125,10 @@ const AddVideoPostComponent = (props)=>{
                         <button onClick={(e)=>{handleRemovalOfTag(e,tag)}}>&times;</button>
                     </div>
                 ))}
-            <button type="submit">Submit Video Post</button>
+            <div style={{color:"red"}}>{errorMessage}</div>
+            <button type="submit" className="btn btn-primary"> Post </button>
         </form>
+    </div>
     )
 
 }

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react"
 import { TreeNode } from "./VideoCommentContainer";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { Link } from "react-router-dom";
 const VideoCommentNodeComponent = (props) =>{
     const [showReplyBox, setShowReplyBox]= useState(false);
