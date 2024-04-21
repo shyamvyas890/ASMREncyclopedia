@@ -1,5 +1,5 @@
-import axios from "axios";
-const hostname= "http://localhost:3001"
+import axios from "./AxiosWithCredentials.js";
+const hostname= "http://localhost:3001";
 const axiosRequest = async (reqNum, inputType, pathname, theInput )=>{ // reqNum = POST =1 DELETE = 2 GET = 3 PUT = 4   inputType = Body= 1 Query = 2 (doesnt cover params input)     
     let response;
     if(reqNum===1){
@@ -27,5 +27,23 @@ const axiosRequest = async (reqNum, inputType, pathname, theInput )=>{ // reqNum
     }
     return response;
 }
+class TreeNode {
+    constructor(data){
+        this._data=data;
+        this._children=[]
+    }
+    get data() {
+        return this._data;
+    }
+    get children() {
+        return this._children;
+    }
+    addChild(child) {
+        this._children = [...this._children, child]
+    }
+    set setChildren(childs) {
+        this._children= childs;
+    }
+}
 
-export {axiosRequest, hostname};
+export {axiosRequest, hostname, TreeNode};
