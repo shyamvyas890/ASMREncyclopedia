@@ -40,6 +40,75 @@ CREATE TABLE VideoPostGenre (
   FOREIGN KEY (GenreId) REFERENCES Genre(GenreId) ON DELETE CASCADE,
   UNIQUE (VideoPostId, GenreId)
 );
+
+CREATE TABLE forums (
+  id INT AUTO_INCREMENT UNIQUE,
+  title varchar(255) NOT NULL UNIQUE,
+  description varchar(255) NOT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE ForumPost(
+  id INT AUTO_INCREMENT UNIQUE,
+  username varchar(255) NOT NULL,
+  title varchar(255) NOT NULL, 
+  body TEXT NOT NULL, 
+  post_timestamp timestamp NOT NULL, 
+  tfidf_vector TEXT,
+  PRIMARY KEY(id),
+  FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+);
+
+CREATE TABLE ForumTag(
+  ForumTagID INT AUTO_INCREMENT PRIMARY KEY,
+  ForumTagName Varchar(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE ForumPostTag(
+  ForumPostTagID INT AUTO_INCREMENT PRIMARY KEY,
+  ForumPostID INT NOT NULL,
+  ForumTagID INT NOT NULL,
+  FOREIGN KEY (ForumPostID) REFERENCES ForumPost(id) ON DELETE CASCADE,
+  FOREIGN KEY (ForumTagID) REFERENCES ForumTag(ForumTagID) ON DELETE CASCADE,
+  UNIQUE (ForumPostID, ForumTagID)
+);
+
+CREATE TABLE ForumPostLikeDislike(
+  LikeDislikeID INT AUTO_INCREMENT PRIMARY KEY,
+  ForumPostID INT NOT NULL,
+  UserID INT NOT NULL,
+  LikeStatus BOOLEAN NOT NULL,
+  FOREIGN KEY (ForumPostID) REFERENCES ForumPost(id) ON DELETE CASCADE,
+  FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE (ForumPostID, UserId)
+);
+
+CREATE TABLE ForumPostComments(
+  id INT AUTO_INCREMENT UNIQUE, 
+  forum_post_id INT, 
+  username varchar(255), 
+  body text NOT NULL, 
+  comment_timestamp timestamp NOT NULL,
+  parent_comment_id INT DEFAULT NULL,
+  NotificationRead BOOLEAN DEFAULT FALSE, 
+  deleted boolean DEFAULT false NOT NULL,
+  PRIMARY KEY (id), 
+  FOREIGN KEY (forum_post_id) REFERENCES ForumPost(id) ON DELETE CASCADE,
+  FOREIGN KEY (parent_comment_id) REFERENCES ForumPostComments(id) ON DELETE CASCADE,
+  FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+);
+
+CREATE TABLE ForumCommentLikeDislike(
+  LikeDislikeID INT AUTO_INCREMENT PRIMARY KEY,
+  ForumPostCommentID INT NOT NULL,
+  UserID INT NOT NULL,
+  LikeStatus BOOLEAN NOT NULL,
+  FOREIGN KEY (ForumPostCommentID) REFERENCES ForumPostComments(id) ON DELETE CASCADE,
+  FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE (ForumPostCommentID, UserId)
+);
+
+
 CREATE TABLE VideoPostComments (
   VideoPostCommentId INT AUTO_INCREMENT PRIMARY KEY,
   UserId INT NOT NULL,
@@ -48,6 +117,7 @@ CREATE TABLE VideoPostComments (
   ReplyToVideoPostCommentId INT,
   CommentedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   DELETED BOOLEAN NOT NULL,
+  NotificationRead BOOLEAN DEFAULT FALSE,
   FOREIGN KEY (UserId) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (VideoPostId) REFERENCES VideoPost(VideoPostId) ON DELETE CASCADE,
   FOREIGN KEY (ReplyToVideoPostCommentId) REFERENCES VideoPostComments(VideoPostCommentId) ON DELETE CASCADE
@@ -101,6 +171,20 @@ CREATE TABLE VideoSubscriptions (
   UNIQUE(UserId, GenreId)
 );
 
+CREATE TABLE ForumSubscriptionOnly (
+  ForumSubscriptionOnlyID INT AUTO_INCREMENT PRIMARY KEY,
+  UserID INT NOT NULL UNIQUE,
+  Only BOOLEAN NOT NULL UNIQUE,
+  FOREIGN KEY(UserID) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE ForumSubscriptions (
+  ForumSubscriptionID INT AUTO_INCREMENT PRIMARY KEY,
+  UserID INT NOT NULL,
+  ForumTagID INT NOT NULL UNIQUE,
+  FOREIGN KEY(UserID) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (ForumTagID) REFERENCES ForumTag(ForumTagID) ON DELETE CASCADE
+);
 
 CREATE TABLE ChatMessage (
   ChatMessageId INT AUTO_INCREMENT PRIMARY KEY,
@@ -111,4 +195,21 @@ CREATE TABLE ChatMessage (
   FOREIGN KEY(SenderUserId) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY(ReceiverUserId) REFERENCES users(id) ON DELETE CASCADE,
   CHECK (SenderUserId != ReceiverUserId)
+);
+
+CREATE TABLE Playlist(
+  PlaylistID INT AUTO_INCREMENT PRIMARY KEY,
+  PlaylistName VARCHAR(255) NOT NULL,
+  DateCreated DATETIME NOT NULL,
+  UserID INT NOT NULL,
+  FOREIGN KEY (UserID) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE PlaylistVideoPosts(
+  PlaylistVideoPostsID INT AUTO_INCREMENT PRIMARY KEY,
+  DateAdded DATETIME NOT NULL,
+  VideoPostID INT NOT NULL,
+  PlaylistID INT NOT NULL,
+  FOREIGN KEY (PlaylistID) REFERENCES Playlist(PlaylistID) ON DELETE CASCADE,
+  FOREIGN KEY (VideoPostID) REFERENCES VideoPost(VideoPostId) ON DELETE CASCADE
 );
