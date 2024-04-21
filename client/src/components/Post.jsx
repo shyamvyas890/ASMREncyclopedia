@@ -211,19 +211,22 @@ const PostComponent = (props) =>{
             <button style={{backgroundColor: "#3B9EBF", marginRight: "5px"}} onClick={()=>navigate(`/video/${props.VideoPostId}`)}> View Post </button>
             {props.totalLikes !== null? <button onClick={handleLike} style={{highlightLikeButtonRating, backgroundColor: "#3B9EBF", marginRight: "5px"}}>Like ({props.totalLikes}) </button> : <div> </div>}
             {props.totaDislikes !== null? <button onClick={handleDislike} style={{highlightDislikeButtonRating, backgroundColor: "#3B9EBF", marginRight: "5px"}}>Dislike ({props.totalDislikes})</button> : <div> </div>}
+            <button onClick={toggleModal} className="btn btn-primary"> Add to Playlist</button>
             {modal && (
-              <div className="modal">
-                <div onClick={toggleModal} className="overlay"></div>
-                <div className="modal-content">
+              <div className={VideoPostCSS.modal}>
+                <div onClick={toggleModal} className={VideoPostCSS.overlay}></div>
+                <div className={VideoPostCSS.modalContent}>
                   {userPlaylists.map(playlist=>(
-                  <div className="user-playlist" key={playlist.playlistID}>
+                  <div className={VideoPostCSS.modalContentContainer} key={playlist.playlistID}>
+                    <div class="form-check">
+
+                      <input type="checkbox" 
+                      checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
+                      onClick={()=>handleCheckBox(playlist.PlaylistID)}
+                      />
+                      </div>
                       <h2>{playlist.PlaylistName}</h2>
-                      <label>
-                        <input type="checkbox" 
-                        checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
-                        onClick={()=>handleCheckBox(playlist.PlaylistID)}
-                        />
-                      </label>
+
                   </div>
                   ))}
                 <button className="close-modal"onClick={toggleModal}>Close</button>
