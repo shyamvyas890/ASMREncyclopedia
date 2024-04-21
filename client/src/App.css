@@ -1,6 +1,4 @@
-.App {
-  text-align: center;
-}
+
 
 .App-logo {
   height: 40vmin;
@@ -14,7 +12,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  /*background-color: #282c34; */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -27,6 +25,63 @@
 .App-link {
   color: #61dafb;
 }
+
+.like,
+.dislike{
+  padding: 8px 12px;
+  margin: 4px;
+  cursor: pointer;
+}
+
+.like.liked {
+  background-color: #4caf50;
+  color: white;
+}
+
+.dislike.disliked{
+  background-color:red;
+  color: white;
+}
+
+.modal, .overlay {
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: fixed;
+}
+
+/*
+.overlay {
+  background: rgba(49,49,49,.8)
+}
+*/
+
+/*
+.modal-content {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  line-height:1.4;
+  background: #171717;
+  padding: 14px 28px;
+  border-radius: 3px;
+  max-width: 600px;
+  min-width: 300px;
+}
+*/
+
+/*
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px, 7px;
+}
+*/
 
 @keyframes App-logo-spin {
   from {
