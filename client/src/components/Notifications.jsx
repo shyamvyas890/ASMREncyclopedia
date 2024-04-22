@@ -9,7 +9,6 @@ import NavigationComponent from "./Navigation";
 const NotificationsComponent = (props)=>{
     const [username, setUsername]= React.useState(null);
     const [socket,setSocket]= React.useState(null);
-    const [showDropdown, setShowDropdown]= React.useState(false);
     const [notifications, setNotifications] = React.useState([]);
     const [notificationsElements, setNotificationsElements] = React.useState(null);
     const [unreadNotifications, setUnreadNotifications]= React.useState(null);
@@ -170,8 +169,8 @@ const NotificationsComponent = (props)=>{
     console.log(notificationsElements);
     return (
         props.AllNotificationsPage === undefined? 
-        (<div style={{position:"relative", width:"300px"}}>
-                <svg onClick= {()=>{setShowDropdown(prev=>!prev)}}  width="30" height="30" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> 
+        (<div style={{position:"relative"}}>
+                <svg width="30" height="30" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> 
                     <path
                         style={{stroke:"white"}}
                         d="M18.1336 11C18.7155 16.3755 21 18 21 18H3C3 18 6 15.8667 6 8.4C6 6.70261 6.63214 5.07475 7.75736 3.87452C8.88258 2.67428 10.4087 2 12 2C12.3373 2 12.6717 2.0303 13 2.08949" 
@@ -191,12 +190,12 @@ const NotificationsComponent = (props)=>{
                         strokeLinecap="round" 
                         strokeLinejoin="round"/> 
                 </svg>
-                {unreadNotifications!==null && unreadNotifications!==0 && <span className="notification-badge">{unreadNotifications}</span>}
+                {unreadNotifications!==null && unreadNotifications!==0 && !props.showDropdown && <span className="notification-badge">{unreadNotifications}</span>}
       
             
                 {
-                    showDropdown &&
-                        <div className='notification-element'>
+                    props.showDropdown &&
+                        <div style={{ position: "absolute", top: "calc(100%)", right: "0px", width: "200px", maxHeight: "200px", overflowY: "auto", backgroundColor: "black", zIndex: 1 }}>
                             {notificationsElements && notificationsElements.length > 0 ? (
                                <> 
                                 {notificationsElements}
@@ -211,14 +210,14 @@ const NotificationsComponent = (props)=>{
                 }
             
         </div>): (
-            <div style={{position:"absolute", width:"100%"}}>
+            <div>
                 <div>
                     <NavigationComponent />
                 </div>
-                <div style={{fontWeight: "bold", fontSize: "30px", marginTop: "10px"}} >All Notifications</div>
+                <div  >All Notifications</div>
                 {notificationsElements && notificationsElements.length > 0 ? (
                         <>
-                            <div style={{width: "30%", marginTop: "10px"}}>
+                            <div style={{position:"absolute", width:"100%"}}>
                             {notificationsElements}
                             </div>
                             
