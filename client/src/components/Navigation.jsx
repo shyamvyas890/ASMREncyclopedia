@@ -8,8 +8,9 @@ import { Navigate } from 'react-router-dom';
 import axios from '../utils/AxiosWithCredentials';
 import {useState } from 'react';
 
+
 const NavigationComponent= () => {
-    const location = useLocation().pathname;   
+    const location = useLocation().pathname; 
     const navigate = useNavigate()
     const [searchTerm, setSearchTerm] = useState()
 
@@ -110,9 +111,9 @@ const NavigationComponent= () => {
             </a>
            </li>
 
-         <li class="nav-item">
+         {location !== "/notifications" && <li class="nav-item">
            <NotificationsComponent />
-         </li>
+         </li>}
     </ul>
 
     <form onSubmit={(e) => {

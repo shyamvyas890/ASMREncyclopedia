@@ -171,7 +171,7 @@ const NotificationsComponent = (props)=>{
     return (
         props.AllNotificationsPage === undefined? 
         (<div style={{position:"relative", width:"300px"}}>
-                <svg onClick= {()=>{setShowDropdown(prev=>!prev)}}  width="24" height="24" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> 
+                <svg onClick= {()=>{setShowDropdown(prev=>!prev)}}  width="30" height="30" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> 
                     <path
                         style={{stroke:"white"}}
                         d="M18.1336 11C18.7155 16.3755 21 18 21 18H3C3 18 6 15.8667 6 8.4C6 6.70261 6.63214 5.07475 7.75736 3.87452C8.88258 2.67428 10.4087 2 12 2C12.3373 2 12.6717 2.0303 13 2.08949" 

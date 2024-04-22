@@ -3,11 +3,17 @@
     color: red;
 }
 
-.notif-bell{
-    cursor: pointer;
+.notification-badge {
+    position: absolute;
+    left:20px;
+    background-color: red;
+    color: white;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    border: none;
-    width: 25px;
-    height: 25px;
-    margin: auto;
-}
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+  }
