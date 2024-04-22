@@ -8,6 +8,7 @@ body {
     width: 50%;
     margin: 0 auto;
     padding: 20px;
+    
     height: 100%; /* Set a minimum height of 100% of the viewport height */
   }
     
@@ -63,12 +64,14 @@ body {
     border: none;
     color: #fff;
   }
-  
 
 
   .forum-post-sort-form{
     margin-bottom: 20px;
+    margin-left: 40px;
+
   }
+  
   .forum-post-form-select {
     padding: 8px;
     background-color: #333;
@@ -106,6 +109,8 @@ body {
   .user-posts {
     background-color: #333;
     padding: 20px;
+    margin-left: 40px;
+
     margin-bottom: 20px;
     border-radius: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
