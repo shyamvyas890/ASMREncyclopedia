@@ -49,12 +49,14 @@
     background-color: #77838F; /* Blue color for current user */
     color: white;
     align-self: flex-end; /* Aligns message bubble to the right */
+    margin-left:auto;
 }
 
 .otherUserMessage {
     background-color: #3B9EBF; /* Gray color for other user */
     color: white;
     align-self: flex-start; /* Aligns message bubble to the left */
+    margin-right:auto;
 }
 
 .sendMessage {

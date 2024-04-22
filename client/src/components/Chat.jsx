@@ -149,11 +149,11 @@ const ChatComponent =()=>{
                         <div key={message.ChatMessageId}>
                             {message.SenderUserId === username.userIdOfCurrentUser ? (
                                 <div className={ChatCSS.currentUserMessage}>
-                                    {`You: ${message.Message}`}
+                                    {`${message.Message}`}
                                 </div>
                             ) : (
                                 <div className={ChatCSS.otherUserMessage}>
-                                    {`${selectedChat.username}: ${message.Message}`}
+                                    {`${message.Message}`}
                                 </div>
                             )}
                         </div>
