@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from '../utils/AxiosWithCredentials';
+import NavigationComponent from './Navigation';
+import ViewUserPlaylistComponentCSS from "../css/viewuserplaylistcomponent.module.css";
 
 export const ViewUserPlaylistComponent = ()=>{
     const {playlistID} = useParams()
@@ -59,24 +61,27 @@ export const ViewUserPlaylistComponent = ()=>{
     
     return (
         <div>
+            <NavigationComponent/>
             <h1>Playlist Videos</h1>
-            <div className="playlist-videos">
-            {playlistVideos.length !== 0 ? (
-                playlistVideos.map(video => (
-                    <div className="video" key={video.VideoPostId}>
-                        <h5><Link to={`/video/${video.VideoPostId}`}>{video.Title}</Link></h5>
-                        <p>{video.VideoLinkId}</p>
-                        <button 
-                            className="remove-video-from-playlist"
-                            onClick={() => removeVideoFromPlaylist(video.VideoPostId)}>
-                            Remove Video
-                        </button>
-                    </div>
-                ))
-            ) : (
-                <div><Link to={`/`}>No videos in this playlist. Perhaps add some?</Link></div>
-            )}
-        </div>
+            <div className={ViewUserPlaylistComponentCSS.playlistVideos}>
+                {playlistVideos.length !== 0 ? (
+                    playlistVideos.map(video => (
+                        <div className={ViewUserPlaylistComponentCSS.videoContainer} key={video.VideoPostId}>
+                            <div className={ViewUserPlaylistComponentCSS.videoContainer}>
+                                <h2><Link to={`/video/${video.VideoPostId}`}>{video.Title}</Link></h2>
+                                <p>{video.VideoLinkId}</p>
+                                <button 
+                                    className="btn btn-danger"
+                                    onClick={() => removeVideoFromPlaylist(video.VideoPostId)}>
+                                    Remove Video
+                                </button>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div><Link to={`/`}>No videos in this playlist. Perhaps add some?</Link></div>
+                )}
+            </div>
         </div>
     )
 }
