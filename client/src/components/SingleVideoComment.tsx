@@ -54,7 +54,7 @@ const SingleVideoCommentComponent = () =>{
             if((fetchParent===null && fetchPosts.data[i].VideoPostCommentId === theVideoPostCommentId) || (fetchParent!==null && fetchPosts.data[i].VideoPostCommentId === fetchParent)) {
                 rootNodes.push(idToCommentMapping[fetchPosts.data[i].VideoPostCommentId]);
             }
-            const fetchRating= await axios.get(`http://localhost:3001/videoCommentRating`, {params:{
+            const fetchRating= await axios.get(`http://localhost:3001/videoCommentRatings`, {params:{
                 UserId:username===null? null:username.userIdOfCurrentUser,
                 VideoPostCommentId:fetchPosts.data[i].VideoPostCommentId
             }})

@@ -37,7 +37,7 @@ const RegistrationComponent = () => {
             <form className={RegisterCSS['login-form']} onSubmit={handleRegister}>
               <input className={RegisterCSS['login-form-username']} type="text" placeholder="Username" name="usernameInput"/>
               <input className={RegisterCSS['login-form-password']} type="password" placeholder='Password' name="passwordInput"/>
-              <button className={RegisterCSS['login-form-button']} type="submit">Login</button>
+              <button className={RegisterCSS['login-form-button']} type="submit"> Register </button>
             </form>
           </div>
           <div className={RegisterCSS['link-container']}>

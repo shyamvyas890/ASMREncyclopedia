@@ -380,6 +380,8 @@ app.post('/video/:VideoId', verifyJWTMiddleware, async (req,res)=>{ //secure
 app.post('/video-rating/:VideoPostId', verifyJWTMiddleware, (req,res)=>{ //secure
     const VideoPostId= req.params.VideoPostId;
     const {UserId, LikeStatus}= req.body;
+    console.log("1: " + UserId)
+    console.log("2 " + req.decodedToken.UserId)
     if(req.decodedToken.UserId !== UserId){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -491,6 +493,8 @@ app.get('/video/id', verifyJWTMiddleware, (req, res)=>{
 })
 app.delete('/video', verifyJWTMiddleware, async (req, res)=>{
     const {id, VideoPostId, LikeDislikeId, GenreId, VideoPostGenreId, UserId, VideoPostCommentId}= req.query
+    console.log(typeof(UserId))
+    console.log("USER ID: " + UserId)
     if(id){
         if(req.decodedToken.UserId !== parseInt(id)){
             return res.status(403).send("You do not have permission to do that");
@@ -538,7 +542,7 @@ app.delete('/video', verifyJWTMiddleware, async (req, res)=>{
 
     }
     else if(VideoPostCommentId && UserId){
-        if(req.decodedToken.UserId !== UserId){
+        if(req.decodedToken.UserId !== parseInt(UserId)){
             return res.status(403).send("You do not have permission to do that");
         }
         db.query('DELETE FROM VideoPostCommentLikeDislike WHERE VideoPostCommentId = ? AND UserId = ?', [VideoPostCommentId, UserId], (err)=>{

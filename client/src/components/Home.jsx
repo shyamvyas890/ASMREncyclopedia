@@ -7,6 +7,7 @@ import {axiosRequest} from "../utils/utils.js";
 import { useNavigate } from 'react-router-dom';
 import NavigationComponent from './Navigation.jsx';
 import HomeCSS from "../css/home.module.css"
+import NotificationsComponent from './Notifications.jsx';
 
 const HomeComponent= () => {
     const [username, setUsername] = useState('');

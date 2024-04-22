@@ -6,6 +6,7 @@ import VideoCommentNodeCSS from "../css/videopostcomment.module.css"
 import { Navigate } from "react-router-dom";
 const VideoCommentNodeComponent = (props) =>{
     console.log("USERNAME HERE: " + props.usernameOfCurrentUser)
+    console.log("USER ID: " + props.userIdOfCurrentUser)
     const [showReplyBox, setShowReplyBox]= useState(false);
     const [showEditBox, setShowEditBox] = useState(false);
     const [collapsed, setCollapsed]= useState(true);
@@ -37,7 +38,8 @@ const VideoCommentNodeComponent = (props) =>{
          VideoPostCommentId: response.data.insertId,
          VideoPostId: props.tn.data.VideoPostId,
          rating: 0,
-         username: props.usernameOfCurrentUser
+         username: props.usernameOfCurrentUser,
+         CommentedAt: new Date()
         };
         const newCommentNode = new TreeNode(newCommentNodeData);
         commentRef.current.value="";
@@ -164,7 +166,6 @@ const VideoCommentNodeComponent = (props) =>{
               >
               {props.tn.data.username}
               </a> ◦ {new Date(props.tn.data.CommentedAt).toLocaleString()} <br></br> {props.tn.data.Comment} </div>}
-
             {props.tn.data.DELETED===0 && <><button onClick={handleLike} style={highlightLikeButtonRating}> Like </button>
             <button onClick={handleDislike} style={highlightDislikeButtonRating}> Dislike </button></>}
             {props.tn.children.length>0 && <button onClick={collapseAndExpand}>{collapsed? "+":"-"}</button>}
