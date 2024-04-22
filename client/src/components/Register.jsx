@@ -33,7 +33,7 @@ const RegistrationComponent = () => {
   return (
     <div className={RegisterCSS['login-container']}>
           <div className={RegisterCSS['login-form-container']}>
-            <div className={RegisterCSS['websiteTitle']}> Registration </div>
+            <div className={RegisterCSS['websiteTitle']}> ASMR Encyclopedia </div>
             <form className={RegisterCSS['login-form']} onSubmit={handleRegister}>
               <input className={RegisterCSS['login-form-username']} type="text" placeholder="Username" name="usernameInput"/>
               <input className={RegisterCSS['login-form-password']} type="password" placeholder='Password' name="passwordInput"/>
@@ -43,7 +43,9 @@ const RegistrationComponent = () => {
           <div className={RegisterCSS['link-container']}>
             <p> Already have an account? <Link to="/"> Login Here!</Link></p>
           </div>
+          {feedback && feedback==="This username is already taken. Please choose a different username." && <p style={{color:'red'}}>{feedback}</p>}
           {feedback && feedback ==="User registered successfully" && <p className='feedback-message' style={{color:'green'}}>{feedback}</p>}
+
         </div>
   );
 };
