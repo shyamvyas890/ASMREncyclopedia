@@ -43,7 +43,7 @@ const RegistrationComponent = () => {
           <div className={RegisterCSS['link-container']}>
             <p> Already have an account? <Link to="/"> Login Here!</Link></p>
           </div>
-          {feedback && feedback ==="Login Successful" && <p className='feedback-message' style={{color:'green'}}>{feedback}</p>}
+          {feedback && feedback ==="User registered successfully" && <p className='feedback-message' style={{color:'green'}}>{feedback}</p>}
         </div>
   );
 };
