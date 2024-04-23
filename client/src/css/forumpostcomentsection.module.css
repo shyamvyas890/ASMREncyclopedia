@@ -10,6 +10,8 @@
     text-align: left; 
     width: 50%;
     overflow-y: auto;
+    margin-left: 40px;
+
   }
   
   .form-container {
@@ -46,25 +48,15 @@
     color: #fff;
   }
   
-  .sort-form button {
-    padding: 8px 16px;
-    background-color: #4CAF50;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    margin-left: 10px;
-  }
-  
-  .sort-form button:hover {
-    background-color: #45a049;
-  }
-  
   .sort-form{
     width: 50%;
   }
   .comment {
-    margin-top: 20px;
-    margin-bottom: 20px;
+    padding: 8px 16px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    background-color: #333;
+    border-radius: 5px;
   }
   
   .comment textarea {
@@ -73,15 +65,3 @@
     border-radius: 5px;
     resize: none;
   }
-
-  .comment-button{
-    padding: 8px 16px;
-    background-color: #4CAF50;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 25px;
-  }
-  
-  
-  

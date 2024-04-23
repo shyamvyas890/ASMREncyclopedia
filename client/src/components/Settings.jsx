@@ -250,7 +250,7 @@ const SettingsComponent = ()=>{
                         <h1 style={{fontWeight: "bold", fontSize: "30px", marginTop: "10px", margin: "auto"}} > Settings </h1>
                         <h2 style={{fontWeight: "bold", fontSize: "30px", marginTop: "20px", margin: "auto"}} >Email</h2>
                         <h3>{emailAndSubscriptionPreferences.email === null ? "No email provided" : emailAndSubscriptionPreferences.email}</h3>
-                        <button className={settingsHome.button} onClick={changeEditEmail}>{emailAndSubscriptionPreferences.email === null ? "Add email" : "Change email"}</button>
+                        <button className="btn btn-primary" onClick={changeEditEmail}>{emailAndSubscriptionPreferences.email === null ? "Add email" : "Change email"}</button>
                       </div>
                   
                       <div className={settingsHome.settingsItem}>
@@ -260,7 +260,7 @@ const SettingsComponent = ()=>{
                           emailAndSubscriptionPreferences.videoSubscriptions.map((genre, index) => (
                             <div key={index}>{genre.GenreName}</div>
                           ))}
-                        <button className={settingsHome.button} onClick={changeEditSubscriptionPreferences}>Update Video Subscription Preferences</button>
+                        <button className="btn btn-primary" onClick={changeEditSubscriptionPreferences}>Update Video Subscription Preferences</button>
                       </div>
                   
                       <div className={settingsHome.settingsItem}>
@@ -270,13 +270,13 @@ const SettingsComponent = ()=>{
                           emailAndSubscriptionPreferences.forumSubscriptions.map((tag, index) => (
                             <div key={index}>{tag.ForumTagName}</div>
                           ))}
-                        <button className={settingsHome.button} onClick={changeEditForumSubscriptionPreferences}>Update Forum Post Subscription Preferences</button>
+                        <button className="btn btn-primary" onClick={changeEditForumSubscriptionPreferences}>Update Forum Post Subscription Preferences</button>
                       </div>
                   
                       <div className={settingsHome.settingsItem}>
                         <h2 style={{fontWeight: "bold", fontSize: "30px", marginTop: "20px", margin: "auto"}} >Security</h2>
-                        <button className={`${settingsHome.button} ${settingsHome.redButton}`} onClick={changeEditPassword}>Change Password</button>
-                        <button className={`${settingsHome.button} ${settingsHome.redButton}`} onClick={changeEditDeleteAccount}>Delete Account</button>
+                        <button className="btn btn-danger" onClick={changeEditPassword}>Change Password</button>
+                        <button className="btn btn-danger" onClick={changeEditDeleteAccount}>Delete Account</button>
                       </div>
                     </div>
                   </>
@@ -287,7 +287,7 @@ const SettingsComponent = ()=>{
                         <label>
                             <input placeholder="Enter the new email" type="email" name="emailInput" />
                         </label>
-                        <button type="submit" className={settingsEmail.button}>Save Email</button>
+                        <button className="btn btn-primary" type="submit">Save Email</button>
                     </form>
                 ):
                 (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && !edit.password && edit.forumSubscriptionPreferences && !edit.accountDeletion)?
@@ -314,14 +314,13 @@ const SettingsComponent = ()=>{
                                 </label>
                                 <br />
                                 {forumTags.map((tag, index) => (
-                                    <div key={index} className={settingsForumPreferences.tag}>
+                                    <button key={index} className={settingsForumPreferences.tag} onClick={(e) => {handleRemovalOfForumTag(e, tag)}}>
                                     {tag}
-                                    <button onClick={(e) => { handleRemovalOfForumTag(e, tag) }}>&times;</button>
-                                    </div>
+                                    </button>
                                 ))}
                             </>
                         }
-                        <button type="submit" className={settingsForumPreferences.button}>Update Subscription Preferences</button>
+                        <button className="btn btn-primary" type="submit">Update Subscription Preferences</button>
                     </form>
                 ):
                 (username && emailAndSubscriptionPreferences && !edit.email && edit.subscriptionPreferences && !edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)?
@@ -348,14 +347,13 @@ const SettingsComponent = ()=>{
                             </label>
                             <br />
                             {videoTags.map((tag, index)=>(
-                                <div key={index} className={settingsForumPreferences.tag}>
+                                <button key={index} className={settingsForumPreferences.tag} onClick={(e)=>{handleRemovalOfTag(e,tag)}}>
                                     {tag}
-                                    <button onClick={(e)=>{handleRemovalOfTag(e,tag)}}>&times;</button>
-                                </div>
+                                </button>
                             ))}
                         </>
                         }
-                        <button type="submit" className={settingsForumPreferences.button}>Update Subscription Preferences</button>
+                        <button className="btn btn-primary" type="submit">Update Subscription Preferences</button>
                     </form>
                 ):
                 (username && emailAndSubscriptionPreferences && !edit.email && !edit.subscriptionPreferences && edit.password && !edit.forumSubscriptionPreferences && !edit.accountDeletion)?
@@ -373,8 +371,8 @@ const SettingsComponent = ()=>{
                             Enter new password again.
                             <input name="newPassword2" type="password" />
                         </label>
-                        <button type="button" className={settingsChangePassword.cancelButton} onClick={() => { setEdit(prevEdit => { setErrorMessageForChangingPasswordAndDeletingAccount(""); return { ...prevEdit, password: !prevEdit.password }; }) }}>Cancel</button>
-                        <button type="submit">Change Password</button>
+                        <button className="btn btn-danger" type="button" onClick={() => { setEdit(prevEdit => { setErrorMessageForChangingPasswordAndDeletingAccount(""); return { ...prevEdit, password: !prevEdit.password }; }) }}>Cancel</button>
+                        <button className="btn btn-primary" type="submit">Change Password</button>
                         <div className={settingsChangePassword.errorMessage}>{errorMessageForChangingPasswordAndDeletingAccount}</div>
                     </form>
                 ):
@@ -385,7 +383,7 @@ const SettingsComponent = ()=>{
                       Enter your current password.
                       <input name="currentPassword" type="password" style={{marginBottom:"0.5rem"}}/>
                       <br/>
-                      <button type="button" className={settingsAccountDeletion.button} style={{marginRight:"0.5rem"}} onClick={() => { setEdit(prevEdit => { setErrorMessageForChangingPasswordAndDeletingAccount(""); return { ...prevEdit, accountDeletion: !prevEdit.accountDeletion }; }) }}>Cancel</button>
+                      <button className="btn btn-primary" type="button" onClick={() => { setEdit(prevEdit => { setErrorMessageForChangingPasswordAndDeletingAccount(""); return { ...prevEdit, accountDeletion: !prevEdit.accountDeletion }; }) }}>Cancel</button>
                       <button type="submit" className={settingsAccountDeletion.button}>Delete</button>
                       <div className={settingsAccountDeletion.errorMessage}>{errorMessageForChangingPasswordAndDeletingAccount}</div>
                     </label>

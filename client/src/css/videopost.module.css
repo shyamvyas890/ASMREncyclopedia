@@ -32,7 +32,6 @@
     margin: auto;
   }
 
-
   .modal, .overlay {
     width: 100vw;
     height: 100vh;
@@ -62,10 +61,10 @@
   
   .modalContentContainer {
     display: flex;
-    align-items: center; /* Align items vertically */
-    margin-bottom: 10px; /* Add some spacing between each playlist */
+    align-items: center;
+    margin-bottom: 10px;
   }
   
   .modalContentContainer h2 {
-    margin-left: 10px; /* Add spacing between checkbox and playlist name */
+    margin-left: 10px;
   }

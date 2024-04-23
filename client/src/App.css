@@ -24,17 +24,6 @@
   color: #61dafb;
 }
 
-.like,
-.dislike{
-  padding: 8px 12px;
-  margin: 4px;
-  cursor: pointer;
-}
-
-.like.liked {
-  background-color: #4caf50;
-  color: white;
-}
 
 .dislike.disliked{
   background-color:red;
@@ -52,6 +41,22 @@
 
 .btn-primary:hover{
   background-color: #30819b;
+}
+
+.btn-primary.liked{
+  background-color: #4caf50;
+}
+
+.btn-primary.liked:hover{
+  background-color: #3f9342;
+}
+
+.btn-primary.disliked{
+  background-color: #cf6541;
+}
+
+.btn-primary.disliked:hover{
+  background-color: #ab5336;
 }
 
 .btn-danger{

@@ -111,7 +111,7 @@ const AddVideoPostComponent = (props)=>{
                     </div>
                 ))}
             <div style={{color:"red"}}>{errorMessage}</div>
-            <button  type="submit" className={AddVideoPostCSS['video-post-button']}> Post </button>
+            <button  type="submit" className="btn btn-primary"> Post </button>
         </form>
     </div>
     )

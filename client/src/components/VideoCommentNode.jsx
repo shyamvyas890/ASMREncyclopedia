@@ -168,21 +168,21 @@ const VideoCommentNodeComponent = (props) =>{
               </a> ◦ {new Date(props.tn.data.CommentedAt).toLocaleString()} <br></br> {props.tn.data.Comment} </div>}
             {props.tn.data.DELETED===0 && <><button onClick={handleLike} style={highlightLikeButtonRating}> Like </button>
             <button onClick={handleDislike} style={highlightDislikeButtonRating}> Dislike </button></>}
-            {props.tn.children.length>0 && <button onClick={collapseAndExpand}>{collapsed? "+":"-"}</button>}
-            {props.tn.data.UserId === props.userIdOfCurrentUser && props.tn.data.DELETED===0 && <button onClick={handleDelete}>Delete</button>}
-            {props.tn.data.UserId === props.userIdOfCurrentUser && !showEditBox && !showReplyBox && props.tn.data.DELETED===0 && <button onClick={handleEditButton}>Edit</button>}
-            {props.tn.data.UserId === props.userIdOfCurrentUser && showEditBox && props.tn.data.DELETED===0 && <><button onClick={handleEditButton}>Discard Edit</button>
+            {props.tn.children.length>0 && <button className="btn btn-primary" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} onClick={collapseAndExpand}>{collapsed? "+":"-"}</button>}
+            {props.tn.data.UserId === props.userIdOfCurrentUser && props.tn.data.DELETED===0 && <button className="btn btn-danger" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} onClick={handleDelete}>Delete</button>}
+            {props.tn.data.UserId === props.userIdOfCurrentUser && !showEditBox && !showReplyBox && props.tn.data.DELETED===0 && <button className="btn btn-primary" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} onClick={handleEditButton}>Edit</button>}
+            {props.tn.data.UserId === props.userIdOfCurrentUser && showEditBox && props.tn.data.DELETED===0 && <><button className="btn btn-danger" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} onClick={handleEditButton}>Discard Edit</button>
             <form onSubmit={(e)=>{handleEdit(e, props.tn.data.VideoPostCommentId)}}>
                     <textarea ref={editRef} defaultValue= {props.tn.data.Comment} rows="5" cols="50"/>
-                    <button type="submit">Submit Edit</button>
+                    <button className="btn btn-primary" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} type="submit">Submit Edit</button>
             </form>
             
             </>}
-            {!showReplyBox && !showEditBox && props.tn.data.DELETED===0 && <button onClick={handleReplyButton}> Reply</button>}
-            {showReplyBox && props.tn.data.DELETED===0 && <><button onClick={handleReplyButton}>Discard Comment</button>
+            {!showReplyBox && !showEditBox && props.tn.data.DELETED===0 && <button className="btn btn-primary" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} onClick={handleReplyButton}> Reply</button>}
+            {showReplyBox && props.tn.data.DELETED===0 && <><button className="btn btn-danger" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} onClick={handleReplyButton}>Discard Comment</button>
             <form onSubmit={handleTheReply}>
                     <textarea ref={commentRef} rows="5" cols="50"/>
-                    <button type="submit">Reply</button>
+                    <button className="btn btn-primary" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} type="submit">Reply</button>
             </form>
             </>
             }

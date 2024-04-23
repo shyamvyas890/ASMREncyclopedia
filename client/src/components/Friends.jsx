@@ -107,14 +107,14 @@ const FriendsComponent = (props)=>{
                     {request.ReceiverUsername}
                     </a>
                 </div>
-                    <button style={{padding: "8px 8px", backgroundColor: "red",  border: "none",color: "#fff",cursor: "pointer"}} onClick={(e)=>{cancelFriendRequest(e, request.ReceiverUserId)}}>Cancel Request</button>
+                    <button className="btn btn-danger">Cancel Request</button>
                 </React.Fragment>
             )): <div> You have no outgoing friend requests. </div>}
             <div style={{fontWeight: "bold", fontSize: "30px", marginTop: "10px"}}>Friends</div>
             {incomingOutgoingFriendRequestsAndFriendships.friendships.length > 0 ? incomingOutgoingFriendRequestsAndFriendships.friendships.map((friend, index)=>(
                 <React.Fragment key={index}>
                     <div>{friend.friendUsername}</div>
-                    <button style={{padding: "8px 8px", backgroundColor: "red",  border: "none",color: "#fff",cursor: "pointer"}} onClick={(e)=>{unfriend(e, friend.UserId1===incomingOutgoingFriendRequestsAndFriendships.userIdOfCurrentUser? friend.UserId2:friend.UserId1)}}>Unfriend</button>
+                    <button className="btn btn-danger">Unfriend</button>
                 </React.Fragment>
             )): <div> You have no friends. Try to make some! </div>}
             
