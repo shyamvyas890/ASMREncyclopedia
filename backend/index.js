@@ -2172,7 +2172,12 @@ app.get("/notifications", verifyJWTMiddleware, (req,res)=>{
                         res.status(500).send("Internal Server Error");
                     }
                     if(!Dropdown){
-                        res.send([...results, ...results1, ...results2, ...results3]);
+                        let sendThis = [...results, ...results1, ...results2, ...results3];
+                        sendThis.forEach((comment)=>{
+                            comment.CommentedAtDateObject = new Date(comment.CommentedAt)
+                        })
+                        sendThis.sort((a, b) => b.CommentedAtDateObject - a.CommentedAtDateObject);
+                        res.send(sendThis);
                     }
                     else {
                         let sendThis = [...results, ...results1, ...results2, ...results3];
