@@ -1160,11 +1160,40 @@ app.post("/forumPostComment/:id", verifyJWTMiddleware, (req, res) => {
         return res.status(403).send("Incorrect User")
     }
 
-   db.query("INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp) VALUES (?, ?, ?, NOW())", [forumPostID, username, body], function (err, insertResult){
+   db.query("INSERT INTO forumpostcomments(forum_post_id, username, body, comment_timestamp) VALUES (?, ?, ?, NOW())", [forumPostID, username, body], function (err, results){
     if(err){
         console.log(err)
     }else{
-        return res.status(201).json({ id: insertResult.insertId, message: "Comment Successful" });
+        db.query("SELECT * FROM ForumPost WHERE id = ?", [forumPostID], (err1,results1)=>{
+            if(err1){
+                console.log(err1);
+                return res.status(500).send("Internal Server Error");
+            }
+            db.query("SELECT * FROM users WHERE username = ?", [results1[0].username], (err2, results2)=>{
+                if(err2){
+                    console.log(err2);
+                    return res.status(500).send("Internal Server Error");
+                }
+                db.query("SELECT * FROM users WHERE username = ?", [username], (err3, results3)=>{
+                    if(err3){
+                        console.log(err3);
+                        return res.status(500).send("Internal Server Error");
+                    }
+                    if(results2[0].id !== results3[0].id) {
+                        io.to(`UserId_${results2[0].id}`).emit("newNotification", {
+                            ForumPostReceiverUserId: results2[0].id,
+                            ForumCommentSenderUserId: results3[0].id, 
+                            ForumPostId: forumPostID,
+                            SenderForumPostCommentId : results.insertId,
+                            Message: body,
+                            CommentedAt: new Date().toISOString(),
+                            NotificationRead:0
+                        })
+                    }
+                    return res.status(201).send("Comment Successful");
+                })
+            })
+        } );
     }
     })
 })
