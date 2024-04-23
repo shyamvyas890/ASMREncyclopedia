@@ -252,7 +252,7 @@ const VideoPostWithCommentsComponent = (props)=>{
                     <h2>{playlist.PlaylistName}</h2>
                   </div>
                   ))}
-                <button className="btn btn-primary"onClick={toggleModal}>Close</button>
+                <button className="btn btn-primary" onClick={toggleModal}>Close</button>
               </div>
             </div>
             )}

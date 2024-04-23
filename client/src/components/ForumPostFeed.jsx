@@ -107,7 +107,7 @@ export const ForumPostFeedComponent = (props) =>{
 //get like/dislike information for posts
 useEffect(() => {
     fetchAllPostsLikesAndDislikes();
-}, [currentUserID]);
+}, [currentUserID, allPosts]);
 
 const fetchAllPostsLikesAndDislikes = async () => {
     await LikeDislikeComponent.fetchAllPostsLikes(allPosts, setAllPostLikes);
@@ -296,7 +296,7 @@ const handleInputKeyDown = (e) =>{
           ))}
          </div>
 
-        <button className={ForumPostFeedCSS["forum-post-button"]} onClick={onSubmit}> Post </button>
+        <button className="btn btn-primary" onClick={onSubmit}> Post </button>
       </form>
     </div>
     
@@ -309,7 +309,7 @@ const handleInputKeyDown = (e) =>{
       <option value="3"> Most Liked to Least Liked </option>
       <option value="4"> Least Liked to Most Liked </option>
     </select>
-    <button className={ForumPostFeedCSS["forum-post-sort-button"]}> Sort </button>
+    <button className="btn btn-primary" style={{marginLeft: "10px"}}> Sort </button>
   </form>
 
 
@@ -335,11 +335,11 @@ const handleInputKeyDown = (e) =>{
             </div>
           ))}
         </div>
-        <button onClick={() => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)} style={{backgroundColor: "#3B9EBF", marginRight: "5px"}}> View Post </button>
-        <button className={`like ${userLikedPosts.includes(post.id) ? "liked" : ""}`} onClick={() => handlePostLikeDislike(post.id, currentUserID, 1)}>
+        <button className="btn btn-primary" onClick={() => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)}> View Post </button>
+        <button className={`btn btn-primary ${userLikedPosts.includes(post.id) ? "liked" : ""}`} onClick={() => handlePostLikeDislike(post.id, currentUserID, 1)}>
           {allPostLikes.get(post.id)} Likes
         </button>
-        <button className={`dislike ${userDislikedPosts.includes(post.id) ? "disliked" : ""}`} onClick={() => handlePostLikeDislike(post.id, currentUserID, 0)}>
+        <button className={`btn btn-primary ${userDislikedPosts.includes(post.id) ? "disliked" : ""}`} onClick={() => handlePostLikeDislike(post.id, currentUserID, 0)}>
           {allPostDislikes.get(post.id)} Dislikes
         </button>
       </div>

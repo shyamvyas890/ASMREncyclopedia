@@ -147,7 +147,7 @@ export const FourmPostCommentSection = (props) => {
            <option value="3">Most Liked to Least Liked</option>
            <option value="4">Least Liked to Most Liked</option>
          </select>
-         <button>Sort</button>
+         <button className="btn btn-primary" style={{marginLeft: "10px"}}>Sort</button>
        </form>
      
    
@@ -175,7 +175,7 @@ export const FourmPostCommentSection = (props) => {
            setCommentText(event.target.value);
          }}
        />
-       <button className={ForumPostCommentSectionCSS['comment-button']} onClick={addParentComment}> Comment </button>
+       <button className="btn btn-primary" onClick={addParentComment}> Comment </button>
      </div>
    </div>
    )

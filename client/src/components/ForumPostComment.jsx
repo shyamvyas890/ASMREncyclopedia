@@ -194,27 +194,27 @@ export const ForumPostComment = (props) => {
           {props.username}
          </a>  ◦ {new Date(props.timestamp).toLocaleString()} <br></br> {props.body}
 
-         {isEditing ? (<div> <textarea value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button style={{border: "none"}} onClick={handleEditCancel}> Cancel Edit </button> <button style={{border: "none"}} onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
+         {isEditing ? (<div> <textarea value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button className="btn btn-primary" style={{padding: "4px 8px"}} onClick={handleEditCancel}> Cancel Edit </button> <button sclassName="btn btn-primary" style={{padding: "4px 8px"}} onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
 
-            {showReplyOption !== false && (<button style={{border: "none"}} className={ForumPostCommentCSS['reply-option-button']} onClick={() => handleReply(props.id)}> Reply to {props.username} </button>) }
+            {showReplyOption !== false && (<button className="btn btn-primary" style={{padding: "4px 8px"}} onClick={() => handleReply(props.id)}> Reply to {props.username} </button>) }
             
-            <button className={ForumPostCommentCSS['show-replies-button']} onClick={showReplyStatus}> {showRepliesText} </button>
+            <button className="btn btn-primary" style={{padding: "4px 8px"}} onClick={showReplyStatus}> {showRepliesText} </button>
             <button 
-                className={`like ${userLikedComments ? "liked" : ""}`} 
-                style={{ padding: "8px 16px", marginRight: "10px", backgroundColor: "#333", border: "none", color: "#fff", cursor: "pointer", marginLeft: "10px"}}
+                className={`btn btn-primary ${userLikedComments ? "liked" : ""}`} 
+                style={{padding: "4px 8px"}}
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 1)}>
                 {commentLikes} Likes
             </button>
             <button
-                className={`dislike ${userDislikedComments ? "disliked" : ""}`} 
-                style={{ padding: "8px 16px", marginRight: "10px", backgroundColor: "#333", border: "none", color: "#fff", cursor: "pointer", marginLeft: "10px"}}
+                className={`btn btn-primary ${userDislikedComments ? "disliked" : ""}`} 
+                style={{padding: "4px 8px"}}
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 0)}>
                 {commentDislikes} Dislikes
             </button>
 
             {currentUsername === commenterUsername && !singleView? (<div>
-              <button className={ForumPostCommentCSS['edit-button']} onClick={setIsEditing}> Edit </button> 
-              <button className={ForumPostCommentCSS['delete-button']} onClick={handleDeleteComment}> Delete </button> </div>
+              <button className="btn btn-primary" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} onClick={setIsEditing}> Edit </button> 
+              <button className="btn btn-danger" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} onClick={handleDeleteComment}> Delete </button> </div>
             ) : <div></div>}
             
             
@@ -230,14 +230,11 @@ export const ForumPostComment = (props) => {
             {(isReplying && replyCommentID === props.id && (
                 <div>
                    <textarea type="text" value={replyText} placeholder="What do you think about that?" onChange={ (event) => {setReplyText(event.target.value)}} />
-                   <button onClick={() => {postReply()}} className='confirm-reply-button'> Reply </button>
-                   <button onClick={() => {setIsReplying(false)}} className='cancel-reply-button'> Cancel </button>
+                   <button className="btn btn-primary" onClick={() => {postReply()}}> Reply </button>
+                   <button className="btn btn-primary" onClick={() => {setIsReplying(false)}}> Cancel </button>
                 </div>)
             )}
         </div>}
         </div>
-        
-        
-        
     )
 }

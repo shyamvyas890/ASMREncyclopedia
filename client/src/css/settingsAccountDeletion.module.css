@@ -14,7 +14,6 @@
   border-radius: 5px;
 }
 
-.formContainer button[type="button"],
 .formContainer button[type="submit"] {
   background-color: #f44336;
   color: white;
@@ -24,7 +23,6 @@
   cursor: pointer;
 }
 
-.formContainer button[type="button"]:hover,
 .formContainer button[type="submit"]:hover {
   background-color: #da190b;
 }

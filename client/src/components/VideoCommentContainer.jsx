@@ -187,7 +187,7 @@ const VideoCommentContainerComponent = (props)=>{
 
             <form  onSubmit={handleTheReply}>
                 <textarea className={VideoCommentContainerCSS['comment']} ref={commentRef} placeholder="What do you think?"/>
-                <button className={VideoCommentContainerCSS['comment-button']} type="submit"> Comment </button>
+                <button className="btn btn-primary" style={{padding: "4px 8px", marginBottom: "10px"}} type="submit"> Comment </button>
             </form>
         </div>)
 }

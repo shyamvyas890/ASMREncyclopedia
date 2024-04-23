@@ -92,17 +92,6 @@ html,body{
     margin-top: 10px;
 }
 
-
-
-
-/*
-.footer.text-muted {
-    color: #ccc;
-
-    font-size: 10px;
-}
-*/
-
 @media (max-width:767px) {
     body {
         padding: 10px;

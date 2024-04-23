@@ -9,7 +9,7 @@ body {
     margin: 0 auto;
     padding: 20px;
     
-    height: 100%; /* Set a minimum height of 100% of the viewport height */
+    height: 100%;
   }
     
   .tag-container{
@@ -19,6 +19,7 @@ body {
   .tag{
     width: 50px;
     height: 50px;
+    margin-bottom: 8px;
   }
 
   .tag-button{
@@ -110,7 +111,6 @@ body {
     background-color: #333;
     padding: 20px;
     margin-left: 40px;
-
     margin-bottom: 20px;
     border-radius: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -129,41 +129,5 @@ body {
     line-height: 1.4;
     margin-bottom: 20px;
   }
-  
-  .user-posts button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 25px;
-    background-color: #4CAF50;
-    color: #fff;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .user-posts button:hover {
-    background-color: #45a049;
-  }
-  
-  
-  .like.liked,
-  .dislike.disliked {
-    background-color: #ff4500;
-  }
-  
-  .like,
-  .dislike {
-    padding: 8px 16px;
-    margin-right: 10px;
-    background-color: #333;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-  }
-  
-  .like:hover,
-  .dislike:hover {
-    background-color: #4CAF50;
-  }
-  
   
 

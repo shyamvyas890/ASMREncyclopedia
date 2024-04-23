@@ -143,7 +143,7 @@ export const ViewForumPostComponent = () =>{
            ◦ {new Date(postObject[0].post_timestamp).toLocaleString()}</h2>
            <h4 style={{fontWeight: "bold"}}> {postObject[0].title} </h4>
 
-           <p>{isEditing ? (<div> <input value={editContent} onChange={ (e) => {setEditContent(e.target.value)}}/> <button onClick={cancelEdit} style={{border: "none"}}> Cancel Edit </button> <button style={{border: "none"}} onClick={submitEdit}> Confirm Edit </button></div>) : (<p> {editContent} </p>)}</p>
+           <p>{isEditing ? (<div> <input value={editContent} onChange={ (e) => {setEditContent(e.target.value)}}/> <button className="btn btn-danger" style={{padding: "4px 8px"}}onClick={cancelEdit}> Cancel Edit </button> <button className="btn btn-primary" style={{padding: "4px 8px"}}onClick={submitEdit}> Confirm Edit </button></div>) : (<p> {editContent} </p>)}</p>
 
           <div>
             Tag(s) {postObject[0].tags && postObject[0].tags.split(',').map(tag => ( //If tags!=null split tags
@@ -157,25 +157,21 @@ export const ViewForumPostComponent = () =>{
         {currentUsername === postObject[0].username && (
          
          <>
-            <button className={ViewForumPostCSS['edit-button']} onClick={setIsEditing} style={{backgroundColor: "#4CAF50", border: "none"}}>
+            <button className="btn btn-primary" onClick={setIsEditing}>
               Edit
             </button>
-            <button className={ViewForumPostCSS['delete-button']}onClick={handleDeletePost} style={{backgroundColor: "red", border: "none"}}>
+            <button className="btn btn-danger" onClick={handleDeletePost}>
               Delete
             </button>
          </>)}
 
-          <button style={{ padding: "8px 16px", marginRight: "10px", backgroundColor: "#333", border: "none", color: "#fff", cursor: "pointer", marginLeft: "10px"}}
-            className={`like ${userLikedPosts.includes(postObject[0].id) ? "liked" : ""}`}
+          <button className={`btn btn-primary ${userLikedPosts.includes(postObject[0].id) ? "liked" : ""}`}
             onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 1)}>
             {postLikes.get(postObject[0].id)} Likes</button>
-          <button style={{ padding: "8px 16px", marginRight: "10px", backgroundColor: "#333", border: "none", color: "#fff", cursor: "pointer"}}
-            className={`dislike ${userDislikedPosts.includes(postObject[0].id) ? "disliked" : ""}`}
+          <button className={`btn btn-primary ${userDislikedPosts.includes(postObject[0].id) ? "disliked" : ""}`}
             onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 0)}>
             {postDislikes.get(postObject[0].id)} Dislikes</button>
         </div>
-        
-
       </div>
 
       <div style={{ display: 'flex' }}>
