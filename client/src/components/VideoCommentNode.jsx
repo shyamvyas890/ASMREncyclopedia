@@ -123,7 +123,6 @@ const VideoCommentNodeComponent = (props) =>{
             props.tn.data.rating=-1;
             props.setRoots(prevRoots=>[...prevRoots]);
         }
-
     }
 
 
@@ -166,9 +165,17 @@ const VideoCommentNodeComponent = (props) =>{
               >
               {props.tn.data.username}
               </a> ◦ {new Date(props.tn.data.CommentedAt).toLocaleString()} <br></br> {props.tn.data.Comment} </div>}
-            {props.tn.data.DELETED===0 && <><button onClick={handleLike} style={highlightLikeButtonRating}> Like </button>
-            <button onClick={handleDislike} style={highlightDislikeButtonRating}> Dislike </button></>}
-            {props.tn.children.length>0 && <button className="btn btn-primary" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} onClick={collapseAndExpand}>{collapsed? "+":"-"}</button>}
+            {props.tn.data.DELETED===0 && <>
+                <button className={`btn btn-primary ${props.tn.data.rating == 1 ? "liked" : ""}`} 
+                    style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}}
+                    onClick={handleLike}> Like </button>
+                <button className={`btn btn-primary ${props.tn.data.rating == -1 ? "disliked" : ""}`} 
+                    style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}}
+                    onClick={handleDislike}> Dislike </button></>}
+            {props.tn.children.length>0 && 
+                <button className="btn btn-primary" 
+                    style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} 
+                    onClick={collapseAndExpand}>{collapsed? "+":"-"}</button>}
             {props.tn.data.UserId === props.userIdOfCurrentUser && props.tn.data.DELETED===0 && <button className="btn btn-danger" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} onClick={handleDelete}>Delete</button>}
             {props.tn.data.UserId === props.userIdOfCurrentUser && !showEditBox && !showReplyBox && props.tn.data.DELETED===0 && <button className="btn btn-primary" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} onClick={handleEditButton}>Edit</button>}
             {props.tn.data.UserId === props.userIdOfCurrentUser && showEditBox && props.tn.data.DELETED===0 && <><button className="btn btn-danger" style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} onClick={handleEditButton}>Discard Edit</button>
@@ -196,9 +203,7 @@ const VideoCommentNodeComponent = (props) =>{
                 />
             )):null}
         </div>
-
     );
-
 }
 
 

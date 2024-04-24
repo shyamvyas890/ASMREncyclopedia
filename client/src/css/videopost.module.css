@@ -21,17 +21,6 @@
     margin-bottom: 20px;
   }
 
-  .user-posts button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 25px;
-    background-color: #4CAF50;
-    color: #fff;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin: auto;
-  }
-
   .modal, .overlay {
     width: 100vw;
     height: 100vh;

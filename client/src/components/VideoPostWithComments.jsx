@@ -233,8 +233,10 @@ const VideoPostWithCommentsComponent = (props)=>{
                 <div>{genre.GenreName}</div>
               </React.Fragment>
             ))}
-            <button style={highlightLikeButtonRating} onClick={handleLike}>Like</button>
-            <button style={highlightDislikeButtonRating} onClick={handleDislike}>Dislike</button>
+            <button className={`btn btn-primary ${allTheVideoPostInformation.rating == 1 ? "liked" : ""}`} 
+              onClick={handleLike}>{allTheVideoPostInformation.likes}Like</button>
+            <button className={`btn btn-primary ${allTheVideoPostInformation.rating == -1 ? "disliked" : ""}`} 
+              onClick={handleDislike}>{allTheVideoPostInformation.dislikes}Dislike</button>
             {allTheVideoPostInformation.UserId===username.userIdOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
             <button onClick={toggleModal} className="btn btn-primary"> Add to Playlist</button>
             {modal && (
@@ -257,8 +259,6 @@ const VideoPostWithCommentsComponent = (props)=>{
             </div>
             )}
           </div>
-
-          
           <div className={VideoPostWithCommentsCSS['video-post-comments-section']}>
             {routerVideoPostId && <VideoCommentContainerComponent
                 VideoPostId= {allTheVideoPostInformation.VideoPostId}
@@ -266,13 +266,9 @@ const VideoPostWithCommentsComponent = (props)=>{
                 usernameOfCurrentUser= {username}
             />}
           </div>
-          
         </div>
-
             )
     )
-
-
 }
 
 export default VideoPostWithCommentsComponent;
