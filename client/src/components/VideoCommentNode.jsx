@@ -172,11 +172,13 @@ const VideoCommentNodeComponent = (props) =>{
                     style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}}
                     onClick={handleLike}> 
                     <LikeDislikeIcon type="like" />
+                    ({props.tn.data.likes})
                 </button>
                 <button className={`btn btn-primary ${props.tn.data.rating == -1 ? "disliked" : ""}`} 
                     style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}}
                     onClick={handleDislike}>
                     <LikeDislikeIcon type="dislike" />
+                    ({props.tn.data.dislikes})
                 </button></>}
             {props.tn.children.length>0 && 
                 <button className="btn btn-primary" 
