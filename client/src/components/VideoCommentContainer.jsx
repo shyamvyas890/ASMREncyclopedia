@@ -102,7 +102,6 @@ const VideoCommentContainerComponent = (props)=>{
                     }
                     return 0;
                 })
-
             }
             else if(sortOption === "oldest"){
                 newRootNodes.sort((a,b)=>{

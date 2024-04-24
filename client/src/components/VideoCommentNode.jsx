@@ -4,6 +4,8 @@ import axios from '../utils/AxiosWithCredentials';
 import { Link, useNavigate } from "react-router-dom";
 import VideoCommentNodeCSS from "../css/videopostcomment.module.css"
 import { Navigate } from "react-router-dom";
+import LikeDislikeIcon from './LikeDislikeIcon';
+
 const VideoCommentNodeComponent = (props) =>{
     console.log("USERNAME HERE: " + props.usernameOfCurrentUser)
     console.log("USER ID: " + props.userIdOfCurrentUser)
@@ -168,10 +170,14 @@ const VideoCommentNodeComponent = (props) =>{
             {props.tn.data.DELETED===0 && <>
                 <button className={`btn btn-primary ${props.tn.data.rating == 1 ? "liked" : ""}`} 
                     style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}}
-                    onClick={handleLike}> Like </button>
+                    onClick={handleLike}> 
+                    <LikeDislikeIcon type="like" />
+                </button>
                 <button className={`btn btn-primary ${props.tn.data.rating == -1 ? "disliked" : ""}`} 
                     style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}}
-                    onClick={handleDislike}> Dislike </button></>}
+                    onClick={handleDislike}>
+                    <LikeDislikeIcon type="dislike" />
+                </button></>}
             {props.tn.children.length>0 && 
                 <button className="btn btn-primary" 
                     style={{padding: "4px 8px", marginTop: "10px", marginBottom: "10px"}} 

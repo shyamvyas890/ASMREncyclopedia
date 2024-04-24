@@ -104,9 +104,6 @@ const SingleVideoCommentComponent = () =>{
             
             }
         </div>
-
-
-
     )
 }
 

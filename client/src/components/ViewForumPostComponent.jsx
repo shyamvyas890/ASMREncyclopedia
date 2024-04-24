@@ -6,9 +6,10 @@ import { useLocation } from "react-router-dom"
 import { useNavigate } from "react-router-dom"
 import { FourmPostCommentSection } from "./ForumPostCommentSection"
 import LikeDislikeComponent from "./LikeDislikeComponent"
-import '../index.css';
 import ViewForumPostCSS from '../css/viewforumpost.module.css'
 import NavigationComponent from './Navigation';
+import LikeDislikeIcon from './LikeDislikeIcon';
+
 export const ViewForumPostComponent = () =>{
    const location = useLocation()
    const state = location.state
@@ -167,30 +168,33 @@ export const ViewForumPostComponent = () =>{
 
           <button className={`btn btn-primary ${userLikedPosts.includes(postObject[0].id) ? "liked" : ""}`}
             onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 1)}>
-            {postLikes.get(postObject[0].id)} Likes</button>
+            <LikeDislikeIcon type="like" />
+            ({postLikes.get(postObject[0].id)}) 
+            </button>
           <button className={`btn btn-primary ${userDislikedPosts.includes(postObject[0].id) ? "disliked" : ""}`}
             onClick={()=>handleForumPostLikeDislike(postObject[0].id, userID, 0)}>
-            {postDislikes.get(postObject[0].id)} Dislikes</button>
+            <LikeDislikeIcon type="dislike" />
+            ({postDislikes.get(postObject[0].id)}) 
+            </button>
         </div>
       </div>
 
       <div style={{ display: 'flex' }}>
         <FourmPostCommentSection />
         <div className={ViewForumPostCSS["recommended-posts"]}>
-          
           {recommendedPosts.length > 0 ? <div>
-            <h2 style={{color: "white"}}> You might also like... </h2>
-           {recommendedPosts.map( (post) => (
+          <h2 style={{color: "white"}}> You might also like... </h2>
+          {recommendedPosts.map( (post) => (
             <div className={ViewForumPostCSS["recommended-post"]}>
-              <h4> <a 
-          style={{textDecoration: 'none'}}
-          onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-          onMouseOut={(e) => e.target.style.textDecoration = 'none'}
-          onClick={() => {navigate(`/username/${post.username}`)}}
-          >
-          {post.username}
-         </a>  ◦ {new Date(post.post_timestamp).toLocaleString()} </h4>
-
+              <h4> 
+                <a 
+                  style={{textDecoration: 'none'}}
+                  onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                  onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+                  onClick={() => {navigate(`/username/${post.username}`)}}
+                >
+            {post.username}
+          </a>  ◦ {new Date(post.post_timestamp).toLocaleString()} </h4>
              <h5 style={{fontWeight: "bold"}}> {post.title}</h5>
               <button style={{backgroundColor: "#3B9EBF", color: "#FFF", border: "none", borderRadius: "25px", padding: "8px 16px;"}} onClick={ () => {
                  navigate(`/forumPost/${post.id}/viewing/${userID}/user`)
@@ -199,7 +203,6 @@ export const ViewForumPostComponent = () =>{
             </div>
            ))}
          </div> : <h4> No recommendations found </h4>}
-          
         </div>
       </div>       
    </div>

@@ -5,6 +5,7 @@ import { VideoCommentContainerComponent } from './VideoCommentContainer';
 import { Link } from 'react-router-dom';
 import { axiosRequest, hostname } from '../utils/utils';
 import VideoPostWithCommentsCSS from "../css/videopostwithcomments.module.css"
+import LikeDislikeIcon from './LikeDislikeIcon';
 
 import NavigationComponent from './Navigation';
 const VideoPostWithCommentsComponent = (props)=>{
@@ -234,9 +235,15 @@ const VideoPostWithCommentsComponent = (props)=>{
               </React.Fragment>
             ))}
             <button className={`btn btn-primary ${allTheVideoPostInformation.rating == 1 ? "liked" : ""}`} 
-              onClick={handleLike}>{allTheVideoPostInformation.likes}Like</button>
+              onClick={handleLike}>
+                <LikeDislikeIcon type="like" />
+                {allTheVideoPostInformation.likes}
+              </button>
             <button className={`btn btn-primary ${allTheVideoPostInformation.rating == -1 ? "disliked" : ""}`} 
-              onClick={handleDislike}>{allTheVideoPostInformation.dislikes}Dislike</button>
+              onClick={handleDislike}>
+              <LikeDislikeIcon type="dislike" />
+              {allTheVideoPostInformation.dislikes}
+            </button>
             {allTheVideoPostInformation.UserId===username.userIdOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
             <button onClick={toggleModal} className="btn btn-primary"> Add to Playlist</button>
             {modal && (

@@ -4,6 +4,8 @@ import { useParams } from "react-router-dom"
 import LikeDislikeComponent from "./LikeDislikeComponent"
 import { useNavigate } from "react-router-dom"
 import ForumPostCommentCSS from "../css/forumpostcomment.module.css"
+import LikeDislikeIcon from './LikeDislikeIcon';
+
 export const ForumPostComment = (props) => {
 
     const {postID} = useParams() //ID of the forum post
@@ -203,13 +205,15 @@ export const ForumPostComment = (props) => {
                 className={`btn btn-primary ${userLikedComments ? "liked" : ""}`} 
                 style={{padding: "4px 8px"}}
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 1)}>
-                {commentLikes} Likes
+                <LikeDislikeIcon type="like" />
+                ({commentLikes})
             </button>
             <button
                 className={`btn btn-primary ${userDislikedComments ? "disliked" : ""}`} 
                 style={{padding: "4px 8px"}}
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 0)}>
-                {commentDislikes} Dislikes
+                <LikeDislikeIcon type="dislike" />
+                ({commentDislikes})
             </button>
 
             {currentUsername === commenterUsername && !singleView? (<div>

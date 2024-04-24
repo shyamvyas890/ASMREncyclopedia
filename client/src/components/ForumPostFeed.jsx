@@ -4,8 +4,8 @@ import { redirectDocument, useNavigate } from "react-router-dom";
 import LikeDislikeComponent from "./LikeDislikeComponent"
 import * as yup from "yup"
 import ForumPostFeedCSS from "../css/forumpostfeed.module.css"
-import '../index.css';
 import NavigationComponent from './Navigation';
+import LikeDislikeIcon from './LikeDislikeIcon';
 
 export const ForumPostFeedComponent = (props) =>{
     const [allPosts, setAllPosts] = useState([])
@@ -336,11 +336,14 @@ const handleInputKeyDown = (e) =>{
           ))}
         </div>
         <button className="btn btn-primary" onClick={() => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)}> View Post </button>
-        <button className={`btn btn-primary ${userLikedPosts.includes(post.id) ? "liked" : ""}`} onClick={() => handlePostLikeDislike(post.id, currentUserID, 1)}>
-          {allPostLikes.get(post.id)} Likes
+        <button className={`btn btn-primary ${userLikedPosts.includes(post.id) ? "liked" : ""}`} 
+          onClick={() => handlePostLikeDislike(post.id, currentUserID, 1)}>
+          <LikeDislikeIcon type="like" />
+          ({allPostLikes.get(post.id)})
         </button>
         <button className={`btn btn-primary ${userDislikedPosts.includes(post.id) ? "disliked" : ""}`} onClick={() => handlePostLikeDislike(post.id, currentUserID, 0)}>
-          {allPostDislikes.get(post.id)} Dislikes
+          <LikeDislikeIcon type="dislike" />
+          ({allPostDislikes.get(post.id)})
         </button>
       </div>
     ))}

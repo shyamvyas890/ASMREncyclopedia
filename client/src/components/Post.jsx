@@ -3,6 +3,7 @@ import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from 'react-router-dom';
 import {Link} from "react-router-dom";
 import VideoPostCSS from "../css/videopost.module.css"
+import LikeDislikeIcon from './LikeDislikeIcon';
 
 const PostComponent = (props) =>{
     const hostname= "http://localhost:3001";
@@ -209,10 +210,18 @@ const PostComponent = (props) =>{
               </React.Fragment>
             ))}
             <button className="btn btn-primary" onClick={()=>navigate(`/video/${props.VideoPostId}`)}> View Post </button>
-            {props.totalLikes !== null? <button className={`btn btn-primary ${props.rating == 1 ? "liked" : ""}`} 
-              onClick={handleLike} >Like ({props.totalLikes}) </button> : <div> </div>}
-            {props.totaDislikes !== null? <button className={`btn btn-primary ${props.rating == -1 ? "disliked" : ""}`}
-              onClick={handleDislike}>Dislike ({props.totalDislikes})</button> : <div> </div>}
+            {props.totalLikes !== null? 
+              <button className={`btn btn-primary ${props.rating == 1 ? "liked" : ""}`} 
+                onClick={handleLike}>
+                <LikeDislikeIcon type="like" />
+                ({props.totalLikes}) 
+              </button> : <div> </div>}
+            {props.totaDislikes !== null? 
+              <button className={`btn btn-primary ${props.rating == -1 ? "disliked" : ""}`}
+                onClick={handleDislike}>
+                <LikeDislikeIcon type="dislike" />
+                ({props.totalDislikes})
+              </button> : <div> </div>}
             <button onClick={toggleModal} className="btn btn-primary"> Add to Playlist</button>
             {modal && (
               <div className={VideoPostCSS.modal}>
