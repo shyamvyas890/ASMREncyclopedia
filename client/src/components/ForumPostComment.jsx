@@ -13,7 +13,7 @@ export const ForumPostComment = (props) => {
     const [replies, setReplies] = useState([]) //replies to a given comment
     const [replyCommentID, setReplyCommentID] = useState() //ID of comment user is replying to
     const [isReplying, setIsReplying] = useState(false) //user is replying or not
-    const [replyText, setReplyText] = useState() //the text the user replies with
+    const [replyText, setReplyText] = useState('') //the text the user replies with
     const [currentUsername, setCurrentUsername] = useState() //username of the current user
     const [commentLikes, setCommentLikes] = useState()
     const [commentDislikes, setCommentDislikes] = useState()
@@ -105,6 +105,10 @@ export const ForumPostComment = (props) => {
     //post information to the server, add new reply from the server response
     const postReply = () =>{
 
+        if(replyText === ''){
+            window.alert("You cannot have an empty reply!")
+            return;
+        }
         console.log("FORUM POST ID NUMBER: " + postID)
         console.log("PARENT COMMENT ID NUMBER: " + replyCommentID)
         axios.post(`http://localhost:3001/forumPostCommentReply/${postID}/${replyCommentID}`, {
@@ -194,7 +198,7 @@ export const ForumPostComment = (props) => {
           onClick={() => {navigate(`/username/${props.username}`)}}
           >
           {props.username}
-         </a>  ◦ {new Date(props.timestamp).toLocaleString()} <br></br> {props.body}
+         </a>  ◦ {new Date(props.timestamp).toLocaleString()} <br></br> {commentBody}
 
          {isEditing ? (<div> <textarea value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button className="btn btn-primary" style={{padding: "4px 8px"}} onClick={handleEditCancel}> Cancel Edit </button> <button sclassName="btn btn-primary" style={{padding: "4px 8px"}} onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
 

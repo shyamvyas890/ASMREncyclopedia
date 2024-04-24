@@ -9,7 +9,7 @@ export const FourmPostCommentSection = (props) => {
    const {postID} = useParams()
    const {userID} = useParams()
    const [parentCommentsObject, setParentCommentsObject] = useState([])
-   const [commentText, setCommentText] = useState()
+   const [commentText, setCommentText] = useState('')
    const [username, setUsername] = useState()
    const [sorted, setSorted] = useState()
    
@@ -54,6 +54,10 @@ export const FourmPostCommentSection = (props) => {
    
       //adding a "parent comment" (initial comment with no replies)
       const addParentComment = () =>{
+        if(commentText === ''){
+          window.alert("You can't submit an empty comment!")
+          return
+        }
          axios.post(`http://localhost:3001/forumPostComment/${postID}`, {
              username: username,
              body: commentText,
