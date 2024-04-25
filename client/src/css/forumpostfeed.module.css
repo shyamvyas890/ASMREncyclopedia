@@ -8,18 +8,7 @@ body {
     width: 50%;
     margin: 0 auto;
     padding: 20px;
-    
     height: 100%;
-  }
-    
-  .tag-container{
-     display: flex;  
-  }
-  
-  .tag{
-    width: 50px;
-    height: 50px;
-    margin-bottom: 8px;
   }
 
   .tag-button{
@@ -115,19 +104,6 @@ body {
     border-radius: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     width: 80%;
-  }
-  
-  .user-posts h2 {
-    color: #fff;
-    font-size: 24px;
-    margin-bottom: 15px;
-  }
-  
-  .user-posts p {
-    color: #fff;
-    font-size: 18px;
-    line-height: 1.4;
-    margin-bottom: 20px;
   }
   
 

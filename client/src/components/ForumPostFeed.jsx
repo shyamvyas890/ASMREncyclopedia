@@ -333,11 +333,9 @@ const handleInputKeyDown = (e) =>{
         <h4 style={{fontWeight: "bold"}}> {post.title} </h4>
 
         <p>{post.body}</p>
-        <div>
+        <div className="tag-container">
           Tag(s) {post.tags && post.tags.split(',').map(tag => ( //If tags!=null split tags
-            <div key={tag ? tag.trim() : 'null'}>
-              <span>{tag ? tag.trim() : 'null'}</span>
-            </div>
+              <span className="tag">{tag ? tag.trim() : 'null'}</span>
           ))}
         </div>
         <button className="btn btn-primary" onClick={() => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)}> View Post </button>

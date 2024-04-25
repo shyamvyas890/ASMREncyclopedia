@@ -187,31 +187,30 @@ export const ForumPostComment = (props) => {
     };
 
     return(
-        <div id='forum-post-comment'>
+        <div style={{padding: "10px"}}id='forum-post-comment'>
            {props.deleted || isDeleted ? <div> <div className={ForumPostCommentCSS["deleted-comment"]}> [Deleted Comment] </div> <div style={replyStyle}>
              {replies && replies.map && showReplies === true && replies.map( (reply) => (
+                
                <ForumPostComment id = {reply.id} postID = {reply.forum_post_id} username = {reply.username} timestamp = {reply.comment_timestamp} body = {reply.body} userID = {props.userID} deleted={reply.deleted}/>
             ))}
             </div> </div>: 
 
         <div className={ForumPostCommentCSS['forum-post-comment-show']}>
-          
-          <a 
-          style={{textDecoration: 'none'}}
-          onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-          onMouseOut={(e) => e.target.style.textDecoration = 'none'}
-          onClick={() => {navigate(`/username/${props.username}`)}}
-          >
-          {props.username}
-         </a>  ◦ {new Date(props.timestamp).toLocaleString()} <br></br> {commentBody}
+            <a 
+            style={{textDecoration: 'none'}}
+            onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+            onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+            onClick={() => {navigate(`/username/${props.username}`)}}
+            >
+            {props.username}
+            </a>  ◦ {new Date(props.timestamp).toLocaleString()} <br></br> {commentBody}
 
          {isEditing ? (<div> <textarea value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button className="btn btn-primary" style={{padding: "4px 8px"}} onClick={handleEditCancel}> Cancel Edit </button> <button sclassName="btn btn-primary" style={{padding: "4px 8px"}} onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
 
             {showReplyOption !== false && (<button className="btn btn-primary" style={{padding: "4px 8px"}} onClick={() => handleReply(props.id)}> Reply to {props.username} </button>) }
             
             <button className="btn btn-primary" style={{padding: "4px 8px"}} onClick={showReplyStatus}> {showRepliesText} </button>
-            <button 
-                className={`btn btn-primary ${userLikedComments ? "liked" : ""}`} 
+            <button className={`btn btn-primary ${userLikedComments ? "liked" : ""}`} 
                 style={{padding: "4px 8px"}}
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 1)}>
                 <LikeDislikeIcon type="like" />

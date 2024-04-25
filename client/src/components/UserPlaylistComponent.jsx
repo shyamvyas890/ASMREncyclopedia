@@ -129,8 +129,13 @@ export const UserPlaylistComponent = ()=>{
                     <button className="btn btn-primary" onClick={postPlaylistSubmit}>Create</button>
                 </form>
             </div>
-            <h1>Playlists</h1>
-            {userPlaylists.map(playlist => (
+            {userPlaylists.length === 0 ? (
+                <h1>Create a Playlist!</h1>
+            ) : (
+                    <h1>Playlists</h1>
+                )
+            }
+            {userPlaylists.length !== 0 && userPlaylists.map(playlist => (
                 <div className={PlaylistCSS.userPlaylist} key={playlist.PlaylistID}>
                     <h2>{playlist.PlaylistName}</h2>
                     <button onClick={() => navigate(`/userPlaylists/${playlist.PlaylistID}/viewing/${currentUserID}/user`)} className="btn btn-primary"> View Playlist </button>

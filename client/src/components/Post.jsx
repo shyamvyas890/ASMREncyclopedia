@@ -203,12 +203,14 @@ const PostComponent = (props) =>{
             { <iframe width="420" height="315" title= "Title" allow="fullscreen;"
                 src={`https://www.youtube.com/embed/${props.VideoLinkId}`}>
             </iframe>}
-            <h4>Tag(s)</h4>
-            {theGenres && theGenres.map((genre, index)=>(
-              <React.Fragment key={index}>
-                <div>{genre.GenreName}</div>
-              </React.Fragment>
-            ))}
+            <div className="tag-container">
+              Tag(s)
+              {theGenres && theGenres.map((genre, index)=>(
+                <React.Fragment key={index}>
+                  <span className="tag">{genre.GenreName}</span>
+                </React.Fragment>
+              ))}
+            </div>
             <button className="btn btn-primary" onClick={()=>navigate(`/video/${props.VideoPostId}`)}> View Post </button>
             {props.totalLikes !== null? 
               <button className={`btn btn-primary ${props.rating == 1 ? "liked" : ""}`} 
@@ -223,22 +225,31 @@ const PostComponent = (props) =>{
                 ({props.totalDislikes})
               </button> : <div> </div>}
             <button onClick={toggleModal} className="btn btn-primary"> Add to Playlist</button>
-            {modal && (
+            {modal &&(
               <div className={VideoPostCSS.modal}>
                 <div onClick={toggleModal} className={VideoPostCSS.overlay}></div>
-                <div className={VideoPostCSS.modalContent}>
-                  {userPlaylists.map(playlist=>(
-                  <div className={VideoPostCSS.modalContentContainer} key={playlist.playlistID}>
-                    <div class="form-check">
-                      <input type="checkbox" 
-                      checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
-                      onClick={()=>handleCheckBox(playlist.PlaylistID)}
-                      />
+                  <div className={VideoPostCSS.modalContent}>
+                    {userPlaylists.length === 0 ? (
+                    <div>
+                      <a href="http://localhost:3000/userPlaylists">
+                        <h2>Click to create a Playlist!</h2>
+                      </a>
+                    </div>
+                    ) : (
+                    userPlaylists.map(playlist => (
+                      <div className={VideoPostCSS.modalContentContainer} key={playlist.playlistID}>
+                        <div class="form-check">
+                          <input
+                            type="checkbox"
+                            checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
+                            onClick={() => handleCheckBox(playlist.PlaylistID)}
+                          />
+                        </div>
+                        <h2>{playlist.PlaylistName}</h2>
                       </div>
-                      <h2>{playlist.PlaylistName}</h2>
-                  </div>
-                  ))}
-                <button className="close-modal"onClick={toggleModal}>Close</button>
+                    ))
+                  )}
+                <button className="btn btn-secondary"onClick={toggleModal}>Close</button>
               </div>
             </div>
             )}

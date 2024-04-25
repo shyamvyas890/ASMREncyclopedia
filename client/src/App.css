@@ -24,6 +24,50 @@
   color: #61dafb;
 }
 
+body {
+  margin: 0;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color:white;
+}
+
+h2 { /* username + datetime */
+  color: #fff;
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+h4 { /* Title of Posts */
+  font-size: 24;
+  margin-bottom: 16px;
+}
+
+p {
+  color: #d8e1e1;
+  font-size: 18px;
+  line-height: 1.4;
+  margin-bottom: 20px;
+}
+
+.tag-container{
+  display: block;  
+  padding-bottom: 16px;
+  padding-top: 16px;
+
+}
+
+.tag{
+  font-size: 14px;
+  width: 50px;
+  height: 50px;
+  padding: 8px;
+  margin: 4px;
+  align-content: center;
+  border-radius: 8px;
+  background-color: #77838F;
+}
 
 .dislike.disliked{
   background-color:red;

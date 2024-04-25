@@ -7,12 +7,6 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     width: 50vw;
   }
-
-  .user-posts h2 {
-    color: #fff;
-    font-size: 24px;
-    margin-bottom: 15px;
-  }
   
   .user-posts p {
     color: #fff;

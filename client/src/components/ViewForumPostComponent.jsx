@@ -146,11 +146,9 @@ export const ViewForumPostComponent = () =>{
 
            <p>{isEditing ? (<div> <input value={editContent} onChange={ (e) => {setEditContent(e.target.value)}}/> <button className="btn btn-danger" style={{padding: "4px 8px"}}onClick={cancelEdit}> Cancel Edit </button> <button className="btn btn-primary" style={{padding: "4px 8px"}}onClick={submitEdit}> Confirm Edit </button></div>) : (<p> {editContent} </p>)}</p>
 
-          <div>
+          <div className="tag-container">
             Tag(s) {postObject[0].tags && postObject[0].tags.split(',').map(tag => ( //If tags!=null split tags
-             <div key={tag ? tag.trim() : 'null'}>
-               <span>{tag ? tag.trim() : 'null'}</span>
-             </div>
+               <span className="tag">{tag ? tag.trim() : 'null'}</span>
            ))}
           </div>
 
