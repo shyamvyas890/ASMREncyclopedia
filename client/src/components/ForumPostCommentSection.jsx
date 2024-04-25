@@ -8,6 +8,7 @@ import ForumPostCommentSectionCSS from "../css/forumpostcomentsection.module.css
 export const FourmPostCommentSection = (props) => {
    const {postID} = useParams()
    const {userID} = useParams()
+   const [feedback, setFeedback] = useState(null)
    const [parentCommentsObject, setParentCommentsObject] = useState([])
    const [commentText, setCommentText] = useState('')
    const [username, setUsername] = useState()
@@ -54,10 +55,12 @@ export const FourmPostCommentSection = (props) => {
    
       //adding a "parent comment" (initial comment with no replies)
       const addParentComment = () =>{
+        
         if(commentText === ''){
-          window.alert("You can't submit an empty comment!")
+          setFeedback("You cannot post an empty comment")
           return
         }
+        
          axios.post(`http://localhost:3001/forumPostComment/${postID}`, {
              username: username,
              body: commentText,
@@ -70,8 +73,10 @@ export const FourmPostCommentSection = (props) => {
                  likes: 0, 
                  dislikes: 0
              }
+             console.log(commentToAdd)
              setParentCommentsObject([...parentCommentsObject, commentToAdd])
              setCommentText('')
+             setFeedback(null)
          })
      }
 
@@ -179,6 +184,9 @@ export const FourmPostCommentSection = (props) => {
            setCommentText(event.target.value);
          }}
        />
+       {feedback && (
+       <p style={{color: "red"}}>{feedback}</p>
+       )}
        <button className="btn btn-primary" onClick={addParentComment}> Comment </button>
      </div>
    </div>

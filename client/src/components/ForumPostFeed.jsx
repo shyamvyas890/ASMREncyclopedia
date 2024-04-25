@@ -9,6 +9,7 @@ import LikeDislikeIcon from './LikeDislikeIcon';
 
 export const ForumPostFeedComponent = (props) =>{
     const [allPosts, setAllPosts] = useState([])
+    const [feedback, setFeedback] = useState(null)
     //Maps contain {[postID, #of likes/dislikes]}
     const [allPostLikes, setAllPostLikes] = useState(new Map())
     const [allPostDislikes, setAllPostDislikes] = useState(new Map())
@@ -242,12 +243,13 @@ const onSubmit =  async (e) => {
       setTitle("")
       setBody("")
       setTagOptions([])
+      setFeedback(null)
     } catch (e){
         console.log(e)
     }
   }
   else{
-      alert("Make sure to give your post a title and body!")
+      setFeedback("You must give your post a title and body!")
   }
 }
 
@@ -268,7 +270,7 @@ const handleInputKeyDown = (e) =>{
       //trying to submit a duplicate tag
       else{
         e.preventDefault()
-        alert(`You already included the tag '${tagInput}'`)
+        setFeedback(`You already included the tag '${tagInput}'`)
         setTagInput('')
       }
   }
@@ -295,6 +297,9 @@ const handleInputKeyDown = (e) =>{
             </div>
           ))}
          </div>
+         {feedback && (
+         <p style={{color: "red"}}>{feedback}</p>
+         )}
 
         <button className="btn btn-primary" onClick={onSubmit}> Post </button>
       </form>

@@ -25,6 +25,7 @@ export const ForumPostComment = (props) => {
     const [editContent, setEditContent] = useState(props.body)
     const [showReplies, setShowReplies] = useState(false)
     const [showRepliesText, setShowRepliesText] = useState('+')
+    const [feedback, setFeedback] = useState(null)
 
     const singleView = props.singleView
     const showReplyOption = props.replyOption
@@ -105,10 +106,12 @@ export const ForumPostComment = (props) => {
     //post information to the server, add new reply from the server response
     const postReply = () =>{
 
+        
         if(replyText === ''){
-            window.alert("You cannot have an empty reply!")
+            setFeedback("You cannot post an empty reply")
             return;
         }
+        
         console.log("FORUM POST ID NUMBER: " + postID)
         console.log("PARENT COMMENT ID NUMBER: " + replyCommentID)
         axios.post(`http://localhost:3001/forumPostCommentReply/${postID}/${replyCommentID}`, {
@@ -127,6 +130,7 @@ export const ForumPostComment = (props) => {
             setReplyText('')
             setIsReplying(false)
             setShowReplies(true)
+            setFeedback(null)
         })    
     }
 
@@ -149,6 +153,7 @@ export const ForumPostComment = (props) => {
        }, {withCredentials: true})
        setCommentBody(editContent)
        setIsEditing(false)
+       setFeedback(null)
     }
 
     const showReplyStatus = () =>{
@@ -238,6 +243,10 @@ export const ForumPostComment = (props) => {
             {(isReplying && replyCommentID === props.id && (
                 <div>
                    <textarea type="text" value={replyText} placeholder="What do you think about that?" onChange={ (event) => {setReplyText(event.target.value)}} />
+                   {feedback && (
+                   <p style={{color: "red"}}>{feedback}</p>
+                   )}
+
                    <button className="btn btn-primary" onClick={() => {postReply()}}> Reply </button>
                    <button className="btn btn-primary" onClick={() => {setIsReplying(false)}}> Cancel </button>
                 </div>)

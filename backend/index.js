@@ -1190,7 +1190,7 @@ app.post("/forumPostComment/:id", verifyJWTMiddleware, (req, res) => {
                             NotificationRead:0
                         })
                     }
-                    return res.status(201).send("Comment Successful");
+                    return res.status(201).send({id: results.insertId});
                 })
             })
         } );
