@@ -7,8 +7,7 @@ import { Navigate } from "react-router-dom";
 import LikeDislikeIcon from './LikeDislikeIcon';
 
 const VideoCommentNodeComponent = (props) =>{
-    console.log("USERNAME HERE: " + props.usernameOfCurrentUser)
-    console.log("USER ID: " + props.userIdOfCurrentUser)
+    console.log(props)
     const [showReplyBox, setShowReplyBox]= useState(false);
     const [showEditBox, setShowEditBox] = useState(false);
     const [collapsed, setCollapsed]= useState(true);
@@ -41,7 +40,9 @@ const VideoCommentNodeComponent = (props) =>{
          VideoPostId: props.tn.data.VideoPostId,
          rating: 0,
          username: props.usernameOfCurrentUser,
-         CommentedAt: new Date()
+         CommentedAt: new Date(),
+         likes:0,
+         dislikes:0
         };
         const newCommentNode = new TreeNode(newCommentNodeData);
         commentRef.current.value="";
@@ -69,6 +70,7 @@ const VideoCommentNodeComponent = (props) =>{
                 LikeStatus: true
             })
             props.tn.data.rating=1;
+            props.tn.data.likes = props.tn.data.likes + 1;
             props.setRoots(prevRoots=>[...prevRoots]);
         }
         else if(props.tn.data.rating===1){
@@ -77,6 +79,7 @@ const VideoCommentNodeComponent = (props) =>{
                 UserId: props.userIdOfCurrentUser
             }})
             props.tn.data.rating=0;
+            props.tn.data.likes = props.tn.data.likes - 1;
             props.setRoots(prevRoots=>[...prevRoots]);
         }
         else if(props.tn.data.rating===-1){
@@ -90,6 +93,8 @@ const VideoCommentNodeComponent = (props) =>{
                 LikeStatus: true
             })
             props.tn.data.rating=1;
+            props.tn.data.likes = props.tn.data.likes + 1;
+            props.tn.data.dislikes = props.tn.data.dislikes - 1;
             props.setRoots(prevRoots=>[...prevRoots]);
         }
     }
@@ -102,6 +107,7 @@ const VideoCommentNodeComponent = (props) =>{
                 LikeStatus: false
             })
             props.tn.data.rating=-1;
+            props.tn.data.dislikes = props.tn.data.dislikes + 1;
             props.setRoots(prevRoots=>[...prevRoots]);
         }
         else if(props.tn.data.rating===-1){
@@ -110,6 +116,7 @@ const VideoCommentNodeComponent = (props) =>{
                 UserId: props.userIdOfCurrentUser
             }})
             props.tn.data.rating=0;
+            props.tn.data.dislikes = props.tn.data.dislikes - 1;
             props.setRoots(prevRoots=>[...prevRoots]);
         }
         else if(props.tn.data.rating===1){
@@ -123,6 +130,8 @@ const VideoCommentNodeComponent = (props) =>{
                 LikeStatus: false
             })
             props.tn.data.rating=-1;
+            props.tn.data.likes = props.tn.data.likes - 1;
+            props.tn.data.dislikes = props.tn.data.dislikes + 1;
             props.setRoots(prevRoots=>[...prevRoots]);
         }
     }

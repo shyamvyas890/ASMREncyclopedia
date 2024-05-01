@@ -290,6 +290,8 @@ app.post("/accountDeletionRequest", verifyJWTMiddleware, async (req, res)=>{
 
 app.post("/login", async (req, res)=>{ // secure
     const { username, password } = req.body;
+    console.log(username)
+    console.log(password)
     db.query(
         'SELECT * FROM users WHERE username = ?',
         [username],
@@ -299,6 +301,7 @@ app.post("/login", async (req, res)=>{ // secure
                 res.status(500).send("Error logging in.")
             }
             else if (results.length>0){
+                console.log(results)
                 const match = await bcrypt.compare(password, results[0].password);
                 if (match) {
                     const exp = Math.floor(Date.now() / 1000) + 86400;
@@ -326,6 +329,7 @@ app.post("/login", async (req, res)=>{ // secure
 })
 
 app.get('/verify-token', verifyJWTMiddleware, (req, res)=>{ //secure
+    console.log(req.decodedToken)
     return res.json(req.decodedToken);
 })
 
@@ -380,8 +384,6 @@ app.post('/video/:VideoId', verifyJWTMiddleware, async (req,res)=>{ //secure
 app.post('/video-rating/:VideoPostId', verifyJWTMiddleware, (req,res)=>{ //secure
     const VideoPostId= req.params.VideoPostId;
     const {UserId, LikeStatus}= req.body;
-    console.log("1: " + UserId)
-    console.log("2 " + req.decodedToken.UserId)
     if(req.decodedToken.UserId !== UserId){
         return res.status(403).send("You do not have permission to do that");
     }
@@ -1849,16 +1851,29 @@ app.post("/videoCommentRating", verifyJWTMiddleware, (req, res)=>{
 
 app.get("/videoCommentRatings", verifyJWTMiddleware, async (req, res)=>{
     const {VideoPostCommentId, UserId} = req.query;
-    if(req.decodedToken.UserId!==parseInt(UserId)){
-        return res.status(403).send("You do not have permission to do that");
-    }
-    db.query("SELECT * FROM VideoPostCommentLikeDislike WHERE UserId= ? AND VideoPostCommentId = ?", [UserId, VideoPostCommentId], (error, results)=>{
-        if (error){
-            console.log(error);
-            return res.status(500).send("Internal Server Error");
+    if(UserId !== undefined){
+        if(req.decodedToken.UserId!==parseInt(UserId)){
+            return res.status(403).send("You do not have permission to do that");
         }
-        return res.json(results);
-    })
+    }
+    if(UserId !== undefined){
+        db.query("SELECT * FROM VideoPostCommentLikeDislike WHERE UserId= ? AND VideoPostCommentId = ?", [UserId, VideoPostCommentId], (error, results)=>{
+            if (error){
+                console.log(error);
+                return res.status(500).send("Internal Server Error");
+            }
+            return res.json(results);
+        })        
+    }
+    else {
+        db.query("SELECT * FROM VideoPostCommentLikeDislike WHERE VideoPostCommentId = ?", [VideoPostCommentId], (error, results)=>{
+            if (error){
+                console.log(error);
+                return res.status(500).send("Internal Server Error");
+            }
+            return res.json(results);
+        })  
+    }
 })
 
 app.post("/friendRequests", verifyJWTMiddleware, (req, res)=>{
