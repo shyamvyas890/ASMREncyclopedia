@@ -103,7 +103,7 @@ Thank you for your interest in exploring the ASMR Encyclopedia! We appreciate yo
 
 ## How to Run This Application
 
-Install MySQL Workbench and run the following code in MySQL Workbench:
+1. Install MySQL Workbench and run the following code in MySQL Workbench: 
 ```sql 
 CREATE DATABASE ASMR_DB;
 use ASMR_DB;
@@ -321,3 +321,26 @@ CREATE TABLE PlaylistVideoPosts(
   FOREIGN KEY (VideoPostID) REFERENCES VideoPost(VideoPostId) ON DELETE CASCADE
 );
 ```
+2. In the [index.js](backend/index.js) , make sure to modify the hostname, user, and password to match your MySQL credentials:
+```javascript 
+const db = mysql.createConnection({ // modify the first three parameters.
+    host: 'localhost',
+    user: 'root',
+    password: 'password',
+    database: 'ASMR_DB',
+});
+```
+
+3. Modify the "secretKey" in the [index.js](backend/index.js) to be a complex, random, and unique string, which you should keep a secret and not tell anyone.
+```javascript
+const secretKey= "secret_key" //Modify this
+```
+4. Install Node.js.
+5. Download this project repository and open up two terminal or command prompt windows.
+6. In one terminal, run this command:
+`cd client`
+7. In another terminal, run this command:
+`cd backend`
+8. Now, run the following command in both terminals:
+`npm start`
+9. Now, the application will open up in your browser. Enjoy!
