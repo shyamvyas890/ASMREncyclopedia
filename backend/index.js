@@ -75,6 +75,12 @@ const queryTheDatabaseGiveResults = (theQuery, theArray)=>{
 }
 app.post("/register", async (req,res)=>{
     const { username, password } = req.body;
+    if(username === ""){
+        return res.status(400).send("Username cannot be empty")
+    }
+    if(password === ""){
+        return res.status(400).send("Password cannot be empty")
+    }
     const hashedPassword = await bcrypt.hash(password, 13);
     db.query(
     'INSERT INTO users (username, password) VALUES (?, ?)',
@@ -347,8 +353,8 @@ app.post('/logout', verifyJWTMiddleware, (req,res)=>{
     })
 })
 
-app.get('/users',(req,res)=>{
-    db.query('SELECT * FROM users', verifyJWTMiddleware, (err, results)=>{
+app.get('/users', verifyJWTMiddleware, (req,res)=>{
+    db.query('SELECT * FROM users', (err, results)=>{
         if(err){
             console.log(err);
             return res.json("Error retrieving all users")

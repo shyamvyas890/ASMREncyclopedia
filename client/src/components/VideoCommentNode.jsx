@@ -10,7 +10,7 @@ const VideoCommentNodeComponent = (props) =>{
     console.log(props)
     const [showReplyBox, setShowReplyBox]= useState(false);
     const [showEditBox, setShowEditBox] = useState(false);
-    const [collapsed, setCollapsed]= useState(true);
+    const [collapsed, setCollapsed]= useState(false);
     const commentRef= useRef("");
     const editRef= useRef("");
     const navigate = useNavigate()
