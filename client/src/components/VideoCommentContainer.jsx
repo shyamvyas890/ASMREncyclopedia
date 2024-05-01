@@ -20,6 +20,7 @@ const VideoCommentContainerComponent = (props)=>{
             fetchPosts.data[i].username =theUsernameOfCommenter.data.username;
         }
         for(let i=0;i<fetchPosts.data.length;i++){
+            console.log(fetchPosts.data[i]);
             const comment = new TreeNode(fetchPosts.data[i]);
             idToCommentMapping[comment.data.VideoPostCommentId]=comment;
         }
@@ -34,13 +35,11 @@ const VideoCommentContainerComponent = (props)=>{
                 UserId:props.userIdOfCurrentUser,
                 VideoPostCommentId:fetchPosts.data[i].VideoPostCommentId
             }})
-            idToCommentMapping[fetchPosts.data[i].VideoPostCommentId].data.rating= fetchRating.data.length===0? 0: fetchRating.data[0].LikeStatus===1? 1:-1;
-        }
-        for( const rootNode of rootNodes){
-            const ratingsForRootNode = await axiosRequest(3,2,"videoCommentRatings", {VideoPostCommentId:rootNode.data.VideoPostCommentId, UserId: props.userIdOfCurrentUser});
+            idToCommentMapping[fetchPosts.data[i].VideoPostCommentId]._data.rating= fetchRating.data.length===0? 0: fetchRating.data[0].LikeStatus===1? 1:-1;
+            const ratingsForAParticularNode = await axiosRequest(3,2,"videoCommentRatings", {VideoPostCommentId:fetchPosts.data[i].VideoPostCommentId});
             let likes=0;
             let dislikes= 0;
-            for(const rating of ratingsForRootNode.data){
+            for(const rating of ratingsForAParticularNode.data){
                 if(rating.LikeStatus===1){
                     likes++;
                 }
@@ -48,7 +47,7 @@ const VideoCommentContainerComponent = (props)=>{
                     dislikes++;
                 }
             }
-            rootNode._data= {...rootNode._data, likes, dislikes}
+            idToCommentMapping[fetchPosts.data[i].VideoPostCommentId]._data= {...idToCommentMapping[fetchPosts.data[i].VideoPostCommentId]._data, likes, dislikes}
         }
         setRoots(rootNodes);
     }
@@ -75,7 +74,9 @@ const VideoCommentContainerComponent = (props)=>{
                 VideoPostId: props.VideoPostId,
                 ReplyToVideoPostCommentId:null,
                 DELETED: 0,
-                username: props.usernameOfCurrentUser
+                username: props.usernameOfCurrentUser,
+                likes: 0,
+                dislikes: 0
             }));
             return newRoots;
         })

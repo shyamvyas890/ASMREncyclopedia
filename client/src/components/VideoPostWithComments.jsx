@@ -243,9 +243,9 @@ const VideoPostWithCommentsComponent = (props)=>{
              </a> 
              ◦ {new Date(allTheVideoPostInformation.PostedAt).toLocaleString()}</h2>
              <h4 style={{fontWeight: "bold"}}> {allTheVideoPostInformation.Title} </h4>
-             {/* { <iframe width="420" height="315" title= "Title" allow="fullscreen;"
+             { <iframe width="420" height="315" title= "Title" allow="fullscreen;"
                 src={`https://www.youtube.com/embed/${allTheVideoPostInformation.VideoLinkId}`}>
-            </iframe>} */}
+            </iframe>}
             <div className="tag-container">
               Tag(s)
               {allTheVideoPostInformation.genres.map((genre, index)=>(
