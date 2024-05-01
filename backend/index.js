@@ -1590,7 +1590,7 @@ app.get("/fetchAllPlaylistVideosID", verifyJWTMiddleware, async (req, res)=>{
 
 app.get("/fetchAllVideos", verifyJWTMiddleware, (req, res)=>{
     const videoPostID = req.query.videoPostID
-    const query = "SELECT * FROM VideoPost WHERE VideoPostID = ?"
+    const query = "SELECT * FROM VideoPost JOIN users ON VideoPost.UserId = users.id WHERE VideoPostId = ?";
     db.query(query, [videoPostID], (err, data)=>{
         if(err){
             console.log(err)

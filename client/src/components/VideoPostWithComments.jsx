@@ -235,6 +235,7 @@ const VideoPostWithCommentsComponent = (props)=>{
                 </React.Fragment>
               ))}
             </div>
+            
             <button className={`btn btn-primary ${allTheVideoPostInformation.rating == 1 ? "liked" : ""}`} 
               onClick={handleLike}>
                 <LikeDislikeIcon type="like" />
