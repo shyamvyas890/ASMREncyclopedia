@@ -264,7 +264,7 @@ const VideoPostWithCommentsComponent = (props)=>{
               <LikeDislikeIcon type="dislike" />
               {`(${allTheVideoPostInformation.totalDislikes})`}
             </button>
-            {allTheVideoPostInformation.UserId===userID && <button onClick={handleDelete}>Delete</button>}
+            {allTheVideoPostInformation.UserId===userID && <button className="btn btn-danger" onClick={handleDelete}>Delete</button>}
             <button onClick={toggleModal} className="btn btn-primary"> Add to Playlist</button>
             {modal && (
               <div className={VideoPostWithCommentsCSS.modal}>

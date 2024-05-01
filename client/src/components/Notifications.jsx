@@ -192,7 +192,7 @@ const NotificationsComponent = (props)=>{
                             {notificationsElements && notificationsElements.length > 0 ? (
                                <> 
                                 {notificationsElements}
-                                <button onClick={()=>{window.open(`/notifications`, '_blank');}}>See all notifications</button>
+                                <button className="btn btn-primary" onClick={()=>{window.open(`/notifications`, '_blank');}}>See all notifications</button>
                                 </>
                             ) : notificationsElements && notificationsElements.length===0 ?  (
                                 <div>No notifications</div>
