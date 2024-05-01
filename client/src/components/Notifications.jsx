@@ -63,7 +63,6 @@ const NotificationsComponent = (props)=>{
                 else if(notification.ForumCommentSenderUserId!==undefined){
                     thisPersonSentTheNotification = await axiosRequest(3,2,"users/id",{UserId: notification.ForumCommentSenderUserId});
                 }
-                console.log(`${thisPersonSentTheNotification.data.username} says: ${notification.Message}`);
                 return <div key={index} style={{ background: notification.NotificationRead===1 ? "#161717" : "#606175", padding: "8px", border: "1px solid maroon", cursor:"pointer" }} onClick={(e) => {markAsRead(e,index)}}>
                     {`${thisPersonSentTheNotification.data.username} says: ${notification.Message}`}
                 </div>
@@ -76,7 +75,6 @@ const NotificationsComponent = (props)=>{
     },[notifications]);
     React.useEffect( ()=>{
         if(socket && username && notifications && notificationsElements){
-            console.log("I made it here")
             socket.on('newNotification', handleNewNotification);
             return ()=>{
                 socket.off('newNotification', handleNewNotification);
@@ -84,7 +82,6 @@ const NotificationsComponent = (props)=>{
         }
     },[socket, username, notifications, notificationsElements]);
     const handleNewNotification = (notification)=>{
-        console.log(notification);
         const updatedNotifications = [...notifications];
         updatedNotifications.unshift(notification);
         if(notifications.length===10 && props.AllNotificationsPage === undefined){
@@ -99,7 +96,6 @@ const NotificationsComponent = (props)=>{
             else if(theNotification.ForumCommentSenderUserId!==undefined){
                 thisPersonSentTheNotification = await axiosRequest(3,2,"users/id",{UserId: theNotification.ForumCommentSenderUserId});
             }
-            console.log(`${thisPersonSentTheNotification.data.username} says: ${theNotification.Message}`);
             return <div key={0} style={{ background: theNotification.NotificationRead===1 ? "#161717" : "#606175", padding: "8px", border: "1px solid maroon", cursor:"pointer" }} onClick={(e) => {markAsRead(e,0)}}>
                 {`${thisPersonSentTheNotification.data.username} says: ${theNotification.Message}`}
             </div>
@@ -125,14 +121,12 @@ const NotificationsComponent = (props)=>{
         })   
     }
     const handleConnect = () => {
-        console.log("Why is this not logging")
         console.log('Connected to server:', socket.id);
     };
     const handleDisconnect = () => {
         console.log('Disconnected from server');
     }
     const fetchNotifications = async (e)=>{
-        console.log(username);
         let notificationsArr;
         if(props.AllNotificationsPage===undefined){
             notificationsArr = (await axiosRequest(3,2,"notifications", {UserId: username.userIdOfCurrentUser, Dropdown:true})).data;
@@ -148,12 +142,12 @@ const NotificationsComponent = (props)=>{
         const updatedNotifications = [...notifications];
         if(updatedNotifications[index].SenderForumPostCommentId!==undefined){
             const markRead= await axios.patch(`${hostname}/notifications`, {ForumPostCommentId: updatedNotifications[index].SenderForumPostCommentId});
-            console.log(markRead);
+
             window.open(`/SingleForumComment/${updatedNotifications[index].SenderForumPostCommentId}`, '_blank');
         }
         else if(updatedNotifications[index].SenderVideoPostCommentId!==undefined){
             const markRead= await axios.patch(`${hostname}/notifications`, {VideoPostCommentId: updatedNotifications[index].SenderVideoPostCommentId});
-            console.log(markRead);
+
             window.open(`/SingleVideoComment/${updatedNotifications[index].SenderVideoPostCommentId}`, '_blank');
         }
         if(updatedNotifications[index].NotificationRead===0){
@@ -166,7 +160,6 @@ const NotificationsComponent = (props)=>{
     const handleError = (error) => {
         console.error("Socket connection error:", error);
     };
-    console.log(notificationsElements);
     return (
         props.AllNotificationsPage === undefined? 
         (<div style={{position:"relative"}}>

@@ -7,8 +7,6 @@ import { Navigate } from "react-router-dom";
 import LikeDislikeIcon from './LikeDislikeIcon';
 
 const VideoCommentNodeComponent = (props) =>{
-    console.log("USERNAME HERE: " + props.usernameOfCurrentUser)
-    console.log("USER ID: " + props.userIdOfCurrentUser)
     const [showReplyBox, setShowReplyBox]= useState(false);
     const [showEditBox, setShowEditBox] = useState(false);
     const [collapsed, setCollapsed]= useState(true);

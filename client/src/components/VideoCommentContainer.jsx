@@ -5,8 +5,6 @@ import { TreeNode, axiosRequest } from "../utils/utils";
 import VideoCommentContainerCSS from "../css/videocommentcontainer.module.css"
 
 const VideoCommentContainerComponent = (props)=>{
-    console.log("USER ID HERE: " + props.userIdOfCurrentUser)
-    console.log("USERNAME CONTAINER: " + props.usernameOfCurrentUser)
     const [roots, setRoots]= useState(null);
     const [sortedRoots, setSortedRoots] = useState(null);
     const [sortOption, setSortOption] = useState("latest");
