@@ -13,7 +13,7 @@ export const SingleForumCommentComponent = () => {
     const [parentCommentID, setParentCommentID] = useState()
     const [enableViewParent, setEnableViewParent] = useState(false)
     const [forumPostCommentBody, setForumPostCommentBody] = useState()
-
+    const [forumPost, setForumPost] = useState()
     const navigate = useNavigate()
     
     const getParentComment = async () => {
@@ -38,8 +38,11 @@ export const SingleForumCommentComponent = () => {
         const getComment = async () => {
             try {
                 const response = await axios.get(`http://localhost:3001/getForumPostCommentByID/${forumPostCommentID}`, {withCredentials: true})
+                const responseForumPost = await axios.get(`http://localhost:3001/forumPostsById/${response.data[0].forum_post_id}`, {withCredentials: true})
+                setForumPost(responseForumPost.data[0])
                 if(response.data[0].parent_comment_id){
                     const response2 = await axios.get(`http://localhost:3001/getForumPostCommentByID/${response.data[0].parent_comment_id}`, {withCredentials: true})
+                    
                     setForumPostComment(response2.data[0])
                     setForumPostCommentBody(response2.data[0].body)
                     if(response2.data[0].parent_comment_id){
@@ -60,9 +63,6 @@ export const SingleForumCommentComponent = () => {
         getComment()
     }, [])
 
-    
-    
-    
 
     //gets the username and id of the current user
     useEffect( () => {
@@ -78,8 +78,6 @@ export const SingleForumCommentComponent = () => {
         fetchUsername()
     }, [])
 
-
-
     const handleViewParentComment = () => {
         navigate(`/SingleForumComment/${parentCommentID}`)
         getParentComment()
@@ -91,8 +89,27 @@ export const SingleForumCommentComponent = () => {
                 <NavigationComponent />
             </div>
 
+            {forumPost && (<div className={SingleForumCommentCSS["container"]}> <h2> <a 
+            style={{textDecoration: 'none'}}
+            onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+            onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+            onClick={() => {navigate(`/username/${forumPost.username}`)}}
+            >
+            {forumPost.username}
+           </a> 
+           ◦ {new Date(forumPost.post_timestamp).toLocaleString()}</h2> 
+           <h4 style={{fontWeight: "bold"}}> {forumPost.title} </h4>
+           <p> {forumPost.body} </p>
+           <div className="tag-container">
+            Tag(s) {forumPost.tags && forumPost.tags.split(',').map(tag => ( //If tags!=null split tags
+               <span className="tag">{tag ? tag.trim() : 'null'}</span>
+           ))}
+          </div>
+          <button className="btn btn-primary" onClick={() => navigate(`/forumPost/${forumPost.id}/viewing/${currentUserID}/user`)}> View Post </button>
+           </div>)}
             {forumPostComment && (
-                <div className={SingleForumCommentCSS['single-comment']}>
+                <div className={SingleForumCommentCSS['comment-container']}>
+                   <div className={SingleForumCommentCSS['single-comment']}>
                     <ForumPostComment
                         id={forumPostComment.id}
                         postID={forumPostComment.forum_post_id}
@@ -116,6 +133,8 @@ export const SingleForumCommentComponent = () => {
 
                    <button className={SingleForumCommentCSS['view-all-comments-button']} onClick={ () => navigate(`/forumPost/${forumPostComment.forum_post_id}/viewing/${currentUserID}/user`)}> View All Comments </button> 
                 </div>
+                </div>
+                
             )}
         </div>
     )

@@ -17,3 +17,26 @@
     border: none;
     border-radius: 25px;
 }
+
+.container{
+        background-color: #333;
+        padding: 20px;
+        margin: 20px 20px 20px 40px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        width: 60%;
+        border-radius: 20px;
+}
+
+.comment-container{
+        background-color: #222;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        max-width: 600px;
+        margin: 0;
+        text-align: left; 
+        width: 50%;
+        overflow-y: auto;
+        margin-left: 40px;
+
+}

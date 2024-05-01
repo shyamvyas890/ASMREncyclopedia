@@ -15,6 +15,7 @@ export const UserPlaylistComponent = ()=>{
     const [modal, setModal] = useState(false)
     const navigate = useNavigate()
 
+    const [feedback, setFeedback] = useState(null)
     useEffect(()=> {
         const fetchUsername = async () => {
             try {
@@ -77,7 +78,7 @@ export const UserPlaylistComponent = ()=>{
             setPlaylistName("")
         }
         else{
-            alert("Make sure to give your playlist a name!")
+            setFeedback("Make sure to give your playlist a name!")
         }
         fetchAllUserPlaylist()
     }
@@ -101,7 +102,7 @@ export const UserPlaylistComponent = ()=>{
             setPlaylistName("")
         }
         else{
-            alert("Make sure to give your playlist a name!")
+            setFeedback("Make sure to give your playlist a name!")
         }
         fetchAllUserPlaylist()
         toggleModal()
@@ -126,6 +127,10 @@ export const UserPlaylistComponent = ()=>{
                 <h2>Create New Playlist</h2>
                 <form className={PlaylistCSS.userPlaylistForm}>
                     <input type="name" placeholder="Playlist Name" value={playlistName} onChange={(event) => { setPlaylistName(event.target.value) }} />
+                    {feedback && (
+                    <p style={{color: "red"}}>{feedback}</p>
+                    )}
+
                     <button className="btn btn-primary" onClick={postPlaylistSubmit}>Create</button>
                 </form>
             </div>
