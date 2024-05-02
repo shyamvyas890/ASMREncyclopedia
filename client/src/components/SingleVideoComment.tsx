@@ -59,6 +59,21 @@ const SingleVideoCommentComponent = () =>{
                 VideoPostCommentId:fetchPosts.data[i].VideoPostCommentId
             }})
             idToCommentMapping[fetchPosts.data[i].VideoPostCommentId].data.rating= fetchRating.data.length===0? 0: fetchRating.data[0].LikeStatus===1? 1:-1;
+            const ratingsForAParticularNode = await axiosRequest(3,2,"videoCommentRatings", {VideoPostCommentId:fetchPosts.data[i].VideoPostCommentId});
+            let likes=0;
+            let dislikes= 0;
+            if(ratingsForAParticularNode){
+                for(const rating of ratingsForAParticularNode.data){
+                    if(rating.LikeStatus===1){
+                        likes++;
+                    }
+                    else if (rating.LikeStatus===0){
+                        dislikes++;
+                    }
+                }
+            }
+            idToCommentMapping[fetchPosts.data[i].VideoPostCommentId].data.likes = likes;
+            idToCommentMapping[fetchPosts.data[i].VideoPostCommentId].data.dislikes = dislikes;
         }
         if(fetchParent!==null){
             const tn = rootNodes[0];
