@@ -46,6 +46,7 @@ function App() {
             <Route path="/userPlaylists/" element={<UserPlaylistComponent />}/>
             <Route path="/userPlaylists/:playlistID/viewing/:userID/user" element={<ViewUserPlaylistComponent/>}/>
             <Route path="/notifications" element={<NotificationsComponent AllNotificationsPage = {true}/>} />
+            <Route path = "/about-us" element = {<HomeComponent />} />
           </Routes>
       </BrowserRouter>
     </div>
