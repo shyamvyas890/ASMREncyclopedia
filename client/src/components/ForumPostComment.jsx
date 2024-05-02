@@ -23,7 +23,7 @@ export const ForumPostComment = (props) => {
     const [isEditing, setIsEditing] = useState()
     const [commentBody, setCommentBody] = useState(props.body)
     const [editContent, setEditContent] = useState(props.body)
-    const [showReplies, setShowReplies] = useState(false)
+    const [showReplies, setShowReplies] = useState(true)
     const [showRepliesText, setShowRepliesText] = useState('+')
     const [feedback, setFeedback] = useState(null)
 
@@ -203,13 +203,13 @@ export const ForumPostComment = (props) => {
             onClick={() => {navigate(`/username/${props.username}`)}}
             >
             {props.username}
-            </a>  ◦ {new Date(props.timestamp).toLocaleString()} <br></br> {commentBody}
+            </a>  ◦ {new Date(props.timestamp).toLocaleString()} <br></br> {singleView ? props.body : commentBody} 
 
-         {isEditing ? (<div> <textarea value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button className="btn btn-primary" style={{padding: "4px 8px"}} onClick={handleEditCancel}> Cancel Edit </button> <button sclassName="btn btn-primary" style={{padding: "4px 8px"}} onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
+         {isEditing ? (<div> <textarea value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button className="btn btn-danger" style={{padding: "4px 8px"}} onClick={handleEditCancel}> Cancel Edit </button> <button sclassName="btn btn-primary" style={{padding: "4px 8px"}} onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
 
             {showReplyOption !== false && (<button className="btn btn-primary" style={{padding: "4px 8px"}} onClick={() => handleReply(props.id)}> Reply to {props.username} </button>) }
             
-            <button className="btn btn-primary" style={{padding: "4px 8px"}} onClick={showReplyStatus}> {showRepliesText} </button>
+            {replies.length > 0 && <button className="btn btn-primary" style={{padding: "4px 8px"}} onClick={showReplyStatus}> {showRepliesText} </button>}
             <button className={`btn btn-primary ${userLikedComments ? "liked" : ""}`} 
                 style={{padding: "4px 8px"}}
                 onClick={()=>handleCommentLikeDislike(props.id, userID, 1)}>
@@ -241,13 +241,13 @@ export const ForumPostComment = (props) => {
 
             {(isReplying && replyCommentID === props.id && (
                 <div>
-                   <textarea type="text" value={replyText} placeholder="What do you think about that?" onChange={ (event) => {setReplyText(event.target.value)}} />
+                   <textarea type="text" style={{marginTop: "10px"}} value={replyText} placeholder="What do you think about that?" onChange={ (event) => {setReplyText(event.target.value)}} />
                    {feedback && (
                    <p style={{color: "red"}}>{feedback}</p>
                    )}
 
                    <button className="btn btn-primary" onClick={() => {postReply()}}> Reply </button>
-                   <button className="btn btn-primary" onClick={() => {setIsReplying(false)}}> Cancel </button>
+                   <button  className="btn btn-danger" onClick={() => {setIsReplying(false)}}> Cancel </button>
                 </div>)
             )}
         </div>}

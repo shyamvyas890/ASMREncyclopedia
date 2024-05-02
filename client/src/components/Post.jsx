@@ -211,6 +211,7 @@ const PostComponent = (props) =>{
                 </React.Fragment>
               ))}
             </div>
+            <div className={VideoPostCSS["button-container"]}> 
             <button className="btn btn-primary" onClick={()=>navigate(`/video/${props.VideoPostId}`)}> View Post </button>
             {props.totalLikes !== null? 
               <button className={`btn btn-primary ${props.rating == 1 ? "liked" : ""}`} 
@@ -253,6 +254,8 @@ const PostComponent = (props) =>{
               </div>
             </div>
             )}
+            </div>
+            
         </div>
     );
 }

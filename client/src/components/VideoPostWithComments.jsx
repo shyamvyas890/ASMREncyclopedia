@@ -296,13 +296,15 @@ const VideoPostWithCommentsComponent = (props)=>{
             </div>
             )}
           </div>
-          <div className={VideoPostWithCommentsCSS['video-post-comments-section']}>
+
+          {props.singleView ? <div></div> : <div className={VideoPostWithCommentsCSS['video-post-comments-section']}>
             {routerVideoPostId && <VideoCommentContainerComponent
                 VideoPostId= {allTheVideoPostInformation.VideoPostId}
                 userIdOfCurrentUser= {userID}
                 usernameOfCurrentUser= {username}
             />}
-          </div>
+          </div>}
+          
         </div>
             )
     )

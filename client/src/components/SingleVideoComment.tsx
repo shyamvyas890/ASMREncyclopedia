@@ -4,6 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import {hostname, axiosRequest, TreeNode } from "../utils/utils";
 import VideoCommentNodeComponent from "./VideoCommentNode";
 import VideoPostWithCommentsComponent from "./VideoPostWithComments";
+import SingleVideoCommentCSS from "../css/singlevideocomment.module.css"
+
 const SingleVideoCommentComponent = () =>{
     const StringVideoPostCommentId = useParams().VideoPostCommentId;
     const theVideoPostCommentId: any = parseInt(StringVideoPostCommentId===undefined? "":StringVideoPostCommentId);
@@ -102,9 +104,9 @@ const SingleVideoCommentComponent = () =>{
     return (
         
         <div>
-            {roots && parentId!=="" && <VideoPostWithCommentsComponent VideoPostId={roots[0].data.VideoPostId}/>}
-            {roots && parentId!=="" && <button disabled= {parentId===null} onClick={()=>{navigate(`/SingleVideoComment/${parentId}`)}}>View Parent Comment</button>}
-            {roots && parentId!=="" && <button onClick={()=>{navigate(`/video/${roots[0].data.VideoPostId}`)}}>View All Comments</button>}
+            {roots && parentId!=="" && <VideoPostWithCommentsComponent singleView={true} VideoPostId={roots[0].data.VideoPostId}/>}
+            {roots && parentId!=="" && <button className={SingleVideoCommentCSS["view-parent-button"]} disabled= {parentId===null} onClick={()=>{navigate(`/SingleVideoComment/${parentId}`)}}>View Parent Comment</button>}
+            {roots && parentId!=="" && <button className={SingleVideoCommentCSS["view-all-comments-button"]} onClick={()=>{navigate(`/video/${roots[0].data.VideoPostId}`)}}>View All Comments</button>}
             {roots && parentId!=="" &&
             roots.map((rootComment, index)=>(
                 <VideoCommentNodeComponent 
@@ -113,6 +115,7 @@ const SingleVideoCommentComponent = () =>{
                 userIdOfCurrentUser= {username ===null? null:username.userIdOfCurrentUser}
                 usernameOfCurrentUser= {username===null? null: username.username}
                 setRoots={setRoots}
+                
                 />
             ))
             

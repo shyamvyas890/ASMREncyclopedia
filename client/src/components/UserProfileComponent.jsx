@@ -266,13 +266,13 @@ const sortVideoPostComments = (e) =>{
                     <option value="1"> Newest to Oldest (Default) </option>
                     <option value="2"> Oldest To Newest </option>
                 </select>
-                <button style={{padding: "8px 16px", backgroundColor: "#4CAF50",  border: "none",color: "#fff",cursor: "pointer",marginLeft: "10px"}} type="submit"> Sort </button>
+                <button className="btn btn-primary" style={{marginLeft: "10px"}} type="submit"> Sort </button>
             </form>
 
             {forumPosts.map(post => (
                 <div key={post.id} style={{marginTop: "20px", backgroundColor: "#333",
                  padding: "20px",
-                 marginBottom: "20px"}}>
+                 marginBottom: "20px", width: "60%"}}>
                     <h2>{post.username} ◦ {new Date(post.post_timestamp).toLocaleString()}</h2>
                     <h4 style={{fontWeight: "bold"}}> {post.title}</h4>
                     <p>{post.body}</p>
@@ -284,7 +284,7 @@ const sortVideoPostComments = (e) =>{
                           </div>
                         ))}
                       </div>
-                    <button style={{backgroundColor: "#3B9EBF", color: "#FFF", padding: "8px 16px", border: "none", borderRadius: "25px"}} onClick={() => navigate(`/forumPost/${post.id}/viewing/${userID}/user`)}>
+                    <button className="btn btn-primary" style={{marginTop: "10px"}} onClick={() => navigate(`/forumPost/${post.id}/viewing/${userID}/user`)}>
                         View Post
                     </button>
                     </div>
@@ -307,7 +307,7 @@ const sortVideoPostComments = (e) =>{
                     <option value="1"> Newest to Oldest </option>
                     <option value="2"> Oldest To Newest </option>
                 </select>
-                <button style={{padding: "8px 16px", backgroundColor: "#4CAF50",  border: "none",color: "#fff",cursor: "pointer",marginLeft: "10px", marginBottom: "20px"}} type="submit"> Sort </button>
+                <button className="btn btn-primary" style={{marginLeft: "10px"}} type="submit"> Sort </button>
             </form>
             {videoPosts.map((video, index) => (
                 <div key={index}> 
@@ -344,7 +344,7 @@ const sortVideoPostComments = (e) =>{
                     <option value="2"> Oldest To Newest (Default) </option>
                     <option value="1">  Newest to Oldest </option>
                 </select>
-                <button style={{padding: "8px 16px", backgroundColor: "#4CAF50",  border: "none",color: "#fff",cursor: "pointer",marginLeft: "10px"}} type="submit"> Sort </button>
+                <button className="btn btn-primary" style={{marginLeft: "10px"}} type="submit"> Sort </button>
         </form>
         {forumPostComments.length !== 0 ? (
 
@@ -360,7 +360,7 @@ const sortVideoPostComments = (e) =>{
           {comment.username}
          </a>  ◦ {new Date(comment.comment_timestamp).toLocaleString()} <br></br> {comment.body}
          <br></br>
-         <button onClick={() => navigate(`/forumPost/${comment.forum_post_id}/viewing/${userID}/user`)}style={{backgroundColor: "#3B9EBF", color: "#fff", border: "none", borderRadius: "25px"}}> View Post </button>
+         <button onClick={() => navigate(`/forumPost/${comment.forum_post_id}/viewing/${userID}/user`)} className="btn btn-primary" > View Post </button>
       </div>
     );
   })
@@ -375,7 +375,7 @@ const sortVideoPostComments = (e) =>{
                     <option value="2"> Oldeset to Newest (Default) </option>
                     <option value="1"> Newest to Oldest </option>
                 </select>
-                <button style={{padding: "8px 16px", backgroundColor: "#4CAF50",  border: "none",color: "#fff",cursor: "pointer",marginLeft: "10px"}} type="submit"> Sort </button>
+                <button className="btn btn-primary" style={{marginLeft: "10px"}} type="submit"> Sort </button>
         </form>
       {videoPostComments.length !== 0 ? (
     videoPostComments.map((comment) => (
@@ -390,7 +390,7 @@ const sortVideoPostComments = (e) =>{
               {ProfileUsername}
               </a> ◦ {new Date(comment.CommentedAt).toLocaleString()} <br></br> {comment.Comment} 
               <br></br>
-           <button style={{backgroundColor: "#3B9EBF", color: "#fff", border: "none", borderRadius: "25px"}} onClick={() => navigate(`/video/${comment.VideoPostId}`)}>
+           <button className="btn btn-primary" onClick={() => navigate(`/video/${comment.VideoPostId}`)}>
              View Post
            </button>
       </div>}
