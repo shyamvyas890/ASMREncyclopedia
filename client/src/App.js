@@ -21,7 +21,7 @@ import { ViewUserPlaylistComponent } from './components/ViewUserPlaylistComponen
 import { SingleForumCommentComponent } from './components/SingleForumCommentComponent.jsx';
 import NotificationsComponent from './components/Notifications.jsx';
 import { SearchComponent } from './components/SearchResults.jsx';
-
+import AboutUsComponent from './components/AboutUs.jsx';
 import "./App.css"
 function App() {
   return (
@@ -46,7 +46,7 @@ function App() {
             <Route path="/userPlaylists/" element={<UserPlaylistComponent />}/>
             <Route path="/userPlaylists/:playlistID/viewing/:userID/user" element={<ViewUserPlaylistComponent/>}/>
             <Route path="/notifications" element={<NotificationsComponent AllNotificationsPage = {true}/>} />
-            <Route path = "/about-us" element = {<HomeComponent />} />
+            <Route path = "/about-us" element = {<AboutUsComponent />} />
           </Routes>
       </BrowserRouter>
     </div>

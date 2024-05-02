@@ -348,3 +348,5 @@ const secretKey= "secret_key" //Modify this
 8. Now, run the following command in both terminals:
 `npm start`
 9. Now, the application will open up in your browser. Enjoy!
+
+Thank you for visiting our repository.

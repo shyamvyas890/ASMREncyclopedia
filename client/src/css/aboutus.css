@@ -1,0 +1,67 @@
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+   
+  .about-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+   
+  .about-header h2 {
+    font-size: 3rem;
+    color: yellow;
+  }
+   
+  .about-header p {
+    font-size: 1.1rem;
+    color: yellow;
+    margin-top: 10px;
+  }
+   
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+  }
+  
+  .team-member-card {
+    background-color: #fff;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 10px 3px 10px rgb(189, 3, 3);
+  }
+  
+  .team-member-card h3 {
+    font-size: 1.8rem;
+    color: black;
+    margin-bottom: 10px;
+  }
+  
+  .team-member-card p {
+    font-size: 1.1rem;
+    color: black;
+    margin-bottom: 20px;
+  }
+  
+  .team-member-card a {
+    display: block;
+    color: #007bff;
+    text-decoration: none;
+    font-size: 1.1rem;
+  }
+  
+  .team-member-card a:hover {
+    text-decoration: underline;
+    color: #0056b3;
+  }
+  
+  @media (max-width: 768px) {
+    .team-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
