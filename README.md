@@ -17,6 +17,7 @@ Welcome to the ASMR Encyclopedia, a meticulously crafted social media platform f
   - [Account Settings](#account-settings)
   - [Random Video Option](#random-video)
   - [Real Time Notification System](#notifications)
+  - [Post Recommendation System](#post-recommendations)
   - [Playlists](#playlists)
   - [Profile Page](#profile-page)
   - [About Us](#about-us-page)
@@ -64,6 +65,9 @@ Discover something new with a [random video](#random-video) option, which displa
 
 ### Real-Time Notification System
 Stay updated with [real-time notifications](#notifications) for likes, comments, and friend requests.
+
+### Post Recommendation System
+Find similar forum posts to the one you are browsing with a NLP powered [post-recommendation system](#post-recommendations)!
 
 ### Playlists Feature 
 Save your favorite videos into organized [playlists](#playlists) for a personalized viewing experience.
