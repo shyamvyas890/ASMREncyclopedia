@@ -144,23 +144,25 @@ const ChatComponent =()=>{
                     </div>
                 ))}
                 </div>
-                <div className={ChatCSS.chatContainer}>
-                    {selectedChat ? (selectedChat.messages.map((message, index) => (
-                        <div key={message.ChatMessageId}>
-                            {message.SenderUserId === username.userIdOfCurrentUser ? (
-                                <div className={ChatCSS.currentUserMessage}>
-                                    {`${message.Message}`}
-                                </div>
-                            ) : (
-                                <div className={ChatCSS.otherUserMessage}>
-                                    {`${message.Message}`}
-                                </div>
-                            )}
-                        </div>
-                        ))
-                    ) : (
-                        <h2>Please select a friend to start chatting.</h2>
-                    )}
+                <div className={ChatCSS.chatANDSendMessageContainer}>
+                    <div className={ChatCSS.chatContainer} id="ChatContainer">
+                        {selectedChat ? (selectedChat.messages.map((message, index) => (
+                            <div key={message.ChatMessageId}>
+                                {message.SenderUserId === username.userIdOfCurrentUser ? (
+                                    <div className={ChatCSS.currentUserMessage}>
+                                        {`${message.Message}`}
+                                    </div>
+                                ) : (
+                                    <div className={ChatCSS.otherUserMessage}>
+                                        {`${message.Message}`}
+                                    </div>
+                                )}
+                            </div>
+                            ))
+                        ) : (
+                            <h2>Please select a friend to start chatting.</h2>
+                        )}
+                    </div>
                     <div>
                         {selectedChat && <input className={ChatCSS.sendMessage} type="text" placeholder="Send a message..." onKeyDown={handleOnKeyDown} />}
                     </div>
