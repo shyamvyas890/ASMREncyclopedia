@@ -45,7 +45,6 @@ const RegistrationComponent = () => {
           </div>
           {feedback && feedback==="This username is already taken. Please choose a different username." && <p style={{color:'red'}}>{feedback}</p>}
           {feedback && feedback ==="User registered successfully" && <p className='feedback-message' style={{color:'green'}}>{feedback}</p>}
-
         </div>
   );
 };

@@ -90,6 +90,7 @@ const AddVideoPostComponent = (props)=>{
     }
     return (
       <div>
+        <div className={AddVideoPostCSS['add-video-sign']}>Add an ASMR Video!</div>
         <form onSubmit={handleSubmit}>
           
             <input className={AddVideoPostCSS['video-title']}    ref={titleRef} type="text" placeholder="Title" />

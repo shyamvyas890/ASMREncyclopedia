@@ -231,70 +231,74 @@ const VideoPostWithCommentsComponent = (props)=>{
         allTheVideoPostInformation!==null && (
         <div>
           <NavigationComponent />
-
-          <div className={VideoPostWithCommentsCSS['user-posts']}>
-          <h2> <a 
-              style={{textDecoration: 'none'}}
-              onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-              onMouseOut={(e) => e.target.style.textDecoration = 'none'}
-               onClick={() => {navigate(`/username/${allTheVideoPostInformation.username}`)}}
-                 >
-              {allTheVideoPostInformation.username}
-             </a> 
-             ◦ {new Date(allTheVideoPostInformation.PostedAt).toLocaleString()}</h2>
-             <h4 style={{fontWeight: "bold"}}> {allTheVideoPostInformation.Title} </h4>
-             { <iframe width="420" height="315" title= "Title" allow="fullscreen;"
-                src={`https://www.youtube.com/embed/${allTheVideoPostInformation.VideoLinkId}`}>
-            </iframe>}
-            <div className="tag-container">
-              Tag(s)
-              {allTheVideoPostInformation.genres.map((genre, index)=>(
-                <React.Fragment key={index}>
-                  <span className="tag">{genre.GenreName}</span>
-                </React.Fragment>
-              ))}
-            </div>
-            
-            <button className={`btn btn-primary ${allTheVideoPostInformation.rating == 1 ? "liked" : ""}`} 
-              onClick={handleLike}>
-                <LikeDislikeIcon type="like" />
-                {`(${allTheVideoPostInformation.totalLikes})`}
-              </button>
-            <button className={`btn btn-primary ${allTheVideoPostInformation.rating == -1 ? "disliked" : ""}`} 
-              onClick={handleDislike}>
-              <LikeDislikeIcon type="dislike" />
-              {`(${allTheVideoPostInformation.totalDislikes})`}
-            </button>
-            {allTheVideoPostInformation.UserId===userID && <button className="btn btn-danger" onClick={handleDelete}>Delete</button>}
-            <button onClick={toggleModal} className="btn btn-primary"> Add to Playlist</button>
-            {modal && (
-              <div className={VideoPostWithCommentsCSS.modal}>
-                <div onClick={toggleModal} className={VideoPostWithCommentsCSS.overlay}></div>
-                <div className={VideoPostWithCommentsCSS.modalContent}>
-                {userPlaylists.length === 0 ? (
-                    <div>
-                      <a href="http://localhost:3000/userPlaylists">
-                        <h2>Click to create a Playlist!</h2>
-                      </a>
-                    </div>
-                    ) : (
-                    userPlaylists.map(playlist => (
-                      <div className={VideoPostWithCommentsCSS.modalContentContainer} key={playlist.playlistID}>
-                        <div class="form-check">
-                          <input
-                            type="checkbox"
-                            checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
-                            onClick={() => handleCheckBox(playlist.PlaylistID)}
-                          />
+          <div className={VideoPostWithCommentsCSS["master-div"]}>
+              <div className={VideoPostWithCommentsCSS['user-posts']}>
+                <h2> <a 
+                    style={{textDecoration: 'underline', cursor:"pointer"}}
+                    onClick={() => {navigate(`/username/${allTheVideoPostInformation.username}`)}}
+                      >
+                    {allTheVideoPostInformation.username}
+                  </a> 
+                  ◦ {new Date(allTheVideoPostInformation.PostedAt).toLocaleString()}
+                </h2>
+                  <h4 style={{fontWeight: "bold"}}> {allTheVideoPostInformation.Title} </h4>
+                  { <iframe width="800" height="450" title= "Title" allow="fullscreen;"
+                      src={`https://www.youtube.com/embed/${allTheVideoPostInformation.VideoLinkId}`}>
+                  </iframe>}
+                  <div className="tag-container">
+                    Tag(s)
+                    {allTheVideoPostInformation.genres.map((genre, index)=>(
+                      <React.Fragment key={index}>
+                        <span className="tag">{genre.GenreName}</span>
+                      </React.Fragment>
+                    ))}
+                  </div>
+                  <div className={VideoPostWithCommentsCSS["button-container"]}>
+                        <button className={`btn btn-primary ${allTheVideoPostInformation.rating == 1 ? "liked" : ""}`} 
+                          onClick={handleLike}>
+                            <LikeDislikeIcon type="like" />
+                            {`(${allTheVideoPostInformation.totalLikes})`}
+                          </button>
+                        <button className={`btn btn-primary ${allTheVideoPostInformation.rating == -1 ? "disliked" : ""}`} 
+                          onClick={handleDislike}>
+                          <LikeDislikeIcon type="dislike" />
+                          {`(${allTheVideoPostInformation.totalDislikes})`}
+                        </button>
+                        {allTheVideoPostInformation.UserId===userID && <button className="btn btn-danger" onClick={handleDelete}>Delete</button>}
+                        <button onClick={toggleModal} className="btn btn-primary"> Add to Playlist</button>
+                        {modal && (
+                          <div className={VideoPostWithCommentsCSS.modal}>
+                            <div onClick={toggleModal} className={VideoPostWithCommentsCSS.overlay}></div>
+                            <div className={VideoPostWithCommentsCSS.modalContent}>
+                            {userPlaylists.length === 0 ? (
+                                <div>
+                                  <a href="http://localhost:3000/userPlaylists">
+                                    <h2>Click to create a Playlist!</h2>
+                                  </a>
+                                </div>
+                                ) : (
+                                userPlaylists.map(playlist => (
+                                  <div className={VideoPostWithCommentsCSS.modalContentContainer} key={playlist.playlistID}>
+                                    <div class="form-check">
+                                      <input
+                                        type="checkbox"
+                                        checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
+                                        onClick={() => handleCheckBox(playlist.PlaylistID)}
+                                      />
+                                    </div>
+                                    <h2>{playlist.PlaylistName}</h2>
+                                  </div>
+                                ))
+                              )}
+                            <button className="btn btn-secondary" onClick={toggleModal}>Close</button>
+                          </div>
                         </div>
-                        <h2>{playlist.PlaylistName}</h2>
-                      </div>
-                    ))
-                  )}
-                <button className="btn btn-secondary" onClick={toggleModal}>Close</button>
+                        )}
+                </div>
+
+
+                  
               </div>
-            </div>
-            )}
           </div>
 
           {props.singleView ? <div></div> : <div className={VideoPostWithCommentsCSS['video-post-comments-section']}>

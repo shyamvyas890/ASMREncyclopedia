@@ -169,9 +169,7 @@ const VideoCommentNodeComponent = (props) =>{
         <div style={{marginLeft:"20px", marginTop: "20px"}}>
             {props.tn.data.DELETED===1 && <div> <div className={VideoCommentNodeCSS['deleted-comment']}> [Deleted Comment] </div> </div>}
             {props.tn.data.DELETED===0 && <div> <a 
-              style={{textDecoration: 'none'}}
-              onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-              onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+              style={{textDecoration: 'underline', cursor:"pointer"}}
               onClick={() => {navigate(`/username/${props.tn.data.username}`)}}
               >
               {props.tn.data.username}

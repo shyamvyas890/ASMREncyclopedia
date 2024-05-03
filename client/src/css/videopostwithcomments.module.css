@@ -1,11 +1,21 @@
-.user-posts {
+.master-div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-top: 20px;
+}
+
+
+.user-posts {
   background-color: #333;
-  padding: 20px;
-  margin-bottom: 20px;
+  margin: 0 auto;
   border-radius: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  width: 50vw;
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
 .video-post-comments-section{
@@ -13,10 +23,9 @@
   color: white;
   padding: 20px;
   border-radius: 10px;
-  max-width: 600px;
+  max-width:100vw;
   text-align: left; 
-  width: 50%;
-  overflow-y: auto;
+  overflow-x:auto;
 }
 
 .modal, .overlay {

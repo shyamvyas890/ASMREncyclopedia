@@ -191,16 +191,14 @@ const PostComponent = (props) =>{
     return (
         <div className={VideoPostCSS['user-posts']}>
             <h2> <a 
-              style={{textDecoration: 'none'}}
-              onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-              onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+              style={{textDecoration: 'underline', cursor:"pointer"}}
                onClick={() => {navigate(`/username/${props.username}`)}}
                  >
               {props.username}
              </a> 
              ◦ {new Date(props.timestamp).toLocaleString()}</h2>
              <h4 style={{fontWeight: "bold"}}> {props.title} </h4>
-            { <iframe width="420" height="315" title= "Title" allow="fullscreen;"
+            { <iframe width="800" height="450" title= "Title" allow="fullscreen;"
                 src={`https://www.youtube.com/embed/${props.VideoLinkId}`}>
             </iframe>}
             <div className="tag-container">
@@ -212,48 +210,48 @@ const PostComponent = (props) =>{
               ))}
             </div>
             <div className={VideoPostCSS["button-container"]}> 
-            <button className="btn btn-primary" onClick={()=>navigate(`/video/${props.VideoPostId}`)}> View Post </button>
-            {props.totalLikes !== null? 
-              <button className={`btn btn-primary ${props.rating == 1 ? "liked" : ""}`} 
-                onClick={handleLike}>
-                <LikeDislikeIcon type="like" />
-                ({props.totalLikes}) 
-              </button> : <div> </div>}
-            {props.totaDislikes !== null? 
-              <button className={`btn btn-primary ${props.rating == -1 ? "disliked" : ""}`}
-                onClick={handleDislike}>
-                <LikeDislikeIcon type="dislike" />
-                ({props.totalDislikes})
-              </button> : <div> </div>}
-            <button onClick={toggleModal} className="btn btn-primary"> Add to Playlist</button>
-            {modal &&(
-              <div className={VideoPostCSS.modal}>
-                <div onClick={toggleModal} className={VideoPostCSS.overlay}></div>
-                  <div className={VideoPostCSS.modalContent}>
-                    {userPlaylists.length === 0 ? (
-                    <div>
-                      <a href="http://localhost:3000/userPlaylists">
-                        <h2>Click to create a Playlist!</h2>
-                      </a>
-                    </div>
-                    ) : (
-                    userPlaylists.map(playlist => (
-                      <div className={VideoPostCSS.modalContentContainer} key={playlist.playlistID}>
-                        <div class="form-check">
-                          <input
-                            type="checkbox"
-                            checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
-                            onClick={() => handleCheckBox(playlist.PlaylistID)}
-                          />
-                        </div>
-                        <h2>{playlist.PlaylistName}</h2>
+              <button className="btn btn-primary" onClick={()=>navigate(`/video/${props.VideoPostId}`)}> View Post </button>
+              {props.totalLikes !== null? 
+                <button className={`btn btn-primary ${props.rating == 1 ? "liked" : ""}`} 
+                  onClick={handleLike}>
+                  <LikeDislikeIcon type="like" />
+                  ({props.totalLikes}) 
+                </button> : <div> </div>}
+              {props.totaDislikes !== null? 
+                <button className={`btn btn-primary ${props.rating == -1 ? "disliked" : ""}`}
+                  onClick={handleDislike}>
+                  <LikeDislikeIcon type="dislike" />
+                  ({props.totalDislikes})
+                </button> : <div> </div>}
+              <button onClick={toggleModal} className="btn btn-primary"> Add to Playlist</button>
+              {modal &&(
+                <div className={VideoPostCSS.modal}>
+                  <div onClick={toggleModal} className={VideoPostCSS.overlay}></div>
+                    <div className={VideoPostCSS.modalContent}>
+                      {userPlaylists.length === 0 ? (
+                      <div>
+                        <a href="http://localhost:3000/userPlaylists">
+                          <h2>Click to create a Playlist!</h2>
+                        </a>
                       </div>
-                    ))
-                  )}
-                <button className="btn btn-secondary"onClick={toggleModal}>Close</button>
+                      ) : (
+                      userPlaylists.map(playlist => (
+                        <div className={VideoPostCSS.modalContentContainer} key={playlist.playlistID}>
+                          <div class="form-check">
+                            <input
+                              type="checkbox"
+                              checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
+                              onClick={() => handleCheckBox(playlist.PlaylistID)}
+                            />
+                          </div>
+                          <h2>{playlist.PlaylistName}</h2>
+                        </div>
+                      ))
+                    )}
+                  <button className="btn btn-secondary"onClick={toggleModal}>Close</button>
+                </div>
               </div>
-            </div>
-            )}
+              )}
             </div>
             
         </div>

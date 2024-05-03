@@ -60,7 +60,9 @@ body {
 
   .forum-post-sort-form{
     margin-bottom: 20px;
-    margin-left: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
   }
   
@@ -92,20 +94,30 @@ body {
   }
   
   
-  .feed-posts {
+  .feed-posts-master-div {
     display: flex;
     flex-direction: column;
     margin: 0 auto;
+  }
+
+  .feed-posts {
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
   .user-posts {
     background-color: #333;
     padding: 20px;
-    margin-left: 40px;
+    width:90vw;
     margin-bottom: 20px;
     border-radius: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    width: 60%;
   }
   
 
+.no-posts {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

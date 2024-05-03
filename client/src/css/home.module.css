@@ -18,7 +18,10 @@ body{
 }
 
 .video-post-sort-form{
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .video-post-sort-form-select {
@@ -45,10 +48,16 @@ body{
     height: 50px;
   }
   
-  .feed-posts {
+  .all-posts-master-div{
     display: flex;
     flex-direction: column;
     margin: 0 auto;
+  }
+
+  .feed-posts {
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
   @media (max-width: 768px) {
@@ -67,4 +76,8 @@ body{
     }
   }
   
-  
+  .no-posts {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }

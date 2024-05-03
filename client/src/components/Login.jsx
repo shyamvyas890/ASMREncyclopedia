@@ -63,9 +63,8 @@ const LoginComponent = (props) => {
             <form className={LoginCSS['login-form']} onSubmit={handleLogin}>
               <input className={LoginCSS['login-form-username']} type="text" placeholder="Username" value={props.username} onChange={(e) => props.setUsername(e.target.value)} />
               <input className={LoginCSS['login-form-password']} type="password" placeholder='Password' name="passwordInput"/>
-              {feedback && (feedback==="Your password is incorrect." || feedback==="This username does not exist." || feedback==="Error logging in.") && <p style={{color:'red'}}>{feedback}</p>}
-
               <button className={LoginCSS['login-form-button']} type="submit">Login</button>
+              {feedback && (feedback==="Your password is incorrect." || feedback==="This username does not exist." || feedback==="Error logging in.") && <p style={{color:'red'}}>{feedback}</p>}
             </form>
           </div>
           <div className={LoginCSS['link-container']}>

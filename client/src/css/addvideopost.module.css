@@ -13,6 +13,15 @@
     border: none;
     color: #fff;
 }
+.add-video-sign {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  color: #fff;
+  margin:auto;
+  font-size:20px;
+
+}
 
 .video-link{
     width: 100%;

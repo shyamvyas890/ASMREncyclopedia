@@ -306,7 +306,7 @@ const handleInputKeyDown = (e) =>{
     </div>
     
 
-  <form className={ForumPostFeedCSS["forum-post-sort-form"]} onSubmit={sortForumPosts}>
+  {allPosts.length !== 0 && <form className={ForumPostFeedCSS["forum-post-sort-form"]} onSubmit={sortForumPosts}>
     <select className={ForumPostFeedCSS['forum-post-form-select']} onChange ={(e) => setSortType(e.target.value)}>
       <option value="none"> Sort by... </option>
       <option value="1"> Newest to Oldest (default) </option>
@@ -315,42 +315,52 @@ const handleInputKeyDown = (e) =>{
       <option value="4"> Least Liked to Most Liked </option>
     </select>
     <button className="btn btn-primary" style={{marginLeft: "10px"}}> Sort </button>
-  </form>
+  </form>}
 
 
   <div className={ForumPostFeedCSS["feed-posts"]}>
-    {allPosts.map(post=>(
-      <div className={ForumPostFeedCSS["user-posts"]} key={post.id}>
-        <h2> <a 
-          style={{textDecoration: 'none'}}
-          onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-          onMouseOut={(e) => e.target.style.textDecoration = 'none'}
-          onClick={() => {navigate(`/username/${post.username}`)}}
-          >
-          {post.username}
-        </a> 
-        ◦ {new Date(post.post_timestamp).toLocaleString()}</h2>
-        <h4 style={{fontWeight: "bold"}}> {post.title} </h4>
+    <div className={ForumPostFeedCSS["feed-posts-master-div"]}>
+      {allPosts.length !== 0 && allPosts.map(post=>(
+        <div className={ForumPostFeedCSS["user-posts"]} key={post.id}>
+          <h2> <a 
+            style={{textDecoration: 'underline', cursor:"pointer"}}
+            onClick={() => {navigate(`/username/${post.username}`)}}
+            >
+            {post.username}
+          </a> 
+          ◦ {new Date(post.post_timestamp).toLocaleString()}</h2>
+          <h4 style={{fontWeight: "bold"}}> {post.title} </h4>
 
-        <p>{post.body}</p>
-        <div className="tag-container">
-          Tag(s) {post.tags && post.tags.split(',').map(tag => ( //If tags!=null split tags
-              <span className="tag">{tag ? tag.trim() : 'null'}</span>
-          ))}
+          <p>{post.body}</p>
+          <div className="tag-container">
+            Tag(s) {post.tags && post.tags.split(',').map(tag => ( //If tags!=null split tags
+                <span className="tag">{tag ? tag.trim() : 'null'}</span>
+            ))}
+          </div>
+          <button className="btn btn-primary" onClick={() => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)}> View Post </button>
+          <button className={`btn btn-primary ${userLikedPosts.includes(post.id) ? "liked" : ""}`} 
+            onClick={() => handlePostLikeDislike(post.id, currentUserID, 1)}>
+            <LikeDislikeIcon type="like" />
+            ({allPostLikes.get(post.id)})
+          </button>
+          <button className={`btn btn-primary ${userDislikedPosts.includes(post.id) ? "disliked" : ""}`} onClick={() => handlePostLikeDislike(post.id, currentUserID, 0)}>
+            <LikeDislikeIcon type="dislike" />
+            ({allPostDislikes.get(post.id)})
+          </button>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)}> View Post </button>
-        <button className={`btn btn-primary ${userLikedPosts.includes(post.id) ? "liked" : ""}`} 
-          onClick={() => handlePostLikeDislike(post.id, currentUserID, 1)}>
-          <LikeDislikeIcon type="like" />
-          ({allPostLikes.get(post.id)})
-        </button>
-        <button className={`btn btn-primary ${userDislikedPosts.includes(post.id) ? "disliked" : ""}`} onClick={() => handlePostLikeDislike(post.id, currentUserID, 0)}>
-          <LikeDislikeIcon type="dislike" />
-          ({allPostDislikes.get(post.id)})
-        </button>
-      </div>
-    ))}
-  </div>
+      ))}
+    </div>
+    </div>
+
+    {allPosts.length === 0 && <div className={ForumPostFeedCSS["no-posts"]}>
+      There are no posts yet. Why not add one?
+
+    </div>
+
+    }
+
+
+  
 </div>
  )
 }

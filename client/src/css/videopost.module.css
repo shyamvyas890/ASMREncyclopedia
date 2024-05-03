@@ -4,8 +4,12 @@
     margin-bottom: 20px;
     border-radius: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    width: 50vw;
+    /* width: 60vw; */
     margin-top: 20px;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
   
   .user-posts p {
@@ -13,10 +17,6 @@
     font-size: 18px;
     line-height: 1.4;
     margin-bottom: 20px;
-  }
-
-  .button-container{
-    display: flex;
   }
 
   .modal, .overlay {

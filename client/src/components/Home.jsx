@@ -212,7 +212,6 @@ const HomeComponent= () => {
             isLoggedIn={isLoggedIn}
             setIsLoggedIn={setIsLoggedIn}
             />
-
             {(isLoggedIn && videoPostsAndRatings && sortedVideos && userIdOfCurrentUser) ? (                
                     <>
                    <div>
@@ -225,48 +224,45 @@ const HomeComponent= () => {
                            />
                           </div>
                         </div> 
-
-
-                        <form className={HomeCSS['video-post-sort-form']}>
-                          <select className={HomeCSS['video-post-sort-form-select']} value={sortOption} onChange={handleSort}>
-                            <option value="none"> Sort by...</option>
-                            <option value="latest"> Newest to Oldest (default) </option>
-                            <option value="oldest"> Oldest to Newest </option>
-                            <option value="best"> Most Liked to Least Liked </option>
-                            <option value="worst"> Least Liked to Most Liked </option>
-                          </select>
-                        </form>
-                       
-                    </div>
-
+                   </div>
+                   <form className={HomeCSS['video-post-sort-form']}>
+                        <select className={HomeCSS['video-post-sort-form-select']} value={sortOption} onChange={handleSort}>
+                        <option value="none"> Sort by...</option>
+                        <option value="latest"> Newest to Oldest (default) </option>
+                        <option value="oldest"> Oldest to Newest </option>
+                        <option value="best"> Most Liked to Least Liked </option>
+                        <option value="worst"> Least Liked to Most Liked </option>
+                        </select>
+                    </form>
+                    { sortedVideos.length !==0 &&
                     <div className={HomeCSS['feed-posts']}>
-                      {sortedVideos.map((post, index)=>(
-                        <div key={index+sortedVideos.length} >
-                            <PostComponent 
-                                key={index}
-                                index={videoPostsAndRatings.indexOf(post)} 
-                                username={post.username} 
-                                title={post.Title} 
-                                userIdOfCurrentUser= {userIdOfCurrentUser}
-                                usernameOfCurrentUser= {username}
-                                VideoLinkId= {post.VideoLinkId}
-                                VideoPostId= {post.VideoPostId}
-                                rating= {sortedVideos[index].feedback}
-                                setVideoPostsAndRatings= {setVideoPostsAndRatings}
-                                timestamp={post.PostedAt}
-                                totalLikes={sortedVideos[index].totalLikes}
-                                totalDislikes={sortedVideos[index].totalDislikes}
-                            />    
-                        </div>
-                      ))}
+                      <div className={HomeCSS['all-posts-master-div']}>
+                        {sortedVideos.map((post, index)=>(
+                            <div key={index+sortedVideos.length} >
+                                <PostComponent 
+                                    key={index}
+                                    index={videoPostsAndRatings.indexOf(post)} 
+                                    username={post.username} 
+                                    title={post.Title} 
+                                    userIdOfCurrentUser= {userIdOfCurrentUser}
+                                    usernameOfCurrentUser= {username}
+                                    VideoLinkId= {post.VideoLinkId}
+                                    VideoPostId= {post.VideoPostId}
+                                    rating= {sortedVideos[index].feedback}
+                                    setVideoPostsAndRatings= {setVideoPostsAndRatings}
+                                    timestamp={post.PostedAt}
+                                    totalLikes={sortedVideos[index].totalLikes}
+                                    totalDislikes={sortedVideos[index].totalDislikes}
+                                />    
+                            </div>
+                        ))}
+                      </div>
                     </div>
+                    }
+                    { sortedVideos.length === 0 &&
+                    <div className={HomeCSS["no-posts"]}>There are no videos posted yet. Why not add one?</div>
+                    }
                         
-
-                    
-
-
-                    
-                  
                 </>
             ):null}
         </div>
