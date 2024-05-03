@@ -314,9 +314,12 @@ const SettingsComponent = ()=>{
                                 </label>
                                 <br />
                                 {forumTags.map((tag, index) => (
-                                    <button key={index} className={settingsForumPreferences.tag} onClick={(e) => {handleRemovalOfForumTag(e, tag)}}>
-                                    {tag}
-                                    </button>
+                                    <div>
+                                        <button key={index} className={settingsForumPreferences.tag} onClick={(e) => {handleRemovalOfForumTag(e, tag)}}>
+                                        x
+                                        </button>
+                                        {tag}
+                                    </div>
                                 ))}
                             </>
                         }
@@ -347,9 +350,12 @@ const SettingsComponent = ()=>{
                             </label>
                             <br />
                             {videoTags.map((tag, index)=>(
-                                <button key={index} className={settingsForumPreferences.tag} onClick={(e)=>{handleRemovalOfTag(e,tag)}}>
-                                    {tag}
-                                </button>
+                                <div>
+                                    <button key={index} className={settingsForumPreferences.tag} onClick={(e)=>{handleRemovalOfTag(e,tag)}}>
+                                        x
+                                    </button>
+                                {tag}
+                                </div>
                             ))}
                         </>
                         }
