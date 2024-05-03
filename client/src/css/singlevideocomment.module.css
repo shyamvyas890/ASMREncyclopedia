@@ -1,0 +1,22 @@
+.view-all-comments-button{
+    background-color: #4CAF50;
+    color: white;
+    margin-top: 10px;
+    border: none;
+    border-radius: 25px;
+    margin-left: 10px;
+}
+
+ .view-parent-button{
+    background-color: #3B9EBF; 
+    color: white;
+    margin-top: 10px;
+    border: none;
+    border-radius: 25px;
+}
+
+*:disabled{
+    background-color: dimgrey;
+    color: linen;
+    opacity: 0.4;
+}

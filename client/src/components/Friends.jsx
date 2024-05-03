@@ -1,6 +1,7 @@
 import React, {useState} from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from "react-router-dom";
+import NavigationComponent from "./Navigation";
 
 const FriendsComponent = (props)=>{
     const hostname= "http://localhost:3001";
@@ -8,30 +9,15 @@ const FriendsComponent = (props)=>{
     const [isLoggedIn, setIsLoggedIn]= useState(false);
     const [incomingOutgoingFriendRequestsAndFriendships, setIncomingOutgoingFriendRequestsAndFriendships]= useState(null)
     const navigate=useNavigate();
-    const tokenVerify= async (e) => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
-            try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-                if(response.data.username){
-                    setUsername(response.data.username)
-                    setIsLoggedIn(true);
-                }
-                else {
-                    // setIsLoggedIn(false);
-                    navigate("/");
-                   
-                }
-            }
-    
-            catch(error){
-                console.log(error);
-            }
+    const tokenVerify= async () => {
+        try{
+            const response= await axios.get(`http://localhost:3001/verify-token`)
+            setUsername(response.data.username)
+            setIsLoggedIn(true);
         }
-        else{
-            // setIsLoggedIn(false);
+        catch(error){
             navigate("/");
-            
+            console.log(error);
         }
     }
     
@@ -74,8 +60,6 @@ const FriendsComponent = (props)=>{
 
     const acceptFriendRequest = async (e, SenderUserId) =>{
         e.preventDefault();
-        const deleteFriendRequest = await axios.delete(`${hostname}/friendRequests`, {params:{SenderUserId, ReceiverUserId:incomingOutgoingFriendRequestsAndFriendships.userIdOfCurrentUser}});
-        console.log(deleteFriendRequest);
         const addFriendship = await axios.post(`${hostname}/Friendships`, {UserId1:SenderUserId, UserId2:incomingOutgoingFriendRequestsAndFriendships.userIdOfCurrentUser});
         console.log(addFriendship);
         populateFriends();
@@ -100,28 +84,39 @@ const FriendsComponent = (props)=>{
         populateFriends();
     }
     return (isLoggedIn && username && incomingOutgoingFriendRequestsAndFriendships? <React.Fragment>
-            <div>Incoming Friend Requests</div>
-            {incomingOutgoingFriendRequestsAndFriendships.incomingFriendRequests.map((request, index)=>(
+            <div>
+                <NavigationComponent />
+            </div>
+            <div style={{fontWeight: "bold", fontSize: "30px", marginTop: "10px"}} >Incoming Friend Requests</div>
+            {incomingOutgoingFriendRequestsAndFriendships.incomingFriendRequests.length > 0 ? incomingOutgoingFriendRequestsAndFriendships.incomingFriendRequests.map((request, index)=>(
                 <React.Fragment key={index}>
                     <div>{request.SenderUsername}</div>
                     <button onClick={(e)=>{acceptFriendRequest(e,request.SenderUserId)}}>✅</button>
                     <button onClick={(e)=>{declineFriendRequest(e,request.SenderUserId)}}>❌</button>
                 </React.Fragment>
-            ))}
-            <div>Outgoing Friend Requests</div>
-            {incomingOutgoingFriendRequestsAndFriendships.outgoingFriendRequests.map((request,index)=>(
+            )): <div> You have no incoming friend requests. </div>}
+            <div style={{fontWeight: "bold", fontSize: "30px", marginTop: "10px"}}>Outgoing Friend Requests</div>
+            {incomingOutgoingFriendRequestsAndFriendships.outgoingFriendRequests.length > 0 ? incomingOutgoingFriendRequestsAndFriendships.outgoingFriendRequests.map((request,index)=>(
                 <React.Fragment key={index}>
-                    <div>{request.ReceiverUsername}</div>
-                    <button onClick={(e)=>{cancelFriendRequest(e, request.ReceiverUserId)}}>Cancel Request</button>
+                    <div> <a 
+                    style={{textDecoration: 'none'}}
+                    onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                    onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+                    onClick={() => {navigate(`/username/${request.ReceiverUsername}`)}}
+                    >
+                    {request.ReceiverUsername}
+                    </a>
+                </div>
+                    <button className="btn btn-danger">Cancel Request</button>
                 </React.Fragment>
-            ))}
-            <div>Friends</div>
-            {incomingOutgoingFriendRequestsAndFriendships.friendships.map((friend, index)=>(
+            )): <div> You have no outgoing friend requests. </div>}
+            <div style={{fontWeight: "bold", fontSize: "30px", marginTop: "10px"}}>Friends</div>
+            {incomingOutgoingFriendRequestsAndFriendships.friendships.length > 0 ? incomingOutgoingFriendRequestsAndFriendships.friendships.map((friend, index)=>(
                 <React.Fragment key={index}>
                     <div>{friend.friendUsername}</div>
-                    <button onClick={(e)=>{unfriend(e, friend.UserId1===incomingOutgoingFriendRequestsAndFriendships.userIdOfCurrentUser? friend.UserId2:friend.UserId1)}}>Unfriend</button>
+                    <button className="btn btn-danger">Unfriend</button>
                 </React.Fragment>
-            ))}
+            )): <div> You have no friends. Try to make some! </div>}
             
             </React.Fragment>:null)
 

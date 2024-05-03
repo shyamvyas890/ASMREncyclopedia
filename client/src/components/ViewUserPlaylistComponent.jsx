@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import axios from "axios";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import axios from '../utils/AxiosWithCredentials';
+import NavigationComponent from './Navigation';
+import ViewUserPlaylistComponentCSS from "../css/viewuserplaylistcomponent.module.css";
 
 export const ViewUserPlaylistComponent = ()=>{
     const {playlistID} = useParams()
     const {userID} = useParams()
     const [playlistVideosID, setPlaylistVideosID] = useState([])
     const [playlistVideos, setPlaylistVideos] = useState([])
+    const navigate = useNavigate();
+
 
     useEffect(()=> {
         fetchAllPlaylistVideosID()
@@ -54,24 +58,44 @@ export const ViewUserPlaylistComponent = ()=>{
             console.log("Can't remove video")
         }
         fetchAllPlaylistVideosID()
-        
     }
     
     return (
         <div>
-            <h1>Playlist Videos</h1>
-            <div classname="playlist-videos">
-                {playlistVideos.map(video=>(
-                    <div className="video" key={video.VideoPostId}>
-                    <h5><Link to={`/video/${video.VideoPostId}`}>{video.Title}</Link></h5>
-                        <p>{video.VideoLinkId}</p>
-                        <button 
-                            className="remove-video-from-playlist"
-                            onClick={()=>removeVideoFromPlaylist(video.VideoPostId)}>
-                            Remove Video
-                        </button>
+            <NavigationComponent/>
+            <h1 style={{padding: "20px"}}>Playlist Videos</h1>
+            <div className={ViewUserPlaylistComponentCSS.playlistVideos}>
+                {playlistVideos.length !== 0 ? (
+                    playlistVideos.map(video => (
+                        <div className={ViewUserPlaylistComponentCSS.videoContainer} key={video.VideoPostId}>
+                            <h2>
+                                <a 
+                                    style={{textDecoration: 'none'}}
+                                    onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                                    onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+                                    onClick={() => {navigate(`/username/${video.username}`)}}
+                                >
+                                    {video.username}
+                                </a> 
+                                ◦ {new Date(video.PostedAt).toLocaleString()}
+                            </h2>
+                            <h4 style={{fontWeight: "bold"}}> {video.Title} </h4>
+                            <iframe style={{marginBottom: "8px"}} width="420" height="315" title= "Title" allow="fullscreen;"
+                                src={`https://www.youtube.com/embed/${video.VideoLinkId}`}>
+                            </iframe>
+                            <div>
+                                <button className="btn btn-primary" onClick={()=>navigate(`/video/${video.VideoPostId}`)}> View Post </button>
+                                <button className="btn btn-danger" onClick={() => removeVideoFromPlaylist(video.VideoPostId)}>
+                                    Remove Video
+                                </button>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div style={{}}>
+                        <Link to={`/`}><h2>No videos in this playlist. Perhaps add some?</h2></Link>
                     </div>
-                ))}
+                )}
             </div>
         </div>
     )

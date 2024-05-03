@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate, useParams } from "react-router-dom";
 import { axiosRequest, hostname } from "../utils/utils";
 import PostComponent from "./Post";
@@ -15,26 +15,15 @@ const SearchVideosComponent = ()=>{
 
     }
     const tokenVerify = async (e) =>{
-        const theToken= localStorage.getItem("token");
-        if(theToken){
-            try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    setUsername(response.data.username);
-                    setUserIdOfCurrentUser(userIdOfCurrentUser);
-                }
-                else {
-                    navigate("/");
-                }
-            }
-    
-            catch(error){
-                console.log(error);
-            }
+        try{
+            const response= await axios.get(`http://localhost:3001/verify-token`)
+            const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+            setUsername(response.data.username);
+            setUserIdOfCurrentUser(userIdOfCurrentUser);
         }
-        else{
-            navigate("/");
+        catch(error){
+            navigate("/")
+            console.log(error);
         }
 
     }

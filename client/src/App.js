@@ -13,37 +13,40 @@ import SettingsComponent from './components/Settings';
 import VideoPostWithCommentsComponent from './components/VideoPostWithComments';
 import ChatComponent from './components/Chat';
 import ProfilePageComponent from './components/ProfilePage';
-import SearchVideosComponent from './components/SearchVideos';
 import RandomVideoComponent from './components/RandomVideo';
 import SingleVideoCommentComponent from './components/SingleVideoComment.tsx';
 import { UserProfileComponent } from './components/UserProfileComponent';
 import { UserPlaylistComponent } from './components/UserPlaylistComponent';
 import { ViewUserPlaylistComponent } from './components/ViewUserPlaylistComponent';
+import { SingleForumCommentComponent } from './components/SingleForumCommentComponent.jsx';
+import NotificationsComponent from './components/Notifications.jsx';
+import { SearchComponent } from './components/SearchResults.jsx';
+import AboutUsComponent from './components/AboutUs.jsx';
+import "./App.css"
 function App() {
-  const [token, setToken]= React.useState("");
   return (
     <div className="App">
       <BrowserRouter>
-          <NavigationComponent token= {token} setToken= {setToken}/>
           <Routes>
-            <Route path="/" element={<HomeComponent token= {token} setToken= {setToken}/>}/>
-            <Route path="/register" element={<RegistrationComponent token= {token} setToken= {setToken}/>}/>
+            <Route path="/" element={<HomeComponent />}/>
+            <Route path="/navTest" element={<NavigationComponent />} />
+            <Route path="/register" element={<RegistrationComponent/>}/>
             <Route path="/forums" element={<ForumComponent/>}/>
             <Route path="/forumPosts" element={<AllForumPostComponent />} />
             <Route path="/forumPost/:postID/viewing/:userID/user" element={<ViewForumPostComponent />} />
-            <Route path="/forumPost/search_by/:searchTitle" element={<SearchForumPostComponent />} />
             <Route path="/friends" element= {<FriendsComponent />}/>
             <Route path="/messages" element= {<ChatComponent />}/>
             <Route path="/settings" element= {<SettingsComponent />} />
             <Route path="/video/:VideoPostId" element={<VideoPostWithCommentsComponent />} />
             <Route path="/username/:ProfileUsername" element={<ProfilePageComponent />} />
-            <Route path="/search/videos/:keyword" element={<SearchVideosComponent />} />
+            <Route path="/searchResults/:searchTerm" element={<SearchComponent />} />
             <Route path="/random" element={<RandomVideoComponent />}/>
             <Route path= "/SingleVideoComment/:VideoPostCommentId" element={<SingleVideoCommentComponent />} />
-            <Route path="/userHistory/:username" element={<UserProfileComponent />} />
-            <Route path="/username/:username" element={<ProfilePageComponent />} />
+            <Route path= "/singleForumComment/:forumPostCommentID" element={<SingleForumCommentComponent />} />
             <Route path="/userPlaylists/" element={<UserPlaylistComponent />}/>
             <Route path="/userPlaylists/:playlistID/viewing/:userID/user" element={<ViewUserPlaylistComponent/>}/>
+            <Route path="/notifications" element={<NotificationsComponent AllNotificationsPage = {true}/>} />
+            <Route path = "/about-us" element = {<AboutUsComponent />} />
           </Routes>
       </BrowserRouter>
     </div>

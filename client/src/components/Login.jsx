@@ -1,7 +1,9 @@
-// LoginComponent.js
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import axios from '../utils/AxiosWithCredentials';
+import LoginCSS from "../css/login.module.css"
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 const LoginComponent = (props) => {
   const [feedback, setFeedback]= useState("");
   const handleLogin = async (e) => {
@@ -11,10 +13,11 @@ const LoginComponent = (props) => {
         username:props.username,
         password:e.target.elements.passwordInput.value
       });
+      console.log(response)
       e.target.elements.passwordInput.value="";
       setFeedback("Login Successful");
-      localStorage.setItem("token", response.data.token);
       props.setIsLoggedIn(true);
+      window.location.reload();
     } catch (error) {
       setFeedback(error.response.data);
       e.target.elements.passwordInput.value="";
@@ -23,26 +26,16 @@ const LoginComponent = (props) => {
     }
   };
   const tokenVerify= async (e) => {
-    const theToken= localStorage.getItem("token");
-    if(theToken){
-        try{
-            const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-            if(response.data.username){
-                props.setUsername(response.data.username)
-                props.setIsLoggedIn(true);
-            }
-            else {
-                props.setIsLoggedIn(false);
-            }
-        }
-
-        catch(error){
-            console.log(error);
-        }
-    }
-    else{
+      try{
+          const response= await axios.get(`http://localhost:3001/verify-token`)
+          props.setUsername(response.data.username)
+          props.setIsLoggedIn(true);
+      }
+      catch(error){
+        console.log(error)
         props.setIsLoggedIn(false);
-    }
+      }
+    
   }
 
   React.useEffect(()=>{
@@ -50,43 +43,43 @@ const LoginComponent = (props) => {
   }, []);
 
   const handleLogout = async (e) => {
-    await axios.post(`http://localhost:3001/logout/${localStorage.getItem("token")}`);
-    localStorage.removeItem("token");
+    await axios.post(`http://localhost:3001/logout/`);
     props.setIsLoggedIn(false);
     props.setUsername("");
     setFeedback('');
+    window.location.reload();
   }
 
   return (
     <div>
         {props.isLoggedIn?(
-            <div>
-            <h1>Welcome, {props.username}!</h1>
-            <button onClick={handleLogout}>Logout</button>
-            </div>
+          <div></div>
+        ) :props.isLoggedIn===false? (
 
-        ) :props.isLoggedIn===false? (<div>
-        <h2>Login</h2>
-        <form onSubmit={handleLogin}>
-            <label>
-            Username:
-            <input type="text" value={props.username} onChange={(e) => props.setUsername(e.target.value)} />
-            </label>
-            <br />
-            <label>
-            Password:
-            <input type="password" name="passwordInput"/>
-            </label>
-            <br />
-            <button type="submit">Login</button>
-        </form>
-        <div>Don't have an account? <Link to="/register">Register here!</Link></div>
-        {feedback && (feedback==="Your password is incorrect." || feedback==="This username does not exist." || feedback==="Error logging in.") && <p style={{color:'red'}}>{feedback}</p>}
-        {feedback && feedback ==="Login Successful" && <p style={{color:'green'}}>{feedback}</p>}
-        </div>):null
+
+          <div className={LoginCSS['login-container']}>
+          <div className={LoginCSS['login-form-container']}>
+            <div className={LoginCSS['websiteTitle']}> ASMR Encyclopedia </div>
+            <form className={LoginCSS['login-form']} onSubmit={handleLogin}>
+              <input className={LoginCSS['login-form-username']} type="text" placeholder="Username" value={props.username} onChange={(e) => props.setUsername(e.target.value)} />
+              <input className={LoginCSS['login-form-password']} type="password" placeholder='Password' name="passwordInput"/>
+              <button className={LoginCSS['login-form-button']} type="submit">Login</button>
+              {feedback && (feedback==="Your password is incorrect." || feedback==="This username does not exist." || feedback==="Error logging in.") && <p style={{color:'red'}}>{feedback}</p>}
+            </form>
+          </div>
+          <div className={LoginCSS['link-container']}>
+            <p>Don't have an account? <Link to="/register">Register Here!</Link></p>
+          </div>
+          
+
+        </div>
+
+        ):null
         }
 
     </div>
   );
+
+  ;
 };
 export default LoginComponent;

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import LoginComponent from './Login';
 import PostComponent from './Post';
-import axios from 'axios';
-import { ForumPostComponent } from './ForumPost';
-import UserPostsComponent from './UserPosts';
-import { ForumPostFeedComponent } from './ForumPostFeed';
+import axios from '../utils/AxiosWithCredentials';
 import AddVideoPostComponent from './AddVideoPost';
 import {axiosRequest} from "../utils/utils.js";
 import { useNavigate } from 'react-router-dom';
+import NavigationComponent from './Navigation.jsx';
+import HomeCSS from "../css/home.module.css"
+import NotificationsComponent from './Notifications.jsx';
+
 const HomeComponent= () => {
     const [username, setUsername] = useState('');
     const [userIdOfCurrentUser, setUserIdOfCurrentUser]= useState(null);
@@ -211,46 +212,57 @@ const HomeComponent= () => {
             isLoggedIn={isLoggedIn}
             setIsLoggedIn={setIsLoggedIn}
             />
-
-            {(isLoggedIn && videoPostsAndRatings && sortedVideos && userIdOfCurrentUser) ? (
-                <>
-                    <h3>Add a new Video!</h3>
-                    <AddVideoPostComponent 
-                    userIdOfCurrentUser={userIdOfCurrentUser}
-                    fetchVideoPosts={fetchVideoPosts}    
-                    />
-                    <form onSubmit={handleSearchButton}>    
-                        <input type='text' placeholder='Search videos...' name='inputElement' />
-                        <button type='submit'>🔍</button>
-                    </form>
-                    <div>
-                        <label>Sort By:</label>
-                        <select value={sortOption} onChange={handleSort}>
-                            <option value="latest">Latest</option>
-                            <option value="oldest">Oldest</option>
-                            <option value="best">Best</option>
-                            <option value="worst">Worst</option>
+            {(isLoggedIn && videoPostsAndRatings && sortedVideos && userIdOfCurrentUser) ? (                
+                    <>
+                   <div>
+                        <NavigationComponent />
+                        <div className={HomeCSS['container']}>
+                          <div>
+                           <AddVideoPostComponent 
+                           userIdOfCurrentUser={userIdOfCurrentUser}
+                           fetchVideoPosts={fetchVideoPosts}    
+                           />
+                          </div>
+                        </div> 
+                   </div>
+                   <form className={HomeCSS['video-post-sort-form']}>
+                        <select className={HomeCSS['video-post-sort-form-select']} value={sortOption} onChange={handleSort}>
+                        <option value="none"> Sort by...</option>
+                        <option value="latest"> Newest to Oldest (default) </option>
+                        <option value="oldest"> Oldest to Newest </option>
+                        <option value="best"> Most Liked to Least Liked </option>
+                        <option value="worst"> Least Liked to Most Liked </option>
                         </select>
+                    </form>
+                    { sortedVideos.length !==0 &&
+                    <div className={HomeCSS['feed-posts']}>
+                      <div className={HomeCSS['all-posts-master-div']}>
+                        {sortedVideos.map((post, index)=>(
+                            <div key={index+sortedVideos.length} >
+                                <PostComponent 
+                                    key={index}
+                                    index={videoPostsAndRatings.indexOf(post)} 
+                                    username={post.username} 
+                                    title={post.Title} 
+                                    userIdOfCurrentUser= {userIdOfCurrentUser}
+                                    usernameOfCurrentUser= {username}
+                                    VideoLinkId= {post.VideoLinkId}
+                                    VideoPostId= {post.VideoPostId}
+                                    rating= {sortedVideos[index].feedback}
+                                    setVideoPostsAndRatings= {setVideoPostsAndRatings}
+                                    timestamp={post.PostedAt}
+                                    totalLikes={sortedVideos[index].totalLikes}
+                                    totalDislikes={sortedVideos[index].totalDislikes}
+                                />    
+                            </div>
+                        ))}
+                      </div>
                     </div>
-                    {sortedVideos.map((post, index)=>(
-                        <div key={index+sortedVideos.length} >
-                            <PostComponent 
-                                key={index}
-                                index={videoPostsAndRatings.indexOf(post)} 
-                                username={post.username} 
-                                title={post.Title} 
-                                userIdOfCurrentUser= {userIdOfCurrentUser}
-                                usernameOfCurrentUser= {username}
-                                VideoLinkId= {post.VideoLinkId}
-                                VideoPostId= {post.VideoPostId}
-                                rating= {sortedVideos[index].feedback}
-                                setVideoPostsAndRatings= {setVideoPostsAndRatings}
-                                timestamp={post.PostedAt}
-                                totalLikes={sortedVideos[index].totalLikes}
-                                totalDislikes={sortedVideos[index].totalDislikes}
-                            />    
-                        </div>
-                    ))}
+                    }
+                    { sortedVideos.length === 0 &&
+                    <div className={HomeCSS["no-posts"]}>There are no videos posted yet. Why not add one?</div>
+                    }
+                        
                 </>
             ):null}
         </div>

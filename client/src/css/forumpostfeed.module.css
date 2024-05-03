@@ -1,0 +1,123 @@
+body {
+    background-color: #1e1e1e;
+    color: #fff;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+  }
+  
+  .container {
+    width: 50%;
+    margin: 0 auto;
+    padding: 20px;
+    height: 100%;
+  }
+
+  .tag-button{
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    margin-left:5px;
+    margin-bottom:2px;
+    background-color: red;
+    border: none;
+    color: white;
+  }
+
+  .container form {
+    margin-bottom: 20px;
+  }
+  
+  .forum-post-container form label {
+    color: green;
+  }
+  
+  .forum-post-form-title[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #333;
+    border: none;
+    color: #fff;
+  }
+  
+  .forum-post-form-body{
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #333;
+    border: none;
+    color: #fff;
+  }
+
+  .forum-post-form-tag{
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #333;
+    border: none;
+    color: #fff;
+  }
+
+
+  .forum-post-sort-form{
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+  }
+  
+  .forum-post-form-select {
+    padding: 8px;
+    background-color: #333;
+    border: none;
+    color: #fff;
+  }
+  
+  .forum-post-button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  .forum-post-sort-button{
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    margin-left: 10px;
+  }
+  .form button:hover {
+    background-color: #45a049;
+  }
+  
+  
+  .feed-posts-master-div {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+  }
+
+  .feed-posts {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .user-posts {
+    background-color: #333;
+    padding: 20px;
+    width:90vw;
+    margin-bottom: 20px;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+  
+
+.no-posts {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate } from 'react-router-dom';
 import {Link} from "react-router-dom";
+import VideoPostCSS from "../css/videopost.module.css"
+import LikeDislikeIcon from './LikeDislikeIcon';
+
 const PostComponent = (props) =>{
     const hostname= "http://localhost:3001";
     const [theGenres, setTheGenres]= useState(null);
@@ -87,7 +90,8 @@ const PostComponent = (props) =>{
 
     React.useEffect(()=>{
       getGenres();
-    },[])
+    },[props.VideoPostId])
+
     const handleDislike= async (e)=>{
         e.preventDefault();
         if(props.rating===0){
@@ -185,44 +189,71 @@ const PostComponent = (props) =>{
   }, [userPlaylists])
 
     return (
-        <div>
-            <h5><Link to={`/username/${props.username}`}>{props.username}</Link></h5>
-            <h6>{props.title}</h6>
-            {/* <iframe width="420" height="315" title= "Title" allow="fullscreen;"
+        <div className={VideoPostCSS['user-posts']}>
+            <h2> <a 
+              style={{textDecoration: 'underline', cursor:"pointer"}}
+               onClick={() => {navigate(`/username/${props.username}`)}}
+                 >
+              {props.username}
+             </a> 
+             ◦ {new Date(props.timestamp).toLocaleString()}</h2>
+             <h4 style={{fontWeight: "bold"}}> {props.title} </h4>
+            { <iframe width="800" height="450" title= "Title" allow="fullscreen;"
                 src={`https://www.youtube.com/embed/${props.VideoLinkId}`}>
-            </iframe> */}
-            <h6>Posted At: {new Date(props.timestamp).toString()}</h6>
-            <div>{props.VideoLinkId}</div>
-            <h4>Tags</h4>
-            {theGenres && theGenres.map((genre, index)=>(
-              <React.Fragment key={index}>
-                <div>{genre.GenreName}</div>
-              </React.Fragment>
-            ))}
-            <button onClick={handleLike} style={highlightLikeButtonRating}>Like ({props.totalLikes}) </button>
-            <button onClick={handleDislike} style={highlightDislikeButtonRating}>Dislike ({props.totalDislikes})</button>
-            {props.username === props.usernameOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
-            <button onClick={()=>navigate(`/video/${props.VideoPostId}`)}>Comments</button>
-            <button onClick={toggleModal} className="btn-Modal"> Add to Playlist</button>
-            {modal && (
-              <div className="modal">
-                <div onClick={toggleModal} className="overlay"></div>
-                <div className="modal-content">
-                  {userPlaylists.map(playlist=>(
-                  <div className="user-playlist" key={playlist.playlistID}>
-                      <h2>{playlist.PlaylistName}</h2>
-                      <label>
-                        <input type="checkbox" 
-                        checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
-                        onClick={()=>handleCheckBox(playlist.PlaylistID)}
-                        />
-                      </label>
-                  </div>
-                  ))}
-                <button className="close-modal"onClick={toggleModal}>Close</button>
-              </div>
+            </iframe>}
+            <div className="tag-container">
+              Tag(s)
+              {theGenres && theGenres.map((genre, index)=>(
+                <React.Fragment key={index}>
+                  <span className="tag">{genre.GenreName}</span>
+                </React.Fragment>
+              ))}
             </div>
-            )}
+            <div className={VideoPostCSS["button-container"]}> 
+              <button className="btn btn-primary" onClick={()=>navigate(`/video/${props.VideoPostId}`)}> View Post </button>
+              {props.totalLikes !== null? 
+                <button className={`btn btn-primary ${props.rating == 1 ? "liked" : ""}`} 
+                  onClick={handleLike}>
+                  <LikeDislikeIcon type="like" />
+                  ({props.totalLikes}) 
+                </button> : <div> </div>}
+              {props.totaDislikes !== null? 
+                <button className={`btn btn-primary ${props.rating == -1 ? "disliked" : ""}`}
+                  onClick={handleDislike}>
+                  <LikeDislikeIcon type="dislike" />
+                  ({props.totalDislikes})
+                </button> : <div> </div>}
+              <button onClick={toggleModal} className="btn btn-primary"> Add to Playlist</button>
+              {modal &&(
+                <div className={VideoPostCSS.modal}>
+                  <div onClick={toggleModal} className={VideoPostCSS.overlay}></div>
+                    <div className={VideoPostCSS.modalContent}>
+                      {userPlaylists.length === 0 ? (
+                      <div>
+                        <a href="http://localhost:3000/userPlaylists">
+                          <h2>Click to create a Playlist!</h2>
+                        </a>
+                      </div>
+                      ) : (
+                      userPlaylists.map(playlist => (
+                        <div className={VideoPostCSS.modalContentContainer} key={playlist.playlistID}>
+                          <div class="form-check">
+                            <input
+                              type="checkbox"
+                              checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
+                              onClick={() => handleCheckBox(playlist.PlaylistID)}
+                            />
+                          </div>
+                          <h2>{playlist.PlaylistName}</h2>
+                        </div>
+                      ))
+                    )}
+                  <button className="btn btn-secondary"onClick={toggleModal}>Close</button>
+                </div>
+              </div>
+              )}
+            </div>
+            
         </div>
     );
 }

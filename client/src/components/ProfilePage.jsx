@@ -1,8 +1,9 @@
 import React from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate, useParams } from "react-router-dom";
 import { axiosRequest } from "../utils/utils";
 import { UserProfileComponent } from "./UserProfileComponent";
+import NavigationComponent from "./Navigation";
 
 const ProfilePageComponent = ()=>{
     const hostname= "http://localhost:3001";
@@ -10,30 +11,19 @@ const ProfilePageComponent = ()=>{
     const [profileUsername, setProfileUsername]= React.useState(null);
     const [friendStatus, setFriendStatus]= React.useState(null);
     const theirUsername= useParams().ProfileUsername;
+    console.log("THEIR NAME IS: " +theirUsername)
     const navigate= useNavigate();
-    const tokenVerify= async (e) => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
-            try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    const userIdOfProfileUser = (await axios.get(`${hostname}/users/id`, {params:{username:theirUsername}}));
-                    setUsername({userIdOfCurrentUser, username:response.data.username});
-                    setProfileUsername({userIdOfProfileUser:userIdOfProfileUser.data.id, username:theirUsername})               
-                }
-                else {
-                    navigate("/");
-                }
-            }
-    
-            catch(error){
-                console.log(error);
-                navigate("/")
-            }
+    const tokenVerify= async () => {
+        try{
+            const response= await axios.get(`http://localhost:3001/verify-token`)
+                const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+                const userIdOfProfileUser = (await axios.get(`${hostname}/users/id`, {params:{username:theirUsername}}));
+                setUsername({userIdOfCurrentUser, username:response.data.username});
+                setProfileUsername({userIdOfProfileUser:userIdOfProfileUser.data.id, username:theirUsername})               
         }
-        else{
-            navigate("/");
+        catch(error){
+            navigate("/")
+            console.log(error);
         }
     }
 
@@ -87,7 +77,6 @@ const ProfilePageComponent = ()=>{
     }
     const handleAcceptFriendRequest = async (e)=>{
         e.preventDefault();
-        await axiosRequest(2,2,"friendRequests", {SenderUserId:profileUsername.userIdOfProfileUser, ReceiverUserId:username.userIdOfCurrentUser});
         await axiosRequest(1,1,"Friendships", {UserId1:username.userIdOfCurrentUser, UserId2: profileUsername.userIdOfProfileUser});
         setFriendStatus(1);
     }
@@ -98,25 +87,32 @@ const ProfilePageComponent = ()=>{
     }
     
     return (
-        
-            username!==null && profileUsername!==null && <>
-            <div>{theirUsername}</div>
-            {friendStatus!==null && friendStatus!==4 && <>
-                {friendStatus===0? <button onClick={handleAddFriend}>Add Friend</button> : 
-                friendStatus===1? <button onClick={handleUnfriend}>Unfriend</button> : 
-                friendStatus===2? <button onClick={handleCancelFriendRequest}>Cancel Friend Request</button>: 
-                <div>
-                    <button onClick={handleAcceptFriendRequest}>✅</button>
-                    <button onClick={handleDeclineFriendRequest}>❌</button>
-                </div>
-                }
-            </>}
-            <div>
-                <button onClick={ () => navigate(`/userHistory/${theirUsername}`)}> View History </button>
-            </div>        
-            </> 
-    
-    )
+        <div>
+            <NavigationComponent />
+            {username !== null && profileUsername !== null && (
+                <>
+                    <div style={{fontWeight: "bold", fontSize: "40px"}}>{theirUsername}'s Profile </div>
+                    {friendStatus !== null && friendStatus !== 4 && (
+                        <>
+                            {friendStatus === 0 ? (
+                                <button style={{padding: "8px 16px", backgroundColor: "#4CAF50",  border: "none",color: "#fff",cursor: "pointer"}} onClick={handleAddFriend}>Add Friend</button>
+                            ) : friendStatus === 1 ? (
+                                <button onClick={handleUnfriend}>Unfriend</button>
+                            ) : friendStatus === 2 ? (
+                                <button style={{padding: "8px 16px", backgroundColor: "red",  border: "none",color: "#fff",cursor: "pointer"}} onClick={handleCancelFriendRequest}>Cancel Friend Request</button>
+                            ) : (
+                                <div>
+                                    <button onClick={handleAcceptFriendRequest}>✅</button>
+                                    <button onClick={handleDeclineFriendRequest}>❌</button>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </>
+            )}
+            <UserProfileComponent />
+        </div>
+    );    
 }
 
 export default ProfilePageComponent;

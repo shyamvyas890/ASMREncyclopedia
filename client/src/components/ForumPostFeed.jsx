@@ -1,17 +1,21 @@
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useState, useEffect } from "react";
 import { redirectDocument, useNavigate } from "react-router-dom";
 import LikeDislikeComponent from "./LikeDislikeComponent"
 import * as yup from "yup"
-import '../index.css';
+import ForumPostFeedCSS from "../css/forumpostfeed.module.css"
+import NavigationComponent from './Navigation';
+import LikeDislikeIcon from './LikeDislikeIcon';
 
 export const ForumPostFeedComponent = (props) =>{
     const [allPosts, setAllPosts] = useState([])
+    const [feedback, setFeedback] = useState(null)
     //Maps contain {[postID, #of likes/dislikes]}
     const [allPostLikes, setAllPostLikes] = useState(new Map())
     const [allPostDislikes, setAllPostDislikes] = useState(new Map())
     const [userLikedPosts, setUserLikedPosts] = useState([])
     const [userDislikedPosts, setUserDislikedPosts] = useState([])
+
     const [currentUsername, setCurrentUsername] = useState()
     const [currentUserID, setCurrentUserID] = useState()
     const [sortType, setSortType] = useState()
@@ -25,13 +29,12 @@ export const ForumPostFeedComponent = (props) =>{
 
     //gets the username of the current user
     useEffect( () => {
-        const token = localStorage.getItem("token")
         const fetchUsername = async () => {
             try {
-              const response = await axios.get(`http://localhost:3001/verify-token/${token}`);
+              const response = await axios.get(`http://localhost:3001/verify-token`);
               setCurrentUsername(response.data.username);
             } catch (error) {
-              console.log(error);
+              navigate("/")
             }
           };
         fetchUsername()
@@ -53,34 +56,59 @@ export const ForumPostFeedComponent = (props) =>{
 
     //get all forumposts upon page load, initially sort from newest to oldest 
     useEffect(()=>{
+      fetchAllPosts()
+    }, [])
+
     const fetchAllPosts = async ()=>{
-        try{
-            const res = await axios.get("http://localhost:3001/forumPostsAll")
-            //initially sort from newest to oldest
-            setAllPosts(res.data)
-            const intialPosts = res.data.sort((a, b) => {
-              if(a.post_timestamp > b.post_timestamp){
-                return -1;
+      try{
+        const only = await axios.get("http://localhost:3001/fetchForumSubscriptionOnly")
+        const sub = await axios.get("http://localhost:3001/fetchForumSubscriptions")
+        const res = await axios.get("http://localhost:3001/forumPostsAll")
+        let arr = []
+        if(only.data.length !== 0 && sub.data.length !== 0){   //If there is a preference
+          const subTags = sub.data.map(tag => tag.ForumTagName);
+          for(const post of res.data){
+            if(post.tags){
+              const postTags = post.tags.split(",")
+              const taggedPost = subTags.some(subTag => postTags.includes(subTag)) // If includes at least one tag
+              if(taggedPost && only.data[0].Only == 1){   //If Only and tags match, add to arr
+                arr.push(post)
+              } else if(!taggedPost && only.data[0].Only == 0){  //If !Only (Except) and no tags match, add to arr
+                arr.push(post)
               }
-              else if(a.post_timestamp < b.post_timestamp){
-                return 1;
-              }
-              else{
-                return 0;
-              }
-            })
-            setAllPosts(intialPosts)
-        }catch(err){
-            console.log(err)
+            } else {  //If post has no tags push either way
+              arr.push(post)
+            }
+          }
+        } else {    //No Preference
+          for(const post of res.data){
+            arr.push(post)
+          }
         }
+          //initially sort from newest to oldest
+          setAllPosts(arr)
+          console.log(arr)
+          const intialPosts = arr.sort((a, b) => {
+            if(a.post_timestamp > b.post_timestamp){
+              return -1;
+            }
+            else if(a.post_timestamp < b.post_timestamp){
+              return 1;
+            }
+            else{
+              return 0;
+            }
+          })
+          setAllPosts(intialPosts)
+      } catch(err){
+          console.log(err)
+      }
     } 
-    fetchAllPosts()
-}, [])
 
 //get like/dislike information for posts
 useEffect(() => {
     fetchAllPostsLikesAndDislikes();
-}, [currentUserID]);
+}, [currentUserID, allPosts]);
 
 const fetchAllPostsLikesAndDislikes = async () => {
     await LikeDislikeComponent.fetchAllPostsLikes(allPosts, setAllPostLikes);
@@ -179,37 +207,53 @@ const onSubmit =  async (e) => {
   const data = {
       title: title,
       body: body,
-      forums: tagOptions,
       username: currentUsername,
       post_timestamp: new Date(),
       allPosts: allPosts
   }
   const isValid = await schema.isValid(data) //valid schema according to yup
   if(isValid){
-      
-      await axios.post('http://localhost:3001/forumPostCreate', data) //post to database
-      //get all posts including new post, resort from newest to oldest
-      const response2 = await axios.get('http://localhost:3001/forumPostsAll') 
-      response2.data.sort((a, b) => {
-        if(a.post_timestamp > b.post_timestamp){
-          return -1;
-        }
-        else if(a.post_timestamp < b.post_timestamp){
-          return 1;
-        }
-        else{
-          return 0;
-        }
-      })
-      setAllPosts(response2.data)
+    try{
+      //Create Forum Post
+      const postRes = await axios.post('http://localhost:3001/forumPostCreate', data) //post to database
+      let tagIDs = []
+      if(tagOptions.length === 0){
+        setFeedback("You must add at least one tag")
+        return
+      }
+      for(let i = 0; i < tagOptions.length; i++){
+        let forumTagName = tagOptions[i]
+        //Create Tags submitted with Forum Post
+        await axios.post('http://localhost:3001/forumTagCreate', {}, {
+          params: { forumTagName: forumTagName }
+        })
+        //Gets the TagID of each Tag
+        const tagRes = await axios.get('http://localhost:3001/fetchForumTag', {
+          params: {forumTagName: forumTagName}
+        })
+        tagIDs.push(tagRes.data[0])
+      }
 
+      for(let forumTagID of tagIDs){
+        //Creates a TagPost, linking Tags to Posts
+        await axios.post('http://localhost:3001/forumPostTagCreate', {}, {
+          params: { postID: postRes.data.id, forumTagID: forumTagID.ForumTagID }
+        })
+      }
+
+      //get all posts including new post, resort from newest to oldest
+      fetchAllPosts()
       //resetting useStates and text boxes
       setTitle("")
       setBody("")
       setTagOptions([])
+      setFeedback(null)
+    } catch (e){
+        console.log(e)
+    }
   }
   else{
-      alert("Make sure to give your post a title and body!")
+      setFeedback("You must give your post a title and body!")
   }
 }
 
@@ -230,91 +274,97 @@ const handleInputKeyDown = (e) =>{
       //trying to submit a duplicate tag
       else{
         e.preventDefault()
-        console.log("TAGS: " + tagOptions)
-        alert(`You already included the tag '${tagInput}'`)
+        setFeedback(`You already included the tag '${tagInput}'`)
         setTagInput('')
-        console.log("TAGS: " + tagOptions)
       }
   }
 }
 
-const searchForumPosts = () =>{
-   navigate(`/forumPost/search_by/${searchInput}`)
-}
 
-return(<div>
-  <form> 
-          <label> Post Title </label>
-          <input type="text" value={title} onChange= {(event) => {setTitle(event.target.value)}} name="title"/>
-          <br></br>
-          <label> Post Body </label>
-          <input type="text"  value={body} onChange= {(event) => {setBody(event.target.value)}} name="body"/>
-          <br>
-          </br>
-          <div>
-           <label> Press "Enter" to create post tag(s) </label>
-           <input type="text" value={tagInput} onChange={ (event) => {setTagInput(event.target.value)}} onKeyDown={handleInputKeyDown}/>
-           <br>
-           </br>
-           <div>
-             {tagOptions.map( (tag) => (
-                <div key={tag}>
-                    {tag}
-                    <button onClick={() => handleTagDelete(tag)}> x </button>
-                </div>
-             ))}
-           </div>
-          </div>
-         <button onClick={onSubmit}> Create Post </button>
-        </form>
+ return(
 
-<h1>All Posts Feed</h1>
 
-<form onSubmit={sortForumPosts}>
- <select onChange={(e) => setSortType(e.target.value)}>
-    <option value="none"> Sort posts by... </option>
-    <option value="1"> Newest to Oldest (default) </option>
-    <option value="2"> Oldest To Newest </option>
-    <option value="3"> Most Liked to Least Liked </option>
-    <option value="4"> Least Liked to Most Liked </option>
- </select>
- <button> Sort </button>
-</form>
-
-<form onSubmit={searchForumPosts}>
-  <input value={searchInput} type="text" placeholder="Search posts by title..." onChange={ (e) => setSearchInput(e.target.value)}/>
-  <button> Search </button>
-</form>
-
-<div className="feed-posts">
-    {allPosts.map(post=>(
-        <div className="user-posts" key={post.id}>
-            <h2>{post.title} by <a 
-          style={{textDecoration: 'none'}}
-          onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-          onMouseOut={(e) => e.target.style.textDecoration = 'none'}
-          onClick={() => {navigate(`/userHistory/${post.username}`)}}
-          >
-          {post.username}
-         </a> 
-         @ {new Date(post.post_timestamp).toLocaleString()}</h2>
-            <p>{post.body}</p>
-            <div>
-              Tag(s)
-              <br></br>
-              {post.forums}
+  <div>
+    <NavigationComponent />
+    <div className={ForumPostFeedCSS['container']}> 
+      <form className={ForumPostFeedCSS['forum-post-form']}>
+        <input className={ForumPostFeedCSS['forum-post-form-title']} id="forum-post-title" type="text" placeholder="Title" value={title} onChange={(event) => {setTitle(event.target.value)}} name="title"/>
+        <br />
+        <textarea className={ForumPostFeedCSS['forum-post-form-body']} type="text" value={body} placeholder="Body" onChange={(event) => {setBody(event.target.value)}} name="body"/>
+        <br />
+        <input className={ForumPostFeedCSS['forum-post-form-tag']} placeholder="Press 'Enter' to create tag(s)" type="text" value={tagInput} onChange={(event) => {setTagInput(event.target.value)}} onKeyDown={handleInputKeyDown}/>
+         <div className={ForumPostFeedCSS["tag-container"]}>
+          {tagOptions.map((tag) => (
+            <div key={tag}>
+              {tag}
+              <button className={ForumPostFeedCSS["tag-button"]} onClick={() => handleTagDelete(tag)}> x </button>
             </div>
-            <button onClick={ () => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)}> View Post </button>
-            <button 
-                className={`like ${userLikedPosts.includes(post.id) ? "liked" : ""}`} 
-                onClick={()=>handlePostLikeDislike(post.id, currentUserID, 1)}>
-                {allPostLikes.get(post.id)} Likes
-            </button>
-            <button className={`dislike ${userDislikedPosts.includes(post.id) ? "disliked" : ""}`}
-                onClick={()=>handlePostLikeDislike(post.id, currentUserID, 0)}>
-                {allPostDislikes.get(post.id)} Dislikes</button>
+          ))}
+         </div>
+         {feedback && (
+         <p style={{color: "red"}}>{feedback}</p>
+         )}
+
+        <button className="btn btn-primary" onClick={onSubmit}> Post </button>
+      </form>
+    </div>
+    
+
+  {allPosts.length !== 0 && <form className={ForumPostFeedCSS["forum-post-sort-form"]} onSubmit={sortForumPosts}>
+    <select className={ForumPostFeedCSS['forum-post-form-select']} onChange ={(e) => setSortType(e.target.value)}>
+      <option value="none"> Sort by... </option>
+      <option value="1"> Newest to Oldest (default) </option>
+      <option value="2"> Oldest To Newest </option>
+      <option value="3"> Most Liked to Least Liked </option>
+      <option value="4"> Least Liked to Most Liked </option>
+    </select>
+    <button className="btn btn-primary" style={{marginLeft: "10px"}}> Sort </button>
+  </form>}
+
+
+  <div className={ForumPostFeedCSS["feed-posts"]}>
+    <div className={ForumPostFeedCSS["feed-posts-master-div"]}>
+      {allPosts.length !== 0 && allPosts.map(post=>(
+        <div className={ForumPostFeedCSS["user-posts"]} key={post.id}>
+          <h2> <a 
+            style={{textDecoration: 'underline', cursor:"pointer"}}
+            onClick={() => {navigate(`/username/${post.username}`)}}
+            >
+            {post.username}
+          </a> 
+          ◦ {new Date(post.post_timestamp).toLocaleString()}</h2>
+          <h4 style={{fontWeight: "bold"}}> {post.title} </h4>
+
+          <p>{post.body}</p>
+          <div className="tag-container">
+            Tag(s) {post.tags && post.tags.split(',').map(tag => ( //If tags!=null split tags
+                <span className="tag">{tag ? tag.trim() : 'null'}</span>
+            ))}
+          </div>
+          <button className="btn btn-primary" onClick={() => navigate(`/forumPost/${post.id}/viewing/${currentUserID}/user`)}> View Post </button>
+          <button className={`btn btn-primary ${userLikedPosts.includes(post.id) ? "liked" : ""}`} 
+            onClick={() => handlePostLikeDislike(post.id, currentUserID, 1)}>
+            <LikeDislikeIcon type="like" />
+            ({allPostLikes.get(post.id)})
+          </button>
+          <button className={`btn btn-primary ${userDislikedPosts.includes(post.id) ? "disliked" : ""}`} onClick={() => handlePostLikeDislike(post.id, currentUserID, 0)}>
+            <LikeDislikeIcon type="dislike" />
+            ({allPostDislikes.get(post.id)})
+          </button>
         </div>
-    ))}
+      ))}
+    </div>
+    </div>
+
+    {allPosts.length === 0 && <div className={ForumPostFeedCSS["no-posts"]}>
+      There are no posts yet. Why not add one?
+
+    </div>
+
+    }
+
+
+  
 </div>
-</div>)
+ )
 }

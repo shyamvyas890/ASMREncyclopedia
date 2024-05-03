@@ -1,0 +1,33 @@
+.formContainer {
+  max-width: 400px; 
+  margin:1rem;
+  font-size: 1.5rem;
+}
+
+.formContainer label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.formContainer input[type="radio"] {
+  margin-right: 5px;
+}
+
+.tag {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  margin-right:5px;
+  margin-bottom:5px;
+  background-color: red;
+  border: none;
+  color: white;
+}
+
+.tag-container {
+  display: inline-block;
+  padding: 5px;
+  margin-top: 5px;
+  border-radius: 5px;
+}

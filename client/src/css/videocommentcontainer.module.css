@@ -1,0 +1,26 @@
+.sort-form{
+    padding: 8px;
+    background-color: #333;
+    border: none;
+    color: #fff;
+  }
+
+  .comment{
+    width: 700px;
+    height:100px;
+    padding: 10px;
+    border-radius: 5px;
+    resize: none;
+    margin-top: 20px;
+    margin-bottom: 5px;
+    resize: none;
+  }
+
+  .comment-button{
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 25px;
+  }

@@ -1,15 +1,20 @@
 import React, { useState, useEffect} from 'react';
-import axios from 'axios';
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate, useParams } from "react-router-dom";
 import { VideoCommentContainerComponent } from './VideoCommentContainer';
 import { Link } from 'react-router-dom';
 import { axiosRequest, hostname } from '../utils/utils';
+import VideoPostWithCommentsCSS from "../css/videopostwithcomments.module.css"
+import LikeDislikeIcon from './LikeDislikeIcon';
+
+import NavigationComponent from './Navigation';
 const VideoPostWithCommentsComponent = (props)=>{
     const navigate= useNavigate();
     const routerVideoPostId=useParams().VideoPostId;
     const propsVideoPostId = props.VideoPostId;
     const VideoPostId = routerVideoPostId || propsVideoPostId;
-    const [username, setUsername]= React.useState(null);
+    const [username, setUsername]= useState();
+    const [userID, setUserID] = useState()
     const [allTheVideoPostInformation, setAllTheVideoPostInformation]= useState(null);
     const [modal, setModal] = useState(false)
     const [userPlaylists, setUserPlaylists] = useState([])
@@ -18,47 +23,56 @@ const VideoPostWithCommentsComponent = (props)=>{
     function changeTheRating(rating){
         setAllTheVideoPostInformation(prev=>({...prev, rating}))
     }
+    function changeTotalLikesAndDislikes(deltaLikes, deltaDislikes){
+      setAllTheVideoPostInformation(prev=>({...prev, totalLikes:prev.totalLikes+deltaLikes, totalDislikes:prev.totalDislikes+deltaDislikes}));
+    }
     const handleLike = async (e) => {
         e.preventDefault();
         if(allTheVideoPostInformation.rating===0){
-          const axiosResponse = await axios.post(`${hostname}/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: username.userIdOfCurrentUser, LikeStatus: true})
-          changeTheRating(1);      
+          const axiosResponse = await axios.post(`${hostname}/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: userID, LikeStatus: true})
+          console.log(axiosResponse);
+          changeTheRating(1);
+          changeTotalLikesAndDislikes(1, 0);      
         }
         else if (allTheVideoPostInformation.rating===-1){
-          const getLikeDislikeId= await axios.get(`${hostname}/video-rating`, {params: {UserId: username.userIdOfCurrentUser, VideoPostId: allTheVideoPostInformation.VideoPostId}});
+          const getLikeDislikeId= await axios.get(`${hostname}/video-rating`, {params: {UserId: userID, VideoPostId: allTheVideoPostInformation.VideoPostId}});
           const LikeDislikeId= getLikeDislikeId.data[0].LikeDislikeId;
           const deleteOldRating = await axios.delete(`${hostname}/video`, {params: {LikeDislikeId}});
-          const addUpdatedRating = await axios.post(`${hostname}/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: username.userIdOfCurrentUser, LikeStatus: true})
+          const addUpdatedRating = await axios.post(`${hostname}/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: userID, LikeStatus: true})
           changeTheRating(1); 
-          
+          changeTotalLikesAndDislikes(1, -1);
         }
         else if (allTheVideoPostInformation.rating===1){
-          const getLikeDislikeId= await axios.get(`${hostname}/video-rating`, {params: {UserId: username.userIdOfCurrentUser, VideoPostId: allTheVideoPostInformation.VideoPostId}});
+          const getLikeDislikeId= await axios.get(`${hostname}/video-rating`, {params: {UserId: userID, VideoPostId: allTheVideoPostInformation.VideoPostId}});
           const LikeDislikeId= getLikeDislikeId.data[0].LikeDislikeId;
           const deleteOldRating = await axios.delete(`${hostname}/video`, {params: {LikeDislikeId}});
           changeTheRating(0)
+          changeTotalLikesAndDislikes(-1, 0);
         }
     }
 
     const handleDislike= async (e)=>{
         e.preventDefault();
         if(allTheVideoPostInformation.rating===0){
-          const axiosResponse = await axios.post(`${hostname}/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: username.userIdOfCurrentUser, LikeStatus: false})
-          changeTheRating(-1);   
+          const axiosResponse = await axios.post(`${hostname}/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: userID, LikeStatus: false})
+          changeTheRating(-1);
+          changeTotalLikesAndDislikes(0, 1);
         }
         else if (allTheVideoPostInformation.rating===1){
-          const getLikeDislikeId= await axios.get(`${hostname}/video-rating`, {params: {UserId: username.userIdOfCurrentUser, VideoPostId: allTheVideoPostInformation.VideoPostId}});
+          const getLikeDislikeId= await axios.get(`${hostname}/video-rating`, {params: {UserId: userID, VideoPostId: allTheVideoPostInformation.VideoPostId}});
           const LikeDislikeId= getLikeDislikeId.data[0].LikeDislikeId;
           const deleteOldRating = await axios.delete(`${hostname}/video`, {params: {LikeDislikeId}});
-          const addUpdatedRating = await axios.post(`${hostname}/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: username.userIdOfCurrentUser, LikeStatus: false})
+          const addUpdatedRating = await axios.post(`${hostname}/video-rating/${allTheVideoPostInformation.VideoPostId}`, {UserId: userID, LikeStatus: false})
           changeTheRating(-1);
+          changeTotalLikesAndDislikes(-1, 1);
           
         }
         else if (allTheVideoPostInformation.rating===-1){
-          const getLikeDislikeId= await axios.get(`${hostname}/video-rating`, {params: {UserId: username.userIdOfCurrentUser, VideoPostId: allTheVideoPostInformation.VideoPostId}});
+          const getLikeDislikeId= await axios.get(`${hostname}/video-rating`, {params: {UserId: userID, VideoPostId: allTheVideoPostInformation.VideoPostId}});
           const LikeDislikeId= getLikeDislikeId.data[0].LikeDislikeId;
           const deleteOldRating = await axios.delete(`${hostname}/video`, {params: {LikeDislikeId}});
           changeTheRating(0);
+          changeTotalLikesAndDislikes(0, -1);
 
         }
 
@@ -75,42 +89,47 @@ const VideoPostWithCommentsComponent = (props)=>{
       }
 
     const tokenVerify= async (e) => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
-            try{
-                const response= await axios.get(`${hostname}/verify-token/${theToken}`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    setUsername({userIdOfCurrentUser, username:response.data.username})
-                }
-                else {
-                    navigate("/");
-                }
-            }
-    
-            catch(error){
-                console.log(error);
-            }
+        try{
+            const response= await axios.get(`${hostname}/verify-token`)
+            console.log(response);
+            const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+            console.log("THE ID IS: " + userIdOfCurrentUser)
+            setUserID(userIdOfCurrentUser)
+            setUsername(response.data.username)
         }
-        else{
+        catch(error){
             navigate("/");
+            console.log(error);
         }
     }
 
     const fetchInformation = async ()=>{
         try{
+            console.log(VideoPostId)
+            console.log(userID)
             const videoBasicInfo= await axiosRequest(3,2, "video/id", {VideoPostId});
             videoBasicInfo.data[0].username= (await axios.get(`${hostname}/users/id`, 
             {
                 params:{ UserId:videoBasicInfo.data[0].UserId }
             })).data.username;
-            const rating= await axiosRequest(3,2,"video-rating", {UserId:username.userIdOfCurrentUser, VideoPostId});
+            const rating= await axiosRequest(3,2,"video-rating", {UserId:userID, VideoPostId});
             const genres= await axiosRequest(3,2,"video-by-genre-or-user", {VideoPostId});
             for(const genre of genres.data) {
                 const GenreName = await axios.get(`${hostname}/genreName`, {params:{GenreId: genre.GenreId}})
                 genre.GenreName= GenreName.data[0].Genre;
             }
-            const theInfo= {...videoBasicInfo.data[0], rating:rating.data.length===0 ? 0:rating.data[0].LikeStatus===1 ? 1:-1, genres:genres.data};
+            const totalVideoRatingData = await axiosRequest(3,2, "video-rating", {VideoPostId})
+            let totalLikes = 0;
+            let totalDislikes = 0;
+            for (const rating of totalVideoRatingData.data){
+              if(rating.LikeStatus === 0){
+                totalDislikes++;
+              }
+              else if(rating.LikeStatus === 1){
+                totalLikes++;
+              }
+            }
+            const theInfo= {...videoBasicInfo.data[0], rating:rating.data.length===0 ? 0:rating.data[0].LikeStatus===1 ? 1:-1, genres:genres.data, totalLikes, totalDislikes};
             console.log(theInfo)
             setAllTheVideoPostInformation(theInfo);
         }
@@ -121,12 +140,12 @@ const VideoPostWithCommentsComponent = (props)=>{
     }
     React.useEffect(()=>{
         tokenVerify();
+        fetchAllUserPlaylist()
     },[]);
 
     React.useEffect(()=>{
         if(username){
             fetchInformation();
-
         }
     }, [username])
 
@@ -138,10 +157,13 @@ const VideoPostWithCommentsComponent = (props)=>{
 
   const fetchAllUserPlaylist = async () => {
     try{
-      const res = await axios.get("http://localhost:3001/fetchAllUserPlaylists", {
-        params: { userID: username.userIdOfCurrentUser}
-      })
-      setUserPlaylists(res.data)
+      //check if username is null first
+      if (username !== null && userID !== null) {
+        const res = await axios.get("http://localhost:3001/fetchAllUserPlaylists", {
+          params: { userID: userID}
+        })
+        setUserPlaylists(res.data)
+      }
       } catch (error) {
           console.log(error)
     }
@@ -206,48 +228,90 @@ const VideoPostWithCommentsComponent = (props)=>{
     };
 
     return (
-        allTheVideoPostInformation!==null && (<div>
-            <h5><Link to={`/username/${allTheVideoPostInformation.username}`}>{allTheVideoPostInformation.username}</Link></h5>
-            <h6>{allTheVideoPostInformation.Title}</h6>
-            <div>{allTheVideoPostInformation.VideoLinkId}</div>
-            <h4>Tags</h4>
-            {allTheVideoPostInformation.genres.map((genre, index)=>(
-              <React.Fragment key={index}>
-                <div>{genre.GenreName}</div>
-              </React.Fragment>
-            ))}
-            <button style={highlightLikeButtonRating} onClick={handleLike}>Like</button>
-            <button style={highlightDislikeButtonRating} onClick={handleDislike}>Dislike</button>
-            {allTheVideoPostInformation.UserId===username.userIdOfCurrentUser && <button onClick={handleDelete}>Delete</button>}
-            <button onClick={toggleModal} className="btn-Modal"> Add to Playlist</button>
-            {modal && (
-              <div className="modal">
-                <div onClick={toggleModal} className="overlay"></div>
-                <div className="modal-content">
-                  {userPlaylists.map(playlist=>(
-                  <div className="user-playlist" key={playlist.playlistID}>
-                      <h2>{playlist.PlaylistName}</h2>
-                      <label>
-                        <input type="checkbox" 
-                        checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
-                        onClick={()=>handleCheckBox(playlist.PlaylistID)}
-                        />
-                      </label>
+        allTheVideoPostInformation!==null && (
+        <div>
+          <NavigationComponent />
+          <div className={VideoPostWithCommentsCSS["master-div"]}>
+              <div className={VideoPostWithCommentsCSS['user-posts']}>
+                <h2> <a 
+                    style={{textDecoration: 'underline', cursor:"pointer"}}
+                    onClick={() => {navigate(`/username/${allTheVideoPostInformation.username}`)}}
+                      >
+                    {allTheVideoPostInformation.username}
+                  </a> 
+                  ◦ {new Date(allTheVideoPostInformation.PostedAt).toLocaleString()}
+                </h2>
+                  <h4 style={{fontWeight: "bold"}}> {allTheVideoPostInformation.Title} </h4>
+                  { <iframe width="800" height="450" title= "Title" allow="fullscreen;"
+                      src={`https://www.youtube.com/embed/${allTheVideoPostInformation.VideoLinkId}`}>
+                  </iframe>}
+                  <div className="tag-container">
+                    Tag(s)
+                    {allTheVideoPostInformation.genres.map((genre, index)=>(
+                      <React.Fragment key={index}>
+                        <span className="tag">{genre.GenreName}</span>
+                      </React.Fragment>
+                    ))}
                   </div>
-                  ))}
-                <button className="close-modal"onClick={toggleModal}>Close</button>
+                  <div className={VideoPostWithCommentsCSS["button-container"]}>
+                        <button className={`btn btn-primary ${allTheVideoPostInformation.rating == 1 ? "liked" : ""}`} 
+                          onClick={handleLike}>
+                            <LikeDislikeIcon type="like" />
+                            {`(${allTheVideoPostInformation.totalLikes})`}
+                          </button>
+                        <button className={`btn btn-primary ${allTheVideoPostInformation.rating == -1 ? "disliked" : ""}`} 
+                          onClick={handleDislike}>
+                          <LikeDislikeIcon type="dislike" />
+                          {`(${allTheVideoPostInformation.totalDislikes})`}
+                        </button>
+                        {allTheVideoPostInformation.UserId===userID && <button className="btn btn-danger" onClick={handleDelete}>Delete</button>}
+                        <button onClick={toggleModal} className="btn btn-primary"> Add to Playlist</button>
+                        {modal && (
+                          <div className={VideoPostWithCommentsCSS.modal}>
+                            <div onClick={toggleModal} className={VideoPostWithCommentsCSS.overlay}></div>
+                            <div className={VideoPostWithCommentsCSS.modalContent}>
+                            {userPlaylists.length === 0 ? (
+                                <div>
+                                  <a href="http://localhost:3000/userPlaylists">
+                                    <h2>Click to create a Playlist!</h2>
+                                  </a>
+                                </div>
+                                ) : (
+                                userPlaylists.map(playlist => (
+                                  <div className={VideoPostWithCommentsCSS.modalContentContainer} key={playlist.playlistID}>
+                                    <div class="form-check">
+                                      <input
+                                        type="checkbox"
+                                        checked={userPlaylistIncludesVideo.includes(playlist.PlaylistID)}
+                                        onClick={() => handleCheckBox(playlist.PlaylistID)}
+                                      />
+                                    </div>
+                                    <h2>{playlist.PlaylistName}</h2>
+                                  </div>
+                                ))
+                              )}
+                            <button className="btn btn-secondary" onClick={toggleModal}>Close</button>
+                          </div>
+                        </div>
+                        )}
+                </div>
+
+
+                  
               </div>
-            </div>
-            )}
+          </div>
+
+          {props.singleView ? <div></div> : <div className={VideoPostWithCommentsCSS['video-post-comments-section']}>
             {routerVideoPostId && <VideoCommentContainerComponent
                 VideoPostId= {allTheVideoPostInformation.VideoPostId}
-                userIdOfCurrentUser= {username.userIdOfCurrentUser}
-                usernameOfCurrentUser= {username.username}
+                userIdOfCurrentUser= {userID}
+                usernameOfCurrentUser= {username}
             />}
-        </div>)
+          </div>}
+          
+        </div>
+            )
     )
-
-
 }
 
 export default VideoPostWithCommentsComponent;

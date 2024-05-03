@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import io from 'socket.io-client';
 import { useNavigate } from "react-router-dom";
 import { axiosRequest, hostname } from '../utils/utils';
+import NavigationComponent from "./Navigation";
+import ChatCSS from "../css/chat.module.css"
+
 const ChatComponent =()=>{
     const [username, setUsername]= useState(null);
     const [socket,setSocket]= useState(null);
@@ -18,34 +21,25 @@ const ChatComponent =()=>{
     };
 
     const tokenVerify= async () => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
             try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    setUsername({userIdOfCurrentUser, username:response.data.username})
-                    const friendsList = await axios.get(`${hostname}/ListOfFriends/${userIdOfCurrentUser}`);
-                    const theFriendsList=[];
-                    for(const friend of friendsList.data){
-                        const friendId= friend.UserId1===userIdOfCurrentUser?friend.UserId2:friend.UserId1;
-                        const friendUsername = (await axiosRequest(3,2,"users/id", {UserId:friendId})).data.username;
-                        theFriendsList.push({UserId:friendId, username:friendUsername});
-                    }
-                    setFriends(theFriendsList);
-                    setSocket(io(hostname, { transports : ['websocket'], query:{token:localStorage.getItem("token")}}));
+                const response= await axios.get(`http://localhost:3001/verify-token`)
+                const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+                setUsername({userIdOfCurrentUser, username:response.data.username})
+                const friendsList = await axios.get(`${hostname}/ListOfFriends/${userIdOfCurrentUser}`);
+                const theFriendsList=[];
+                for(const friend of friendsList.data){
+                    const friendId= friend.UserId1===userIdOfCurrentUser?friend.UserId2:friend.UserId1;
+                    const friendUsername = (await axiosRequest(3,2,"users/id", {UserId:friendId})).data.username;
+                    theFriendsList.push({UserId:friendId, username:friendUsername});
                 }
-                else {
-                    navigate("/");
-                }
+                setFriends(theFriendsList);
+                setSocket(io(hostname, { transports : ['websocket']}));
+                
             }
             catch(error){
+                navigate("/")
                 console.log(error);
             }
-        }
-        else{
-            navigate("/");
-        }
     }
 
     React.useEffect(()=>{
@@ -135,43 +129,47 @@ const ChatComponent =()=>{
     }
 
     return (
-        friends && username && 
-        <div style={{ display: 'flex', height: '100vh' }}>
-            <div style={{ width: '200px', backgroundColor: 'black' }}>
-                {friends.map((friend, index) => {
-                    return <div key={index} onClick={(e)=>{handleSelectChat(e,friend.username)}} style={{ cursor: 'pointer', padding: '10px' }}>
+        <div>
+            <NavigationComponent/>
+            <div className={ChatCSS.container}>
+                <div className={ChatCSS.friendsContainer}>
+                <h2>Chat with a Friend!</h2>
+                {friends && username && friends.map((friend, index) => (
+                    <div 
+                        className={`${ChatCSS.friends} ${selectedChat && selectedChat.UserId === friend.UserId ? ChatCSS.selectedFriend : ''}`} 
+                        key={index} 
+                        onClick={(e) => handleSelectChat(e, friend.username)}
+                    >
                         {friend.username}
                     </div>
-                })}
+                ))}
+                </div>
+                <div className={ChatCSS.chatANDSendMessageContainer}>
+                    <div className={ChatCSS.chatContainer} id="ChatContainer">
+                        {selectedChat ? (selectedChat.messages.map((message, index) => (
+                            <div key={message.ChatMessageId}>
+                                {message.SenderUserId === username.userIdOfCurrentUser ? (
+                                    <div className={ChatCSS.currentUserMessage}>
+                                        {`${message.Message}`}
+                                    </div>
+                                ) : (
+                                    <div className={ChatCSS.otherUserMessage}>
+                                        {`${message.Message}`}
+                                    </div>
+                                )}
+                            </div>
+                            ))
+                        ) : (
+                            <h2>Please select a friend to start chatting.</h2>
+                        )}
+                    </div>
+                    <div>
+                        {selectedChat && <input className={ChatCSS.sendMessage} type="text" placeholder="Send a message..." onKeyDown={handleOnKeyDown} />}
+                    </div>
+                </div>
             </div>
-            <div style={{ flex: 1, padding: '20px' }}>
-                {!selectedChat && <h2>Select a user to chat</h2>}
-                {selectedChat && selectedChat.messages.map((message, index)=>{
-                    if(message.SenderUserId===username.userIdOfCurrentUser){
-                        return <div key={index}>{`${username.username}: ${message.Message}`}</div>
-                    }
-                    else {
-                        return <div key={index}>{`${selectedChat.username}: ${message.Message}`}</div>
-                    }
-                })}
-                {selectedChat && <input type="text" placeholder="Send a message..." onKeyDown={handleOnKeyDown}/>}
-                
-            </div>
-            
-            
-
-
-
-
         </div>
-
-    )
-
-    
-    
-
-
+    );
 }
-
 
 export default ChatComponent

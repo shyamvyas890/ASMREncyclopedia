@@ -1,9 +1,13 @@
 import React, { useState, useRef } from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import VideoCommentNodeComponent from "./VideoCommentNode";
-import { TreeNode } from "../utils/utils";
+import { TreeNode, axiosRequest } from "../utils/utils";
+import VideoCommentContainerCSS from "../css/videocommentcontainer.module.css"
+
 const VideoCommentContainerComponent = (props)=>{
     const [roots, setRoots]= useState(null);
+    const [sortedRoots, setSortedRoots] = useState(null);
+    const [sortOption, setSortOption] = useState("latest");
     const commentRef = useRef("");
     const fetchAllCommentsForThisPost = async () => {
         const fetchPosts = await axios.get(`http://localhost:3001/videoComments/${props.VideoPostId}`);
@@ -16,6 +20,7 @@ const VideoCommentContainerComponent = (props)=>{
             fetchPosts.data[i].username =theUsernameOfCommenter.data.username;
         }
         for(let i=0;i<fetchPosts.data.length;i++){
+            console.log(fetchPosts.data[i]);
             const comment = new TreeNode(fetchPosts.data[i]);
             idToCommentMapping[comment.data.VideoPostCommentId]=comment;
         }
@@ -26,19 +31,26 @@ const VideoCommentContainerComponent = (props)=>{
             else{
                 rootNodes.push(idToCommentMapping[fetchPosts.data[i].VideoPostCommentId]);
             }
-            const fetchRating= await axios.get(`http://localhost:3001/videoCommentRating`, {params:{
+            const fetchRating= await axios.get(`http://localhost:3001/videoCommentRatings`, {params:{
                 UserId:props.userIdOfCurrentUser,
                 VideoPostCommentId:fetchPosts.data[i].VideoPostCommentId
             }})
-            idToCommentMapping[fetchPosts.data[i].VideoPostCommentId].data.rating= fetchRating.data.length===0? 0: fetchRating.data[0].LikeStatus===1? 1:-1;
+            idToCommentMapping[fetchPosts.data[i].VideoPostCommentId]._data.rating= fetchRating.data.length===0? 0: fetchRating.data[0].LikeStatus===1? 1:-1;
+            const ratingsForAParticularNode = await axiosRequest(3,2,"videoCommentRatings", {VideoPostCommentId:fetchPosts.data[i].VideoPostCommentId});
+            let likes=0;
+            let dislikes= 0;
+            for(const rating of ratingsForAParticularNode.data){
+                if(rating.LikeStatus===1){
+                    likes++;
+                }
+                else if (rating.LikeStatus===0){
+                    dislikes++;
+                }
+            }
+            idToCommentMapping[fetchPosts.data[i].VideoPostCommentId]._data= {...idToCommentMapping[fetchPosts.data[i].VideoPostCommentId]._data, likes, dislikes}
         }
         setRoots(rootNodes);
     }
-
-
-
-    
-
 
     const handleTheReply = async (e)=>{
         e.preventDefault();
@@ -56,10 +68,15 @@ const VideoCommentContainerComponent = (props)=>{
                 VideoPostCommentId: commentResponse.data.insertId,
                 UserId: props.userIdOfCurrentUser,
                 Comment: theComment,
+                CommentedAt: new Date().toISOString(),
+                NotificationRead:0,
+                rating:0,
                 VideoPostId: props.VideoPostId,
                 ReplyToVideoPostCommentId:null,
                 DELETED: 0,
-                username: props.usernameOfCurrentUser
+                username: props.usernameOfCurrentUser,
+                likes: 0,
+                dislikes: 0
             }));
             return newRoots;
         })
@@ -68,13 +85,95 @@ const VideoCommentContainerComponent = (props)=>{
     React.useEffect(()=>{
         fetchAllCommentsForThisPost();
     },[props.userIdOfCurrentUser]);
+
+    React.useEffect(()=>{
+        if(roots){
+            let newRootNodes = [...roots]
+            if(sortOption === "latest"){
+                newRootNodes.sort((a,b)=>{
+                    const dateA= new Date(a._data.CommentedAt);
+                    const dateB = new Date(b._data.CommentedAt);
+                    if(dateA.getTime()>dateB.getTime()){
+                        return -1;
+                    }
+                    else if(dateA.getTime()<dateB.getTime()){
+                        return 1;
+                    }
+                    return 0;
+                })
+            }
+            else if(sortOption === "oldest"){
+                newRootNodes.sort((a,b)=>{
+                    const dateA= new Date(a._data.CommentedAt);
+                    const dateB = new Date(b._data.CommentedAt);
+                    if(dateA.getTime()>dateB.getTime()){
+                        return 1;
+                    }
+                    else if(dateA.getTime()<dateB.getTime()){
+                        return -1;
+                    }
+                    return 0;
+                })
+                
+            }
+            else if(sortOption === "best"){
+
+                newRootNodes.sort((a,b)=>{
+                    const AScore = a._data.likes-a._data.dislikes;
+                    const BScore = b._data.likes-b._data.dislikes;
+                    if(AScore>BScore){
+                        return -1;
+                    }
+                    else if (BScore>AScore){
+                        return 1;
+                    }
+                    return 0;
+                })
+                
+            }
+            else if(sortOption === "worst"){
+                newRootNodes.sort((a,b)=>{
+                    const AScore = a._data.likes-a._data.dislikes;
+                    const BScore = b._data.likes-b._data.dislikes;
+                    if(AScore>BScore){
+                        return 1;
+                    }
+                    else if (BScore>AScore){
+                        return -1;
+                    }
+                    return 0;
+                })
+            }
+            setSortedRoots(newRootNodes)
+        }
+    }, [roots, sortOption])
+
     
     return (<div>
-            <form onSubmit={handleTheReply}>
-                    <textarea ref={commentRef} rows="5" cols="50" placeholder="What are your thoughts?"/>
-                    <button type="submit">Reply</button>
-            </form>
-            {roots && roots.map((rootComment, index)=>(
+        <div>
+                <select className={VideoCommentContainerCSS['sort-form']} onChange={(e)=>{
+                    if(e.target.value==="latest"){
+                        setSortOption("latest")
+                    }
+                    else if(e.target.value==="oldest"){
+                        setSortOption("oldest")
+                    }
+                    else if(e.target.value==="best"){
+                        setSortOption("best")
+                    }
+                    else if(e.target.value==="worst"){
+                        setSortOption("worst")
+                    }
+                }}>
+                    <option value="none"> Sort by....</option>
+                    <option value="latest"> Newest to Oldest (default) </option>
+                    <option value="oldest"> Oldest to Newest </option>
+                    <option value="best"> Most Liked to Least Liked</option>
+                    <option value="worst"> Least Liked to Most Liked </option>
+                </select>
+            </div>
+            
+            {sortedRoots && sortedRoots.map((rootComment, index)=>(
                 <VideoCommentNodeComponent 
                 tn ={rootComment}
                 key={index}
@@ -83,10 +182,12 @@ const VideoCommentContainerComponent = (props)=>{
                 setRoots={setRoots}
                 />
             ))}
-        
 
-                
-            </div>)
+            <form  onSubmit={handleTheReply}>
+                <div><textarea className={VideoCommentContainerCSS['comment']} ref={commentRef} placeholder="What do you think?"/></div>
+                <button className="btn btn-primary" style={{padding: "4px 8px", marginBottom: "10px"}} type="submit"> Comment </button>
+            </form>
+        </div>)
 }
 
 export  {VideoCommentContainerComponent, TreeNode};

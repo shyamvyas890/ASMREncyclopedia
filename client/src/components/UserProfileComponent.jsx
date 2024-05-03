@@ -1,80 +1,24 @@
 import { useEffect } from "react"
 import { useState } from "react"
-import axios from "axios"
+import axios from '../utils/AxiosWithCredentials';
 import { useParams } from "react-router-dom"
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { useNavigate } from "react-router-dom";
 import 'react-tabs/style/react-tabs.css';
 import PostComponent from "./Post";
-import LikeDislikeComponent from "./LikeDislikeComponent"
 
 export const UserProfileComponent = () =>{
     const navigate = useNavigate()
-    const {username} = useParams()
+    const {ProfileUsername} = useParams()
+    console.log("VIEWING PROFILE OF " + ProfileUsername)
     const [userID, setUserID] = useState()
     const [forumPostComments, setForumPostComments] = useState([])
     const [videoPostComments, setVideoPostComments] = useState([])
     const [videoPosts, setVideoPosts] = useState([])
     const [forumPosts, setFourmPosts] = useState([])
     const [sortType, setSortType] = useState()
-    const [allUser, setAllUser] = useState([])
-
-    /*
-    const [allPostLikes, setAllPostLikes] = useState(new Map())
-    const [allPostDislikes, setAllPostDislikes] = useState(new Map())
-    const [commentLikes, setCommentLikes] = useState()
-    const [commentDislikes, setCommentDislikes] = useState()
-    const [forumPostCommentID, setForumPostCommentID] = useState()
-    */
-
-    const sortAllUser = (e) =>{
-      e.preventDefault()
-      let copyOfAllPosts = [...allUser]
-      //remove duplicate forum_post_comments from useEffect
-      copyOfAllPosts = copyOfAllPosts.filter((obj, index, self) => 
-        index === self.findIndex((t) => (
-        t.timestamp === obj.timestamp
-      ))
-      )
-      
-       if(sortType === '1'){
-        copyOfAllPosts.sort((a, b) => {
-          if(a.timestamp > b.timestamp){
-            return -1;
-          }
-          else if(a.timestamp < b.timestamp){
-            return 1;
-          }
-          else{
-            return 0;
-          }
-        })
-       }
-       //oldest to newest
-       else if(sortType === '2'){
-        console.log(copyOfAllPosts)
-        copyOfAllPosts.sort((a, b) => {
-          if(a.timestamp > b.timestamp){
-            return 1;
-          }
-          else if(a.timestamp < b.timestamp){
-            return -1;
-          }
-          else{
-            return 0;
-          }
-        })
-       }
-       console.log("AFTER")
-       console.log(copyOfAllPosts.length)
-       setAllUser(copyOfAllPosts)
-    }
     
-/*
-sort forumposts based off user choice 
-sorting based on time uses post_timestamp attribute
-sorting based on like - dislike count uses allPostLikes and allPostDislikes maps
-*/
+
 const sortForumPosts = (e) =>{
   e.preventDefault()
   const copyOfAllPosts = [...forumPosts]
@@ -110,11 +54,7 @@ const sortForumPosts = (e) =>{
    setFourmPosts(copyOfAllPosts)
 }
 
-/*
-sort forumpostcomments based off user choice 
-sorting based on time uses post_timestamp attribute
-sorting based on like - dislike count uses allPostLikes and allPostDislikes maps
-*/
+
 const sortForumPostComments = (e) =>{
   e.preventDefault()
   const copyOfAllPosts = [...forumPostComments]
@@ -150,11 +90,7 @@ const sortForumPostComments = (e) =>{
    setForumPostComments(copyOfAllPosts)
 }
 
-/*
-sort videoposts based off user choice 
-sorting based on time uses post_timestamp attribute
-sorting based on like - dislike count uses allPostLikes and allPostDislikes maps
-*/
+
 const sortVideoPosts = (e) =>{
   e.preventDefault()
   const copyOfAllPosts = [...videoPosts]
@@ -190,22 +126,17 @@ const sortVideoPosts = (e) =>{
    setVideoPosts(copyOfAllPosts)
   }
 
-/*
-sort forumpostcomments based off user choice 
-sorting based on time uses post_timestamp attribute
-sorting based on like - dislike count uses allPostLikes and allPostDislikes maps
-*/
 const sortVideoPostComments = (e) =>{
   e.preventDefault()
   const copyOfAllPosts = [...videoPostComments]
-  
+  console.log("START SOTRING")
   //newest to oldest
    if(sortType === '1'){
     copyOfAllPosts.sort((a, b) => {
       if(a.CommentedAt > b.CommentedAt){
         return -1;
       }
-      else if(a.comment_timestamp < b.comment_timestamp){
+      else if(a.CommentedAt < b.CommentedAt){
         return 1;
       }
       else{
@@ -216,11 +147,11 @@ const sortVideoPostComments = (e) =>{
    //oldest to newest
    else if(sortType === '2'){
     copyOfAllPosts.sort((a, b) => {
-      if(a.commentedAt > b.commentedAt){
-        return 1;
-      }
-      else if(a.commentedAt < b.commentedAt){
+      if(a.commentedAt < b.commentedAt){
         return -1;
+      }
+      else if(a.commentedAt > b.commentedAt){
+        return 1;
       }
       else{
         return 0;
@@ -234,32 +165,25 @@ const sortVideoPostComments = (e) =>{
 
    //gets the ID of the current user
    useEffect( () => {
-    console.log("GETTING ID")
     const fetchID = async () => {
         try {
-          const response = await axios.get(`http://localhost:3001/users/id?username=${username}`);
+          const response = await axios.get(`http://localhost:3001/users/id?username=${ProfileUsername}`);
           setUserID(response.data.id)
         } catch (error) {
           console.log(error);
         }
       };
     fetchID()
-}, [username])
+}, [ProfileUsername])
 
    //get all forumposts of the specified user
    useEffect( () =>{
     const fetchForumPosts = async () =>{
         try{
-            const response = await axios.get("http://localhost:3001/UserPosts", {
-                params: {username: username}
+            const response = await axios.get("http://localhost:3001/forumPostByUsername", {
+                params: {username: ProfileUsername}
             })
-            const responseWithType = response.data.map(obj => ({
-              ...obj, 
-              type: "forum_post", 
-              timestamp: obj.post_timestamp
-            }))
             setFourmPosts(response.data)
-            setAllUser(prevAllUser => prevAllUser.concat(responseWithType))
         }
         catch(error){
             console.log(error)
@@ -279,7 +203,6 @@ const sortVideoPostComments = (e) =>{
               type: "video_post", 
               timestamp: obj.PostedAt
             }))
-            setAllUser(prevAllUser => prevAllUser.concat(responseWithType))
             setVideoPosts(response.data)
         }
         catch(error){
@@ -291,10 +214,9 @@ const sortVideoPostComments = (e) =>{
 
    useEffect( () =>{
      const fetchComments = async () =>{
-        console.log("FETCHING COMMENTS")
         try{
             const response = await axios.get("http://localhost:3001/getForumPostComments", {
-              params: {username, username}
+              params: {username: ProfileUsername}
             })
             const responseWithType = response.data.map(obj => ({
               ...obj, 
@@ -302,7 +224,6 @@ const sortVideoPostComments = (e) =>{
               timestamp: obj.comment_timestamp
             }))
             setForumPostComments(response.data)
-            setAllUser(prevAllUser => prevAllUser.concat(responseWithType))
             const response2 = await axios.get("http://localhost:3001/getVideoPostComments", {
               params: {userID, userID}
             })
@@ -312,7 +233,6 @@ const sortVideoPostComments = (e) =>{
               timestamp: obj.CommentedAt
             }))
             setVideoPostComments(response2.data)
-            setAllUser(prevAllUser => prevAllUser.concat(responseWithType2))
         }
         catch(error){
           console.log(error)
@@ -321,101 +241,12 @@ const sortVideoPostComments = (e) =>{
      fetchComments()
    }, [userID])
 
-/*
-const fetchAllPostsLikesAndDislikes = async () => {
-  await LikeDislikeComponent.fetchAllPostsLikes(forumPosts, setAllPostLikes);
-  await LikeDislikeComponent.fetchAllPostsDislikes(forumPosts, setAllPostDislikes);
-};
-
-const fetchAllCommentsLikesAndDislikes = async (commentID) => {
-  await LikeDislikeComponent.fetchAllCommentsLikes(commentID, setCommentLikes);
-  await LikeDislikeComponent.fetchAllCommentDislikes(commentID, setCommentDislikes);
-};
-
-   //get like/dislike information for posts and comments
-   useEffect(() => {
-    fetchAllPostsLikesAndDislikes();
-  }, [forumPosts]);
-*/
    return(
-    <Tabs forceRenderTabPanel defaultIndex={0}>
+    <Tabs forceRenderTabPanel defaultIndex={0} style={{marginTop: "20px"}}>
     <TabList>
-      <Tab> Overview </Tab>
       <Tab> Posts</Tab>
       <Tab> Comments </Tab>
     </TabList>
-
-    <TabPanel>
-  <div> 
-    <form onSubmit={sortAllUser}>
-      <select onChange={(e) => setSortType(e.target.value)}>
-        <option value="none"> Sort everything by... </option>
-        <option value="1"> Newest to Oldest </option>
-        <option value="2"> Oldest To Newest </option>
-      </select>
-      <button type="submit"> Sort </button>
-    </form>
-    {console.log("INITIAL LENGTH")}
-    {console.log(allUser.length)}
-    {console.log(allUser)}
-    {allUser.map((obj) => {
-      if (obj.type === 'forum_post') {
-        return (
-          <div>
-            <h2>{obj.title} by {obj.username} @ {new Date(obj.post_timestamp).toLocaleString()}</h2>
-            <p>{obj.body}</p>
-            <div>
-              Tag(s)
-              <br></br>
-              {obj.forums}
-              <br></br>
-              
-              <button onClick={() => navigate(`/forumPost/${obj.id}/viewing/${userID}/user`)}>
-                View Post
-              </button>
-            </div>
-            <br></br>
-          </div>
-        );
-      } else if (obj.type === 'video_post') {
-        return (
-          <div> 
-            <PostComponent 
-              username={username} 
-              title={obj.Title} 
-              VideoLinkId={obj.VideoLinkId}
-              VideoPostId={obj.VideoPostId}
-              setVideoPostsAndRatings={null}
-              timestamp={obj.PostedAt}
-              totalLikes={null}
-              totalDislikes={null}
-            />
-            <br></br>
-          </div>
-        );
-      } else if (obj.type === 'forum_post_comment') {
-        return (
-          <div>
-            {obj.username} commented @ {new Date(obj.comment_timestamp).toLocaleString()}: {obj.body}
-           
-            <button onClick={() => navigate(`/forumPost/${obj.forum_post_id}/viewing/${userID}/user`)}>
-              View Post
-            </button>
-            <br></br>
-          </div>
-        );
-      } else if (obj.type === 'video_post_comment') {
-        return (
-          <div>
-            {username} commented @ {new Date(obj.CommentedAt).toLocaleString()}: {obj.Comment}
-            <br></br>
-          </div>
-        );
-      }
-      return null; // Added to handle cases where obj.type doesn't match any condition
-    })}
-  </div>
-</TabPanel>
 
     <TabPanel>
       <Tabs forceRenderTabPanel>
@@ -430,27 +261,32 @@ const fetchAllCommentsLikesAndDislikes = async (commentID) => {
     ) : (
         <>
             <form onSubmit={sortForumPosts}>
-                <select onChange={(e) => setSortType(e.target.value)}>
-                    <option value="none"> Sort posts by... </option>
-                    <option value="1"> Newest to Oldest </option>
+                <select style={{padding: "8px", backgroundColor: "#333", border: "none", color: "#fff"}} onChange={(e) => setSortType(e.target.value)}>
+                    <option value="none"> Sort by... </option>
+                    <option value="1"> Newest to Oldest (Default) </option>
                     <option value="2"> Oldest To Newest </option>
                 </select>
-                <button type="submit"> Sort </button>
+                <button className="btn btn-primary" style={{marginLeft: "10px"}} type="submit"> Sort </button>
             </form>
 
             {forumPosts.map(post => (
-                <div key={post.id}>
-                    <h2>{post.title} by {post.username} @ {new Date(post.post_timestamp).toLocaleString()}</h2>
+                <div key={post.id} style={{marginTop: "20px", backgroundColor: "#333",
+                 padding: "20px",
+                 marginBottom: "20px", width: "60%"}}>
+                    <h2>{post.username} ◦ {new Date(post.post_timestamp).toLocaleString()}</h2>
+                    <h4 style={{fontWeight: "bold"}}> {post.title}</h4>
                     <p>{post.body}</p>
                     <div>
-                        Tag(s)
-                        <br></br>
-                        {post.forums}
-                        <br></br>
-
-                       <button onClick={() => navigate(`/forumPost/${post.id}/viewing/${userID}/user`)}>
-                            View Post
-                        </button>
+                      <div>
+                        Tags: {post.tags && post.tags.split(',').map(tag => ( //If tags!=null split tags
+                          <div>
+                            <span key={tag ? tag.trim() : 'null'}>{tag ? tag.trim() : 'null'}</span>
+                          </div>
+                        ))}
+                      </div>
+                    <button className="btn btn-primary" style={{marginTop: "10px"}} onClick={() => navigate(`/forumPost/${post.id}/viewing/${userID}/user`)}>
+                        View Post
+                    </button>
                     </div>
                 </div>
             ))}
@@ -466,24 +302,24 @@ const fetchAllCommentsLikesAndDislikes = async (commentID) => {
     ) : (
         <>
             <form onSubmit={sortVideoPosts}>
-                <select onChange={(e) => setSortType(e.target.value)}>
-                    <option value="none"> Sort posts by... </option>
+                <select style={{padding: "8px", backgroundColor: "#333", border: "none", color: "#fff"}} onChange={(e) => setSortType(e.target.value)}>
+                    <option value="none"> Sort by... </option>
                     <option value="1"> Newest to Oldest </option>
                     <option value="2"> Oldest To Newest </option>
                 </select>
-                <button type="submit"> Sort </button>
+                <button className="btn btn-primary" style={{marginLeft: "10px"}} type="submit"> Sort </button>
             </form>
             {videoPosts.map((video, index) => (
                 <div key={index}> 
                     <PostComponent 
-                        username={username} 
+                        username={ProfileUsername} 
                         title={video.Title} 
                         VideoLinkId={video.VideoLinkId}
                         VideoPostId={video.VideoPostId}
                         setVideoPostsAndRatings={null}
                         timestamp={video.PostedAt}
                         totalLikes={null}
-                        totalDislikes={null}
+                        totaDislikes={null}
                     />
                 </div>
             ))}
@@ -502,29 +338,29 @@ const fetchAllCommentsLikesAndDislikes = async (commentID) => {
           <Tab> Video Post Comments </Tab>
         </TabList>
 
-        <TabPanel> <form onSubmit={sortForumPostComments}>
-                <select onChange={(e) => setSortType(e.target.value)}>
-                    <option value="none"> Sort comments by... </option>
-                    <option value="1"> Newest to Oldest </option>
-                    <option value="2"> Oldest To Newest </option>
+        <TabPanel> <form onSubmit={sortForumPostComments} >
+                <select onChange={(e) => setSortType(e.target.value)} style={{padding: "8px", backgroundColor: "#333", border: "none", color: "#fff"}}>
+                    <option value="none"> Sort by...</option>
+                    <option value="2"> Oldest To Newest (Default) </option>
+                    <option value="1">  Newest to Oldest </option>
                 </select>
-                <button type="submit"> Sort </button>
+                <button className="btn btn-primary" style={{marginLeft: "10px"}} type="submit"> Sort </button>
         </form>
         {forumPostComments.length !== 0 ? (
-    forumPostComments.map((comment) => {
-    //fetchAllCommentsLikesAndDislikes(comment.id);
-    return (
-      <div key={comment.id}>
-        {comment.username} commented @ {new Date(comment.comment_timestamp).toLocaleString()}: {comment.body} 
 
-        <div>
-         <button onClick={() => navigate(`/forumPost/${comment.forum_post_id}/viewing/${userID}/user`)}>
-          View Post
-         </button>
-        </div>
-        <br></br>
-        
-        
+    forumPostComments.map((comment) => {
+    return (
+      <div key={comment.id} style={{marginTop: "20px"}}>
+        <a 
+          style={{textDecoration: 'none'}}
+          onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+          onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+          onClick={() => {navigate(`/username/${comment.username}`)}}
+          >
+          {comment.username}
+         </a>  ◦ {new Date(comment.comment_timestamp).toLocaleString()} <br></br> {comment.body}
+         <br></br>
+         <button onClick={() => navigate(`/forumPost/${comment.forum_post_id}/viewing/${userID}/user`)} className="btn btn-primary" > View Post </button>
       </div>
     );
   })
@@ -534,17 +370,31 @@ const fetchAllCommentsLikesAndDislikes = async (commentID) => {
 
 </TabPanel>
         <TabPanel> <form onSubmit={sortVideoPostComments}>
-                <select onChange={(e) => setSortType(e.target.value)}>
-                    <option value="none"> Sort comments by... </option>
+                <select style={{padding: "8px", backgroundColor: "#333", border: "none", color: "#fff"}} onChange={(e) => setSortType(e.target.value)}>
+                    <option value="none"> Sort by... </option>
+                    <option value="2"> Oldeset to Newest (Default) </option>
                     <option value="1"> Newest to Oldest </option>
-                    <option value="2"> Oldest To Newest </option>
                 </select>
-                <button type="submit"> Sort </button>
+                <button className="btn btn-primary" style={{marginLeft: "10px"}} type="submit"> Sort </button>
         </form>
       {videoPostComments.length !== 0 ? (
     videoPostComments.map((comment) => (
       <div>
-        {username} commented @ {new Date(comment.CommentedAt).toLocaleString()}: {comment.Comment}
+        {!comment.DELETED && <div style={{marginTop: "20px"}}>
+        <a 
+              style={{textDecoration: 'none'}}
+              onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+              onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+              onClick={() => {navigate(`/username/${ProfileUsername}`)}}
+              >
+              {ProfileUsername}
+              </a> ◦ {new Date(comment.CommentedAt).toLocaleString()} <br></br> {comment.Comment} 
+              <br></br>
+           <button className="btn btn-primary" onClick={() => navigate(`/video/${comment.VideoPostId}`)}>
+             View Post
+           </button>
+      </div>}
+
       </div>
     ))
   ) : (

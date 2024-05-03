@@ -1,0 +1,67 @@
+
+
+.comment-section-container {
+    background-color: #222;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin: 0;
+    text-align: left; 
+    width: 50%;
+    overflow-y: auto;
+    margin-left: 40px;
+
+  }
+  
+  .form-container {
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  
+  .sort-form label {
+    color: #bbb;
+  }
+  
+  .sort-form{
+    display: flex; 
+    align-items: center; 
+  }
+
+  .sort-form input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #333;
+    border: none;
+    color: #fff;
+  }
+  
+  .sort-form input[type="text"]:focus {
+    outline: none;
+  }
+  
+  .sort-form select {
+    padding: 8px;
+    background-color: #333;
+    border: none;
+    color: #fff;
+  }
+  
+  .sort-form{
+    width: 50%;
+  }
+  .comment {
+    padding: 8px 16px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    background-color: #333;
+    border-radius: 5px;
+  }
+  
+  .comment textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border-radius: 5px;
+    resize: none;
+  }

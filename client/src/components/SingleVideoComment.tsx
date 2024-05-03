@@ -1,9 +1,11 @@
 import React from "react";
-import axios from "axios";
+import axios from '../utils/AxiosWithCredentials';
 import { useNavigate, useParams } from "react-router-dom";
 import {hostname, axiosRequest, TreeNode } from "../utils/utils";
 import VideoCommentNodeComponent from "./VideoCommentNode";
 import VideoPostWithCommentsComponent from "./VideoPostWithComments";
+import SingleVideoCommentCSS from "../css/singlevideocomment.module.css"
+
 const SingleVideoCommentComponent = () =>{
     const StringVideoPostCommentId = useParams().VideoPostCommentId;
     const theVideoPostCommentId: any = parseInt(StringVideoPostCommentId===undefined? "":StringVideoPostCommentId);
@@ -12,26 +14,15 @@ const SingleVideoCommentComponent = () =>{
     const [username, setUsername]= React.useState<{userIdOfCurrentUser: number, username: string;} | null>(null);
     const navigate = useNavigate();
     const tokenVerify= async () => {
-        const theToken= localStorage.getItem("token");
-        if(theToken){
             try{
-                const response= await axios.get(`http://localhost:3001/verify-token/${theToken}`)
-                if(response.data.username){
-                    const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
-                    setUsername({userIdOfCurrentUser, username:response.data.username})
-                }
-                else {
-                    navigate("/");
-                }
+                const response= await axios.get(`http://localhost:3001/verify-token`)
+                const userIdOfCurrentUser = (await axios.get(`${hostname}/users/id`, {params:{username:response.data.username}})).data.id;
+                setUsername({userIdOfCurrentUser, username:response.data.username})
             }
-    
             catch(error){
                 console.log(error);
+                navigate("/")
             }
-        }
-        else{
-            navigate("/");
-        }
     }
 
     const fetchAllCommentsForThisPost = async () => {
@@ -65,11 +56,26 @@ const SingleVideoCommentComponent = () =>{
             if((fetchParent===null && fetchPosts.data[i].VideoPostCommentId === theVideoPostCommentId) || (fetchParent!==null && fetchPosts.data[i].VideoPostCommentId === fetchParent)) {
                 rootNodes.push(idToCommentMapping[fetchPosts.data[i].VideoPostCommentId]);
             }
-            const fetchRating= await axios.get(`http://localhost:3001/videoCommentRating`, {params:{
+            const fetchRating= await axios.get(`http://localhost:3001/videoCommentRatings`, {params:{
                 UserId:username===null? null:username.userIdOfCurrentUser,
                 VideoPostCommentId:fetchPosts.data[i].VideoPostCommentId
             }})
             idToCommentMapping[fetchPosts.data[i].VideoPostCommentId].data.rating= fetchRating.data.length===0? 0: fetchRating.data[0].LikeStatus===1? 1:-1;
+            const ratingsForAParticularNode = await axiosRequest(3,2,"videoCommentRatings", {VideoPostCommentId:fetchPosts.data[i].VideoPostCommentId});
+            let likes=0;
+            let dislikes= 0;
+            if(ratingsForAParticularNode){
+                for(const rating of ratingsForAParticularNode.data){
+                    if(rating.LikeStatus===1){
+                        likes++;
+                    }
+                    else if (rating.LikeStatus===0){
+                        dislikes++;
+                    }
+                }
+            }
+            idToCommentMapping[fetchPosts.data[i].VideoPostCommentId].data.likes = likes;
+            idToCommentMapping[fetchPosts.data[i].VideoPostCommentId].data.dislikes = dislikes;
         }
         if(fetchParent!==null){
             const tn = rootNodes[0];
@@ -98,9 +104,9 @@ const SingleVideoCommentComponent = () =>{
     return (
         
         <div>
-            {roots && parentId!=="" && <VideoPostWithCommentsComponent VideoPostId={roots[0].data.VideoPostId}/>}
-            {roots && parentId!=="" && <button disabled= {parentId===null} onClick={()=>{navigate(`/SingleVideoComment/${parentId}`)}}>View Parent Comment</button>}
-            {roots && parentId!=="" && <button onClick={()=>{navigate(`/video/${roots[0].data.VideoPostId}`)}}>View All Comments</button>}
+            {roots && parentId!=="" && <VideoPostWithCommentsComponent singleView={true} VideoPostId={roots[0].data.VideoPostId}/>}
+            {roots && parentId!=="" && <button className={SingleVideoCommentCSS["view-parent-button"]} disabled= {parentId===null} onClick={()=>{navigate(`/SingleVideoComment/${parentId}`)}}>View Parent Comment</button>}
+            {roots && parentId!=="" && <button className={SingleVideoCommentCSS["view-all-comments-button"]} onClick={()=>{navigate(`/video/${roots[0].data.VideoPostId}`)}}>View All Comments</button>}
             {roots && parentId!=="" &&
             roots.map((rootComment, index)=>(
                 <VideoCommentNodeComponent 
@@ -109,15 +115,13 @@ const SingleVideoCommentComponent = () =>{
                 userIdOfCurrentUser= {username ===null? null:username.userIdOfCurrentUser}
                 usernameOfCurrentUser= {username===null? null: username.username}
                 setRoots={setRoots}
+                
                 />
             ))
             
             
             }
         </div>
-
-
-
     )
 }
 
