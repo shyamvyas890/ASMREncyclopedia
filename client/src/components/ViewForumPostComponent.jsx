@@ -100,13 +100,12 @@ export const ViewForumPostComponent = () =>{
     }
 
     const handleDeletePost = async () =>{
-      const confirmDelete = window.confirm("Are you sure you want to delete this post?")
-      if(confirmDelete){
+      
          await axios.delete(`http://localhost:3001/forumPostDelete/${postID}`, {
           currentUsername, currentUsername
          }, {withCredentials: true})
          navigate("/forumPosts")
-      }
+      
     }
 
     const cancelEdit = () =>{
