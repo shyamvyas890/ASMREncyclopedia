@@ -52,11 +52,11 @@ const AddVideoPostComponent = (props)=>{
         const theLink= linkRef.current.value;
         const theId= getYouTubeVideoId(theLink);
         if(!theId){
-            console.log("Something is wrong with the link you gave");
+            setErrorMessage("Something is wrong with the link you gave");
             return;
         }
         if(videoTags.length===0){
-            console.log("You must have at least one tag");
+            setErrorMessage("You must have at least one tag");
             return;
         }
         let addPost;
