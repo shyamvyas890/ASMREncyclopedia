@@ -339,6 +339,7 @@ const db = mysql.createConnection({ // modify the first three parameters.
 ```javascript
 const secretKey= "secret_key" //Modify this
 ```
+
 4. Install Node.js.
 5. Download this project repository and open up two terminal or command prompt windows.
 6. In one terminal, run this command:
@@ -348,5 +349,11 @@ const secretKey= "secret_key" //Modify this
 8. Now, run the following command in both terminals:
 `npm start`
 9. Now, the application will open up in your browser. Enjoy!
+
+## NLP Recommendation Threshold
+- If you want to change the NLP post recommendation threshold, modify the following code in [index.js](backend/index.js) ("/forumPostRecommendedPost/:postID" route)
+```javascript
+const similarityThreshold = ___ //(0.0 - 1.0, lower value = lower threshold for recommendation, higher value = higher threshold for recommendation)
+```
 
 Thank you for visiting our repository.
