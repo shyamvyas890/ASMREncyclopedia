@@ -8,8 +8,8 @@ const AboutUsComponent = () => {
       <NavigationComponent />
       <div className={AboutUsCSS["about-us-container"]}v>
       <div className={AboutUsCSS["about-header"]}>
-        <h2>Meet The Team</h2>
-        <p>Get to know the braintrust of ASMR Encyclopedia, our foundation, and what we hope to accomplish.</p>
+        <h2> About Us </h2>
+        <p>We are the founders of ASMR Encyclopedia. We hope to provide an interactive social media platform for ASMR enthusiasts to connect and share their passion for ASMR.</p>
       </div>
       <div className={AboutUsCSS["team-grid"]}>
         <TeamMemberCard
