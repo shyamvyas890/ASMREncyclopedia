@@ -135,11 +135,10 @@ export const ForumPostComment = (props) => {
     }
 
     const handleDeleteComment = async () =>{
-        const confirmDelete = window.confirm("Are you sure you want to delete your comment?")
-        if(confirmDelete){
+        
             await axios.put(`http://localhost:3001/deleteForumPostComment/${props.id}`, {withCredentials: true})
             setIsDeleted(true)
-        }
+        
 
     }
     
