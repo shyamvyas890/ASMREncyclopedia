@@ -205,7 +205,7 @@ export const ForumPostComment = (props) => {
             {props.username}
             </a>  ◦ {new Date(props.timestamp).toLocaleString()} <br></br> {singleView ? props.body : commentBody} 
 
-         {isEditing ? (<div> <textarea value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button className="btn btn-danger" style={{padding: "4px 8px"}} onClick={handleEditCancel}> Cancel Edit </button> <button sclassName="btn btn-primary" style={{padding: "4px 8px"}} onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
+         {isEditing ? (<div> <textarea value={editContent} onChange={ (e) => setEditContent(e.target.value)}/> <button className="btn btn-danger" style={{padding: "4px 8px", marginBottom: "10px"}} onClick={handleEditCancel}> Cancel Edit </button> <button className="btn btn-primary" style={{padding: "4px 8px", marginBottom: "10px"}} onClick={handleEditSubmit}> Confirm Edit </button></div>) : (<p></p>)}
 
             {showReplyOption !== false && (<button className="btn btn-primary" style={{padding: "4px 8px"}} onClick={() => handleReply(props.id)}> Reply to {props.username} </button>) }
             
