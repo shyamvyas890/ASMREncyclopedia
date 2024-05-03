@@ -217,6 +217,10 @@ const onSubmit =  async (e) => {
       //Create Forum Post
       const postRes = await axios.post('http://localhost:3001/forumPostCreate', data) //post to database
       let tagIDs = []
+      if(tagOptions.length === 0){
+        setFeedback("You must add at least one tag")
+        return
+      }
       for(let i = 0; i < tagOptions.length; i++){
         let forumTagName = tagOptions[i]
         //Create Tags submitted with Forum Post
