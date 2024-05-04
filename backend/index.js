@@ -296,8 +296,6 @@ app.post("/accountDeletionRequest", verifyJWTMiddleware, async (req, res)=>{
 
 app.post("/login", async (req, res)=>{ // secure
     const { username, password } = req.body;
-    console.log(username)
-    console.log(password)
     db.query(
         'SELECT * FROM users WHERE username = ?',
         [username],
@@ -307,7 +305,6 @@ app.post("/login", async (req, res)=>{ // secure
                 res.status(500).send("Error logging in.")
             }
             else if (results.length>0){
-                console.log(results)
                 const match = await bcrypt.compare(password, results[0].password);
                 if (match) {
                     const exp = Math.floor(Date.now() / 1000) + 86400;
@@ -335,7 +332,6 @@ app.post("/login", async (req, res)=>{ // secure
 })
 
 app.get('/verify-token', verifyJWTMiddleware, (req, res)=>{ //secure
-    console.log(req.decodedToken)
     return res.json(req.decodedToken);
 })
 
@@ -501,8 +497,6 @@ app.get('/video/id', verifyJWTMiddleware, (req, res)=>{
 })
 app.delete('/video', verifyJWTMiddleware, async (req, res)=>{
     const {id, VideoPostId, LikeDislikeId, GenreId, VideoPostGenreId, UserId, VideoPostCommentId}= req.query
-    console.log(typeof(UserId))
-    console.log("USER ID: " + UserId)
     if(id){
         if(req.decodedToken.UserId !== parseInt(id)){
             return res.status(403).send("You do not have permission to do that");
@@ -675,7 +669,6 @@ app.get("/forums", (req,res)=>{
 
 app.get("/forumPostByUsername", verifyJWTMiddleware, (req, res) =>{
     const username = req.query.username
-    console.log("HI USER " + username)
     db.query("SELECT * from forumpost WHERE username=?", [username], (err, data) =>{
         if(err){
             console.log(err)

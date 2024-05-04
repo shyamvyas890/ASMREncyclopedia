@@ -75,6 +75,7 @@ const NotificationsComponent = (props)=>{
     },[notifications]);
     React.useEffect( ()=>{
         if(socket && username && notifications && notificationsElements){
+            console.log("It connected to newNotification.")
             socket.on('newNotification', handleNewNotification);
             return ()=>{
                 socket.off('newNotification', handleNewNotification);

@@ -38,13 +38,14 @@ const FriendsComponent = (props)=>{
             }
             console.log(outgoingFriendRequests)
             const friendships = (await axios.get(`${hostname}/ListOfFriends/${id}`)).data
+            console.log(friendships)
             for(let i=0;i<friendships.length;i++){
                 let theUserId;
                 if(friendships[i].UserId1===id){
                     theUserId=friendships[i].UserId2
                 }
                 else{
-                    theUserId=friendships[i].UserId2
+                    theUserId=friendships[i].UserId1
                 }
                 friendships[i].friendUsername= (await axios.get(`${hostname}/users/id?UserId=${theUserId}`)).data.username;
             }
@@ -107,14 +108,14 @@ const FriendsComponent = (props)=>{
                     {request.ReceiverUsername}
                     </a>
                 </div>
-                    <button className="btn btn-danger">Cancel Request</button>
+                    <button className="btn btn-danger" onClick={(e)=>{cancelFriendRequest(e, request.ReceiverUserId)}}>Cancel Request</button>
                 </React.Fragment>
             )): <div> You have no outgoing friend requests. </div>}
             <div style={{fontWeight: "bold", fontSize: "30px", marginTop: "10px"}}>Friends</div>
             {incomingOutgoingFriendRequestsAndFriendships.friendships.length > 0 ? incomingOutgoingFriendRequestsAndFriendships.friendships.map((friend, index)=>(
                 <React.Fragment key={index}>
                     <div>{friend.friendUsername}</div>
-                    <button className="btn btn-danger">Unfriend</button>
+                    <button className="btn btn-danger" onClick={(e)=>{unfriend(e, friend.UserId1===incomingOutgoingFriendRequestsAndFriendships.userIdOfCurrentUser? friend.UserId2:friend.UserId1)}}>Unfriend</button>
                 </React.Fragment>
             )): <div> You have no friends. Try to make some! </div>}
             
