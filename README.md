@@ -355,5 +355,3 @@ const secretKey= "secret_key" //Modify this
 ```javascript
 const similarityThreshold = ___ //(0.0 - 1.0, lower value = lower threshold for recommendation, higher value = higher threshold for recommendation)
 ```
-
-Thank you for visiting our repository.
