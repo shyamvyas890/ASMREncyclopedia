@@ -38,13 +38,14 @@ const FriendsComponent = (props)=>{
             }
             console.log(outgoingFriendRequests)
             const friendships = (await axios.get(`${hostname}/ListOfFriends/${id}`)).data
+            console.log(friendships)
             for(let i=0;i<friendships.length;i++){
                 let theUserId;
                 if(friendships[i].UserId1===id){
                     theUserId=friendships[i].UserId2
                 }
                 else{
-                    theUserId=friendships[i].UserId2
+                    theUserId=friendships[i].UserId1
                 }
                 friendships[i].friendUsername= (await axios.get(`${hostname}/users/id?UserId=${theUserId}`)).data.username;
             }
